@@ -1,0 +1,75 @@
+vars: {
+  d2-config: {
+    layout-engine: elk
+    theme-id: 101
+  }
+}
+
+direction: right
+
+classes: {
+  source: {
+    style.fill: "#eef2ff"
+    style.stroke: "#4338ca"
+  }
+  guarded: {
+    style.fill: "#fff7ed"
+    style.stroke: "#c2410c"
+  }
+  core: {
+    style.fill: "#ecfdf5"
+    style.stroke: "#047857"
+  }
+  app: {
+    style.fill: "#f8fafc"
+    style.stroke: "#475569"
+  }
+}
+
+sources: {
+  label: "Source Systems"
+  class: source
+  primerx: "PrimeRx\nAPI + Webhooks"
+  ops: "Airtable + Operations\nTasks, CRM, Finance, Documents"
+}
+
+ingestion: {
+  label: "Controlled Ingestion"
+  class: guarded
+  intake: "Receive + Store Raw Payloads"
+  privacy: "Remove / Transform PHI"
+  mapping: "Map to Canonical Model"
+}
+
+analytics: {
+  label: "Analytics Core"
+  class: core
+  model: "Canonical Pharmacy Data"
+  kpis: "KPI + Root-Cause Engine"
+  decisions: "Alerts, Reports,\nRecommendations, Scenarios"
+}
+
+product: {
+  label: "Role-Based Product"
+  class: app
+  owner: "Owner / Executive"
+  store: "Store Manager"
+  ops: "Technician, Finance,\nCompliance, Doctor Relations"
+}
+
+platform: {
+  label: "Platform Foundation"
+  class: app
+  security: "Auth, RBAC,\nTenant Isolation, Audit"
+}
+
+sources -> ingestion
+ingestion.intake -> ingestion.privacy
+ingestion.privacy -> ingestion.mapping
+ingestion -> analytics
+analytics.model -> analytics.kpis
+analytics.kpis -> analytics.decisions
+analytics -> product
+platform -> ingestion
+platform -> analytics
+platform -> product

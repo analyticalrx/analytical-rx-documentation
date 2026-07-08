@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>High-Level Design</title>
+  <style>
+    :root {
+      --ink: #1f2933;
+      --muted: #5f6c7b;
+      --line: #d9e2ec;
+      --panel: #f8fafc;
+      --code: #eef2f7;
+      --accent: #0f766e;
+      --accent-soft: #ccfbf1;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background: #ffffff;
+      line-height: 1.58;
+    }
+
+    main {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 44px 24px 72px;
+    }
+
+    nav {
+      margin-bottom: 28px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    nav a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    article {
+      max-width: 920px;
+    }
+
+    h1 {
+      margin: 0 0 18px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+      font-size: 34px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 34px 0 12px;
+      font-size: 23px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 24px 0 10px;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    h4 {
+      margin: 20px 0 8px;
+      font-size: 16px;
+    }
+
+    p {
+      margin: 0 0 13px;
+    }
+
+    ul, ol {
+      margin: 0 0 18px;
+      padding-left: 24px;
+    }
+
+    li {
+      margin: 5px 0;
+    }
+
+    blockquote {
+      margin: 18px 0;
+      padding: 14px 18px;
+      border-left: 4px solid var(--accent);
+      border-radius: 6px;
+      background: var(--accent-soft);
+    }
+
+    blockquote p:last-child {
+      margin-bottom: 0;
+    }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: var(--code);
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    pre {
+      overflow-x: auto;
+      margin: 18px 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    pre code {
+      padding: 0;
+      background: transparent;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    a {
+      color: var(--accent);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--panel);
+      text-align: left;
+    }
+
+    hr {
+      margin: 34px 0;
+      border: 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .step-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .step-grid div {
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      font-weight: 700;
+    }
+
+    .step-grid span {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--accent);
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+</style>
+</head>
+<body>
+  <main>
+    <nav><a href="index.html">Back to design index</a></nav>
+    <article>
+      <h1 id="high-level-design-for-multi-pharmacy-analytics-platform">High-Level Design for Multi-Pharmacy Analytics Platform</h1>
+      <h2 id="purpose">Purpose</h2>
+      <p>This document defines the target architecture for the Multi-Pharmacy Analytics Platform before all source-system details are available. The design is based on the requirements brief, the PrimeRx API Swagger spec, and the PrimeRx webhook onboarding guide.</p>
+      <p>The product should be designed as a pharmacy analytics and operations platform first, with SaaS-ready boundaries from the start.</p>
+      <h2 id="confirmed-source-facts">Confirmed Source Facts</h2>
+      <ul>
+      <li>PrimeRx exposes a documented API at <code>https://gatewayapi.micromerchantsystems.com/swagger/index.html</code></li>
+      <li>The API spec is <code>PrimeAPI Docs (MMS.GatewayApi)</code> version <code>v3.6.1</code></li>
+      <li>The API uses <code>Bearer</code> authentication</li>
+      <li>PrimeRx also supports webhooks for near-real-time event notifications</li>
+      <li>The webhook guide states that webhook events are HTTPS POSTs with JSON payloads</li>
+      <li>Both the API and the webhook payloads include PHI-heavy fields, so the analytics layer must treat raw source data as restricted until transformed</li>
+      <li>We do not yet know whether PrimeRx provides a bulk historical export, batch send, or other backfill mechanism, so that remains a key vendor question</li>
+      </ul>
+      <h2 id="design-principles">Design Principles</h2>
+      <ol>
+      <li>Canonical model first, source adapters second.</li>
+      <li>Webhooks are for near-real-time event triggers, not the only data source.</li>
+      <li>API pulls are for enrichment, backfill, and reconciliation.</li>
+      <li>PHI must be suppressed or transformed before data enters the analytics database.</li>
+      <li>Everything must be tenant-safe from the beginning, even if the first deployment is internal only.</li>
+      <li>Build the minimum useful slice first, then widen the surface area.</li>
+      </ol>
+      <h2 id="overall-architecture">Overall Architecture</h2>
+      <p>Reference diagrams:</p>
+      <ul>
+      <li><a href="diagrams/overall-platform.svg">Overall platform</a></li>
+      <li><a href="diagrams/primerx-ingestion.svg">PrimeRx ingestion</a></li>
+      <li><a href="diagrams/webhook-processing.svg">Webhook processing</a></li>
+      </ul>
+      <h2 id="system-layers">System Layers</h2>
+      <h3 id="1-source-layer">1. Source Layer</h3>
+      <p>This layer includes all systems that provide operational data.</p>
+      <ul>
+      <li>PrimeRx API</li>
+      <li>PrimeRx webhooks</li>
+      <li>Bulk export or scheduled report send, if available</li>
+      <li>Current Airtable prototype</li>
+      <li>Finance inputs</li>
+      <li>Documents and licenses</li>
+      <li>Tasks and calendar inputs</li>
+      <li>Doctor relationship activity</li>
+      </ul>
+      <h3 id="2-restricted-ingestion-boundary">2. Restricted Ingestion Boundary</h3>
+      <p>This is the highest-risk zone in the architecture. Raw source payloads may contain direct patient identifiers and other PHI, so this layer must be isolated and auditable.</p>
+      <p>Responsibilities:</p>
+      <ul>
+      <li>Authenticate inbound webhook/API traffic</li>
+      <li>Store raw payloads in restricted quarantine storage</li>
+      <li>Validate schema and payload shape</li>
+      <li>Classify fields by policy</li>
+      <li>Suppress, hash, bucket, or drop PHI</li>
+      <li>Emit import and privacy audit logs</li>
+      <li>Route bad payloads to exception handling</li>
+      </ul>
+      <h3 id="3-canonical-data-model">3. Canonical Data Model</h3>
+      <p>This is the stable internal model that every source maps into.</p>
+      <p>Core entities:</p>
+      <ul>
+      <li>Store</li>
+      <li>Prescription fill</li>
+      <li>Payer</li>
+      <li>Drug</li>
+      <li>Prescriber</li>
+      <li>Patient cohort or pseudonymous token</li>
+      <li>Employee</li>
+      <li>Task</li>
+      <li>Financial fact</li>
+      <li>Document or license</li>
+      <li>Import job</li>
+      <li>Alert</li>
+      <li>User and permission</li>
+      </ul>
+      <h3 id="4-analytics-and-decision-layer">4. Analytics and Decision Layer</h3>
+      <p>This layer turns normalized data into business value.</p>
+      <ul>
+      <li>KPI calculations</li>
+      <li>Store comparison</li>
+      <li>Payer profitability</li>
+      <li>Drug profitability</li>
+      <li>Root-cause analysis</li>
+      <li>Alerts and exceptions</li>
+      <li>Recommendations</li>
+      <li>Scenario modeling</li>
+      </ul>
+      <h3 id="5-product-layer">5. Product Layer</h3>
+      <p>Role-specific interfaces should sit on top of the analytics layer.</p>
+      <ul>
+      <li>Owner / executive dashboard</li>
+      <li>Store manager dashboard</li>
+      <li>Technician dashboard</li>
+      <li>Bookkeeper / finance dashboard</li>
+      <li>Compliance / admin dashboard</li>
+      <li>Doctor relations dashboard</li>
+      <li>Strategy / scenario center</li>
+      </ul>
+      <h3 id="6-platform-services">6. Platform Services</h3>
+      <p>Shared services needed by all product surfaces.</p>
+      <ul>
+      <li>Authentication</li>
+      <li>RBAC</li>
+      <li>Multi-tenant isolation</li>
+      <li>Audit logging</li>
+      <li>Monitoring</li>
+      <li>Secrets management</li>
+      <li>Support/admin tooling</li>
+      <li>Future billing and onboarding</li>
+      </ul>
+      <h2 id="ingestion-strategy">Ingestion Strategy</h2>
+      <p>The recommended integration model is:</p>
+      <div class="step-grid">
+        <div><span>Webhooks</span>Near-real-time event trigger</div>
+        <div><span>API</span>Detail lookup, backfill, reconciliation</div>
+        <div><span>Bulk / Batch</span>Historical load if PrimeRx supports it</div>
+      </div>
+      <p>Important operational rule:</p>
+      <ul>
+      <li>Webhooks should ack fast and hand off work asynchronously.</li>
+      <li>API calls should be rate-limited, idempotent, and resumable.</li>
+      <li>Reconciliation must exist even if webhooks are reliable.</li>
+      <li>The system should be able to rebuild KPIs from source data.</li>
+      </ul>
+      <h2 id="phi-policy">PHI Policy</h2>
+      <p>The platform should not ingest direct patient identifiers into the analytics database unless compliance and legal explicitly approve a different policy later.</p>
+      <p>Preferred handling:</p>
+      <ul>
+      <li>Remove patient name, address, DOB, phone, email, driver license, prescription image, and free-text identifier fields</li>
+      <li>Convert DOB into age band or another bucketed form</li>
+      <li>Convert address into ZIP3, city, or market area if needed</li>
+      <li>Use internal row IDs, source transaction IDs, or one-way pseudonymous tokens instead of prescription numbers when possible</li>
+      <li>Treat any webhook or API response as PHI until processed by the restricted ingestion boundary</li>
+      </ul>
+      <h2 id="kpi-scope">KPI Scope</h2>
+      <p>The first analytics release should support:</p>
+      <ul>
+      <li>RX volume</li>
+      <li>Revenue</li>
+      <li>Gross profit</li>
+      <li>Estimated net profit</li>
+      <li>Average profit per RX</li>
+      <li>Payer mix</li>
+      <li>Drug profitability</li>
+      <li>Rejections and reversals</li>
+      <li>Prescription status and queue movement</li>
+      <li>Doctor referral performance</li>
+      <li>Task completion</li>
+      <li>Compliance expirations</li>
+      <li>Financial close status</li>
+      </ul>
+      <h2 id="recommended-mvp-slice">Recommended MVP Slice</h2>
+      <p>The first buildable slice should prove the following flow:</p>
+      <div class="step-grid">
+        <div><span>1</span>PrimeRx payload</div>
+        <div><span>2</span>Restricted intake</div>
+        <div><span>3</span>PHI minimization</div>
+        <div><span>4</span>Canonical mapping</div>
+        <div><span>5</span>KPI calculation</div>
+        <div><span>6</span>Dashboards + drilldowns</div>
+        <div><span>7</span>Import audit log</div>
+      </div>
+      <h2 id="build-sequence">Build Sequence</h2>
+      <ol>
+      <li>Finalize source questions and assumptions.</li>
+      <li>Lock the canonical model.</li>
+      <li>Build the restricted ingestion boundary.</li>
+      <li>Implement API connector and webhook receiver.</li>
+      <li>Implement PHI suppression and mapping.</li>
+      <li>Load the canonical analytics database.</li>
+      <li>Build owner and store dashboards.</li>
+      <li>Add alerts, exceptions, and audit views.</li>
+      <li>Extend to tasks, documents, doctor CRM, and finance workflows.</li>
+      <li>Add SaaS tenancy, onboarding, and billing.</li>
+      </ol>
+      <h2 id="key-tradeoffs">Key Tradeoffs</h2>
+      <h3 id="api-first-vs-webhook-first">API-first vs webhook-first</h3>
+      <p>API-first is required for backfill and reconciliation. Webhooks are the best near-real-time trigger, but they do not eliminate the need for polling or batch sync.</p>
+      <h3 id="airtable-vs-custom-backend">Airtable vs custom backend</h3>
+      <p>Airtable is useful as a prototype reference, but a custom database is the cleaner long-term core if the product is meant to become SaaS.</p>
+      <h3 id="phi-minimized-vs-patient-continuity-analytics">PHI-minimized vs patient-continuity analytics</h3>
+      <p>Pure aggregate analytics is safer. If continuity is required, a pseudonymous token strategy is preferable to exposing direct identifiers.</p>
+      <h2 id="open-questions-for-primerx">Open Questions For PrimeRx</h2>
+      <ul>
+      <li>Do you provide a bulk API, bulk export, scheduled report send, SFTP export, or other batch mechanism for historical load and reconciliation?</li>
+      <li>Can webhooks and APIs exclude PHI or direct patient identifiers?</li>
+      <li>Can you provide pseudonymous patient tokens if continuity is needed?</li>
+      <li>What fields are available for prescription, payer, drug, prescriber, pharmacy, rejection, reversal, and billing analytics?</li>
+      <li>Are webhook retries, replay, event IDs, and schema versioning available?</li>
+      <li>What is the best supported method for multi-store analytics?</li>
+      </ul>
+      <h2 id="architecture-summary">Architecture Summary</h2>
+      <p>The platform should be built as a pipeline that turns operational pharmacy data into explainable business decisions. The main system boundary is not the dashboard. The main boundary is the PHI-controlled ingestion layer that protects the analytics store and makes the rest of the platform safe to scale.</p>
+      
+    </article>
+  </main>
+</body>
+</html>

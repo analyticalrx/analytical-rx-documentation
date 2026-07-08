@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PrimeRx Ingestion Pipeline Design</title>
+  <style>
+    :root {
+      --ink: #1f2933;
+      --muted: #5f6c7b;
+      --line: #d9e2ec;
+      --panel: #f8fafc;
+      --code: #eef2f7;
+      --accent: #0f766e;
+      --accent-soft: #ccfbf1;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background: #ffffff;
+      line-height: 1.58;
+    }
+
+    main {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 44px 24px 72px;
+    }
+
+    nav {
+      margin-bottom: 28px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    nav a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    article {
+      max-width: 920px;
+    }
+
+    h1 {
+      margin: 0 0 18px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+      font-size: 34px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 34px 0 12px;
+      font-size: 23px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 24px 0 10px;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    h4 {
+      margin: 20px 0 8px;
+      font-size: 16px;
+    }
+
+    p {
+      margin: 0 0 13px;
+    }
+
+    ul, ol {
+      margin: 0 0 18px;
+      padding-left: 24px;
+    }
+
+    li {
+      margin: 5px 0;
+    }
+
+    blockquote {
+      margin: 18px 0;
+      padding: 14px 18px;
+      border-left: 4px solid var(--accent);
+      border-radius: 6px;
+      background: var(--accent-soft);
+    }
+
+    blockquote p:last-child {
+      margin-bottom: 0;
+    }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: var(--code);
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    pre {
+      overflow-x: auto;
+      margin: 18px 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    pre code {
+      padding: 0;
+      background: transparent;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    a {
+      color: var(--accent);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--panel);
+      text-align: left;
+    }
+
+    hr {
+      margin: 34px 0;
+      border: 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .step-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .step-grid div {
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      font-weight: 700;
+    }
+
+    .step-grid span {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--accent);
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+</style>
+</head>
+<body>
+  <main>
+    <nav><a href="index.html">Back to design index</a></nav>
+    <article>
+      <h1 id="primerx-ingestion-pipeline-design">PrimeRx Ingestion Pipeline Design</h1>
+      <p>This document defines the ingestion path for PrimeRx and Micro Merchant data into the analytics platform.</p>
+      <h2 id="scope">Scope</h2>
+      <p>The pipeline must support three ingestion modes:</p>
+      <ol>
+      <li>Webhooks for near-real-time event triggers.</li>
+      <li>API sync for backfill, enrichment, and reconciliation.</li>
+      <li>Bulk export or scheduled batch send if PrimeRx provides one.</li>
+      </ol>
+      <h2 id="reference-diagram">Reference Diagram</h2>
+      <ul>
+      <li><a href="diagrams/primerx-ingestion.svg">PrimeRx ingestion</a></li>
+      <li><a href="diagrams/webhook-processing.svg">Webhook processing</a></li>
+      </ul>
+      <h2 id="goals">Goals</h2>
+      <ul>
+      <li>Accept source data safely</li>
+      <li>Prevent PHI leakage into analytics storage</li>
+      <li>Normalize source payloads into a canonical model</li>
+      <li>Support initial load, daily sync, and missed-event recovery</li>
+      <li>Produce audit logs and exception reports</li>
+      <li>Keep the ingestion layer resilient to retries, duplicates, and schema drift</li>
+      </ul>
+      <h2 id="ingestion-flows">Ingestion Flows</h2>
+      <h3 id="1-webhook-flow">1. Webhook Flow</h3>
+      <p>Webhooks are the primary near-real-time trigger.</p>
+      <p>Behavior:</p>
+      <ul>
+      <li>Receive HTTPS POST requests</li>
+      <li>Authenticate the sender</li>
+      <li>Persist the raw payload in restricted quarantine storage</li>
+      <li>Return <code>2xx</code> quickly</li>
+      <li>Process the payload asynchronously</li>
+      <li>Deduplicate events</li>
+      <li>Suppress PHI before downstream use</li>
+      <li>Optionally call the API to enrich incomplete webhook payloads</li>
+      </ul>
+      <h3 id="2-api-flow">2. API Flow</h3>
+      <p>API sync covers backfill and reconciliation.</p>
+      <p>Behavior:</p>
+      <ul>
+      <li>Authenticate using PrimeRx API credentials</li>
+      <li>Pull prescription, patient, payer, drug, prescriber, pharmacy, and status data</li>
+      <li>Support paging and incremental windows if available</li>
+      <li>Support manual backfill and scheduled syncs</li>
+      <li>Store raw responses in restricted quarantine</li>
+      <li>Apply the same PHI and validation controls as webhook events</li>
+      </ul>
+      <h3 id="3-bulk--batch-flow">3. Bulk / Batch Flow</h3>
+      <p>If PrimeRx offers a bulk export, scheduled report send, or SFTP delivery, that channel should be used for:</p>
+      <ul>
+      <li>Historical load</li>
+      <li>Large backfills</li>
+      <li>KPI rebuilds</li>
+      <li>Source reconciliation</li>
+      </ul>
+      <h2 id="pipeline-stages">Pipeline Stages</h2>
+      <h3 id="stage-1-ingress">Stage 1: Ingress</h3>
+      <p>Ingress services are thin by design.</p>
+      <ul>
+      <li>Webhook receiver</li>
+      <li>API sync worker</li>
+      <li>Bulk file receiver, if available</li>
+      </ul>
+      <p>Responsibilities:</p>
+      <ul>
+      <li>Authentication</li>
+      <li>Request validation</li>
+      <li>Durable write to quarantine</li>
+      <li>Fast acknowledgement</li>
+      </ul>
+      <h3 id="stage-2-quarantine">Stage 2: Quarantine</h3>
+      <p>Raw payloads are isolated here.</p>
+      <p>Responsibilities:</p>
+      <ul>
+      <li>Hold PHI-containing data briefly</li>
+      <li>Support replay</li>
+      <li>Preserve original payloads for audit</li>
+      <li>Restrict access to ingestion operators only</li>
+      </ul>
+      <h3 id="stage-3-phi-filter">Stage 3: PHI Filter</h3>
+      <p>This is the trust boundary.</p>
+      <p>Responsibilities:</p>
+      <ul>
+      <li>Remove direct patient identifiers</li>
+      <li>Bucket or generalize sensitive fields</li>
+      <li>Convert source IDs into internal IDs or pseudonyms</li>
+      <li>Reject payloads that violate policy</li>
+      </ul>
+      <h3 id="stage-4-validation-and-mapping">Stage 4: Validation and Mapping</h3>
+      <p>Responsibilities:</p>
+      <ul>
+      <li>Validate payload shape</li>
+      <li>Map source fields to canonical columns</li>
+      <li>Detect duplicates and replays</li>
+      <li>Normalize enums and status values</li>
+      <li>Emit transformation exceptions</li>
+      </ul>
+      <h3 id="stage-5-canonical-load">Stage 5: Canonical Load</h3>
+      <p>Responsibilities:</p>
+      <ul>
+      <li>Upsert into fact and dimension tables</li>
+      <li>Preserve import lineage</li>
+      <li>Track source timestamps and ingestion timestamps</li>
+      <li>Support replay-safe writes</li>
+      </ul>
+      <h3 id="stage-6-reconciliation">Stage 6: Reconciliation</h3>
+      <p>Responsibilities:</p>
+      <ul>
+      <li>Compare webhook-driven events with API or bulk source truth</li>
+      <li>Detect missing, duplicated, or reversed events</li>
+      <li>Recompute KPIs when needed</li>
+      <li>Write reconciliation results to audit logs</li>
+      </ul>
+      <h2 id="data-handling-rules">Data Handling Rules</h2>
+      <ul>
+      <li>Do not allow patient name, street address, DOB, phone, email, driver license, prescription images, or free-text identifier fields into analytics storage</li>
+      <li>Use age bands instead of DOB</li>
+      <li>Use ZIP3 or region grouping instead of full address when needed</li>
+      <li>Use internal IDs or approved pseudonymous tokens for continuity</li>
+      <li>Mark all source fields as allowed, excluded, or transformed before implementation</li>
+      </ul>
+      <h2 id="failure-modes">Failure Modes</h2>
+      <ul>
+      <li>Invalid auth</li>
+      <li>Bad JSON or schema mismatch</li>
+      <li>Duplicate webhook delivery</li>
+      <li>Out-of-order event delivery</li>
+      <li>API rate limit or timeout</li>
+      <li>Missing bulk batch file</li>
+      <li>Reversal or cancellation after initial receipt</li>
+      <li>PHI leakage attempt</li>
+      <li>Source field drift after vendor update</li>
+      </ul>
+      <p>Each of these should route to an exception queue or audit record, not silent failure.</p>
+      <h2 id="operational-questions-for-primerx">Operational Questions For PrimeRx</h2>
+      <ul>
+      <li>Do you support a bulk historical export or batch send?</li>
+      <li>Do webhooks support retries, replay, and event IDs?</li>
+      <li>Can webhook payloads suppress PHI?</li>
+      <li>Can API responses suppress PHI?</li>
+      <li>Are incremental sync endpoints available?</li>
+      <li>What is the source of truth for reversals, rejections, and adjustments?</li>
+      <li>Can the API or bulk feed be used for daily reconciliation?</li>
+      </ul>
+      <h2 id="mvp-requirement">MVP Requirement</h2>
+      <p>The first successful ingestion milestone should prove:</p>
+      <div class="step-grid">
+        <div><span>1</span>PrimeRx payload</div>
+        <div><span>2</span>Controlled intake</div>
+        <div><span>3</span>PHI minimization</div>
+        <div><span>4</span>Validation + mapping</div>
+        <div><span>5</span>Audit log</div>
+        <div><span>6</span>Dashboard-ready data</div>
+      </div>
+      
+    </article>
+  </main>
+</body>
+</html>

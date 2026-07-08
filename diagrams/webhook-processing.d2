@@ -1,0 +1,66 @@
+vars: {
+  d2-config: {
+    layout-engine: elk
+    theme-id: 101
+  }
+}
+
+direction: right
+
+classes: {
+  source: {
+    style.fill: "#eef2ff"
+    style.stroke: "#4338ca"
+  }
+  guarded: {
+    style.fill: "#fff7ed"
+    style.stroke: "#c2410c"
+  }
+  core: {
+    style.fill: "#ecfdf5"
+    style.stroke: "#047857"
+  }
+  support: {
+    style.fill: "#f8fafc"
+    style.stroke: "#475569"
+  }
+}
+
+event: "PrimeRx Webhook Event"
+event.class: source
+
+receiver: {
+  label: "Webhook Intake"
+  class: guarded
+  receive: "Validate Sender"
+  store: "Store Raw Event"
+  ack: "Acknowledge Quickly"
+}
+
+processing: {
+  label: "Async Processing"
+  class: guarded
+  normalize: "De-duplicate + Order Safely"
+  privacy: "Minimize PHI"
+  enrich: "Enrich from API if Needed"
+}
+
+analytics: {
+  label: "Analytics Update"
+  class: core
+  model: "Canonical Event / Fill Records"
+  outputs: "KPIs, Alerts, Audit"
+}
+
+reconcile: "Periodic API / Bulk Reconciliation"
+reconcile.class: support
+
+event -> receiver.receive
+receiver.receive -> receiver.store
+receiver.store -> receiver.ack
+receiver.store -> processing.normalize
+processing.normalize -> processing.privacy
+processing.privacy -> processing.enrich
+processing.enrich -> analytics.model
+analytics.model -> analytics.outputs
+reconcile -> analytics.model

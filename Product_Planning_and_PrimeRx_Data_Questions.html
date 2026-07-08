@@ -1,0 +1,947 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Product Planning and PrimeRx Data Questions</title>
+  <style>
+    :root {
+      --ink: #1f2933;
+      --muted: #5f6c7b;
+      --line: #d9e2ec;
+      --panel: #f8fafc;
+      --code: #eef2f7;
+      --accent: #0f766e;
+      --accent-soft: #ccfbf1;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background: #ffffff;
+      line-height: 1.58;
+    }
+
+    main {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 44px 24px 72px;
+    }
+
+    nav {
+      margin-bottom: 28px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    nav a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    article {
+      max-width: 920px;
+    }
+
+    h1 {
+      margin: 0 0 18px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+      font-size: 34px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 34px 0 12px;
+      font-size: 23px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 24px 0 10px;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    h4 {
+      margin: 20px 0 8px;
+      font-size: 16px;
+    }
+
+    p {
+      margin: 0 0 13px;
+    }
+
+    ul, ol {
+      margin: 0 0 18px;
+      padding-left: 24px;
+    }
+
+    li {
+      margin: 5px 0;
+    }
+
+    blockquote {
+      margin: 18px 0;
+      padding: 14px 18px;
+      border-left: 4px solid var(--accent);
+      border-radius: 6px;
+      background: var(--accent-soft);
+    }
+
+    blockquote p:last-child {
+      margin-bottom: 0;
+    }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: var(--code);
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    pre {
+      overflow-x: auto;
+      margin: 18px 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    pre code {
+      padding: 0;
+      background: transparent;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    a {
+      color: var(--accent);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--panel);
+      text-align: left;
+    }
+
+    hr {
+      margin: 34px 0;
+      border: 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .diagram {
+      margin: 18px 0;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      overflow-x: auto;
+    }
+
+    .diagram img {
+      display: block;
+      width: 100%;
+      min-width: 680px;
+      height: auto;
+    }
+
+    .mvp-flow {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .mvp-flow div {
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      font-weight: 700;
+    }
+
+    .mvp-flow span {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--accent);
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+</style>
+</head>
+<body>
+  <main>
+    <nav><a href="index.html">Back to design index</a></nav>
+    <article>
+      <h1 id="multi-pharmacy-analytics-platform-planning-notes">Multi-Pharmacy Analytics Platform Planning Notes</h1>
+      <h2 id="current-planning-context">Current Planning Context</h2>
+      <p>We are planning ahead before the pharmacy operations team and data owners are available to walk through the current system. The product should therefore be designed around a stable internal model and replaceable data-source adapters.</p>
+      <p>Update: Micro Merchant has confirmed that API support exists. We located the public Swagger UI at:</p>
+      <p><a href="https://gatewayapi.micromerchantsystems.com/swagger/index.html">https://gatewayapi.micromerchantsystems.com/swagger/index.html</a></p>
+      <p>The Swagger UI loads an OpenAPI document from:</p>
+      <p><a href="https://gatewayapi.micromerchantsystems.com/swagger/v2/swagger.json">https://gatewayapi.micromerchantsystems.com/swagger/v2/swagger.json</a></p>
+      <p>The architecture should now treat API integration as the preferred path while keeping file-based exports as a fallback until production credentials, endpoint access, data coverage, rate limits, and privacy controls are confirmed.</p>
+      <p>Additional update: a local PDF named <code>PrimeRx Webhook Onboarding.pdf</code> was found in Downloads. It confirms that PrimeRx supports webhook notifications for selected events. Webhooks should be treated as a near real-time event notification channel, not as the only source for historical or complete analytics data.</p>
+      <p>The core planning principle is:</p>
+      <blockquote>
+      <p>Build the product around a canonical pharmacy analytics model first, then map PrimeRx / Micro Merchant / Airtable data into it once exports and source details become available.</p>
+      </blockquote>
+      <h2 id="initial-product-architecture">Initial Product Architecture</h2>
+      <div class="diagram">
+        <img src="diagrams/overall-platform.svg" alt="Initial product architecture">
+      </div>
+      <h2 id="what-can-be-designed-before-real-data-is-available">What Can Be Designed Before Real Data Is Available</h2>
+      <ul>
+      <li>Product modules and user workflows</li>
+      <li>Canonical pharmacy data model</li>
+      <li>Data ingestion contract</li>
+      <li>HIPAA-minimized field policy</li>
+      <li>KPI definitions and dashboard structure</li>
+      <li>Alert and exception rules</li>
+      <li>Recommendation and scenario-engine assumptions</li>
+      <li>Role-based permissions</li>
+      <li>SaaS-ready boundaries</li>
+      <li>Mock/sample data for early dashboard and workflow development</li>
+      </ul>
+      <h2 id="what-should-not-be-locked-in-yet">What Should Not Be Locked In Yet</h2>
+      <ul>
+      <li>Exact PrimeRx / Micro Merchant export format</li>
+      <li>Exact report names</li>
+      <li>Exact source-field mappings</li>
+      <li>Exact API capabilities, endpoints, authentication method, rate limits, and available data objects</li>
+      <li>Exact patient-continuity strategy</li>
+      <li>Final KPI formulas where source data availability is unknown</li>
+      <li>Final automation method if API coverage is incomplete: CSV, SFTP, email parsing, scheduled report, manual upload, etc.</li>
+      </ul>
+      <h2 id="recommended-mvp-vertical-slice">Recommended MVP Vertical Slice</h2>
+      <div class="mvp-flow">
+        <div><span>1</span>PrimeRx sample data</div>
+        <div><span>2</span>Controlled ingestion</div>
+        <div><span>3</span>PHI minimization</div>
+        <div><span>4</span>Canonical model</div>
+        <div><span>5</span>KPI calculation</div>
+        <div><span>6</span>Owner + store dashboards</div>
+        <div><span>7</span>Payer / drug drilldown</div>
+        <div><span>8</span>Import audit log</div>
+      </div>
+      <p>This gives the team something buildable now. When real data becomes available, only the source adapter and mapping layer should need major changes.</p>
+      <hr>
+      <h1 id="primerx--micro-merchant-data-export-questions">PrimeRx / Micro Merchant Data Export Questions</h1>
+      <h2 id="current-known-fact">Current Known Fact</h2>
+      <p>Micro Merchant has confirmed that API support exists. Public Swagger documentation is available and describes the API as:</p>
+      <ul>
+      <li>Title: <code>PrimeAPI Docs (MMS.GatewayApi)</code></li>
+      <li>OpenAPI version: <code>3.0.1</code></li>
+      <li>API version: <code>v3.6.1</code></li>
+      <li>Authentication scheme: <code>Bearer</code> token in the <code>Authorization</code> header</li>
+      <li>Token generation: documentation points to the MMS Gatekeeper service</li>
+      <li>Required request identity fields mentioned in the API description:<ul>
+      <li><code>ClientId</code></li>
+      <li><code>MemberId</code></li>
+      <li><code>IdentifierType</code>, documented as always <code>2</code></li>
+      <li><code>Identifier</code>, documented as the pharmacy NPI</li>
+      </ul>
+      </li>
+      </ul>
+      <p>The public OpenAPI spec currently exposes 41 paths across these groups:</p>
+      <ul>
+      <li><code>HealthCheck</code></li>
+      <li><code>Prescription</code></li>
+      <li><code>Patient</code></li>
+      <li><code>PatientAddress</code></li>
+      <li><code>PatientInsurance</code></li>
+      <li><code>PatientAllergy</code></li>
+      <li><code>PatientDiagnosis</code></li>
+      <li><code>PatientExternalProfile</code></li>
+      <li><code>Document</code></li>
+      <li><code>Delivery</code></li>
+      <li><code>FollowUp</code></li>
+      <li><code>WorkFlow</code></li>
+      <li><code>BatchManagement</code></li>
+      <li><code>PrimeRx</code></li>
+      <li><code>PPA</code></li>
+      <li><code>Diagnosis</code></li>
+      <li><code>Allergy</code></li>
+      </ul>
+      <p>Useful analytics-related API areas visible in Swagger:</p>
+      <ul>
+      <li>Prescription detail lookup</li>
+      <li>Prescription detail by queue name</li>
+      <li>Patient profile/search</li>
+      <li>Patient insurance</li>
+      <li>Prescriber information inside prescription detail</li>
+      <li>Drug information inside prescription detail</li>
+      <li>Primary/secondary/tertiary insurance names, BIN, PCN, and paid amounts</li>
+      <li>Copay, total Rx amount, amount due, ingredient cost, other fees, discounts, tax, and total insurance paid</li>
+      <li>Prescription status, queue name, order status, refill queue status, PA status, delivery method, fill date, dispense date, written date</li>
+      <li>Pharmacy name, NPI, DEA, phone, fax, and address</li>
+      </ul>
+      <p>Important concern:</p>
+      <p>The visible API schemas include direct patient identifiers and PHI fields such as patient name, DOB, phone, mobile number, street address, prescription number, notes, patient insurance member ID, and prescription images. The analytics platform must not ingest these fields into the SaaS database. The API connector should explicitly suppress, hash, bucket, or aggregate sensitive fields before data leaves the ingestion boundary.</p>
+      <p>Still unknown:</p>
+      <ul>
+      <li>Whether API access covers all required analytics data</li>
+      <li>Whether API access is available directly to the pharmacy or only through an approved partner</li>
+      <li>Whether API use requires additional contracts, fees, BAAs, or vendor approvals</li>
+      <li>Whether the public Swagger endpoints are all available to this customer</li>
+      <li>Whether the API supports bulk historical extraction</li>
+      <li>Whether the API supports incremental sync by updated timestamp</li>
+      <li>Whether the API supports webhook/event delivery</li>
+      <li>Whether there are reporting endpoints for payer performance, drug profitability, financial close, acquisition cost, negative-margin claims, rejections, reversals, and adjustments</li>
+      <li>Whether patient identifiers can be excluded at the API response level</li>
+      <li>Whether a pseudonymous patient token can be generated by the vendor</li>
+      <li>Whether rate limits support daily or multi-daily analytics sync across multiple stores</li>
+      </ul>
+      <p>The next discussion with Micro Merchant should focus on API scope, access, documentation, security, and data coverage.</p>
+      <hr>
+      <h1 id="api-first-integration-implications">API-First Integration Implications</h1>
+      <h2 id="what-this-changes">What This Changes</h2>
+      <p>Since API support is confirmed, the HLD should assume an API connector as the first integration path:</p>
+      <div class="diagram">
+        <img src="diagrams/primerx-ingestion.svg" alt="PrimeRx ingestion architecture">
+      </div>
+      <h2 id="api-connector-responsibilities">API Connector Responsibilities</h2>
+      <ul>
+      <li>Authenticate using the vendor-supported token flow.</li>
+      <li>Store credentials securely.</li>
+      <li>Pull only the minimum fields required for analytics.</li>
+      <li>Prevent direct patient identifiers from entering the analytics database.</li>
+      <li>Normalize pharmacy/store identity using NPI and any available stable store ID.</li>
+      <li>Normalize prescription/fill data into the canonical model.</li>
+      <li>Normalize payer fields: insurance name, BIN, PCN, group if available, paid amount.</li>
+      <li>Normalize drug fields: NDC, drug name, brand/generic indicators if available.</li>
+      <li>Normalize prescriber fields: NPI, name, practice/contact details where allowed.</li>
+      <li>Track every sync attempt, request window, response status, and transformation result.</li>
+      <li>Produce exception reports for missing, malformed, or unmapped data.</li>
+      </ul>
+      <h2 id="webhook-receiver-responsibilities">Webhook Receiver Responsibilities</h2>
+      <ul>
+      <li>Expose a vendor-facing webhook intake endpoint.</li>
+      <li>Validate the webhook source.</li>
+      <li>Accept events quickly and process them asynchronously.</li>
+      <li>Treat webhook payloads as PHI-containing until transformed.</li>
+      <li>Deduplicate repeated events where PrimeRx provides stable identifiers.</li>
+      <li>Avoid relying on strict event ordering.</li>
+      <li>Use webhook events to trigger follow-up API pulls when full details are needed.</li>
+      <li>Maintain receipt, processing, and suppression audit logs.</li>
+      </ul>
+      <h2 id="api-fit-for-mvp">API Fit For MVP</h2>
+      <p>The visible Swagger spec appears promising for prescription, drug, payer, prescriber, queue, and pharmacy-level data. However, it does not yet prove that the API can support the full analytics MVP.</p>
+      <p>Before relying on it fully, we need confirmation on:</p>
+      <ul>
+      <li>Bulk historical prescription/fill extraction</li>
+      <li>Daily incremental sync</li>
+      <li>Rejections, reversals, rebills, partial fills, deleted prescriptions, and adjustments</li>
+      <li>Acquisition cost and gross-profit reliability</li>
+      <li>Payer/PBM-level summaries</li>
+      <li>Drug profitability reporting</li>
+      <li>Negative-margin claim detection</li>
+      <li>Multi-store access</li>
+      <li>PHI-minimized response configuration</li>
+      <li>API rate limits</li>
+      <li>Sandbox/test credentials</li>
+      </ul>
+      <h2 id="updated-api-proof-of-concept">Updated API Proof-of-Concept</h2>
+      <div class="mvp-flow">
+        <div><span>1</span>Sandbox access</div>
+        <div><span>2</span>Safe API sample</div>
+        <div><span>3</span>Field classification</div>
+        <div><span>4</span>Canonical mapping</div>
+        <div><span>5</span>KPI calculation</div>
+        <div><span>6</span>Sample dashboards</div>
+        <div><span>7</span>Sync + PHI audit</div>
+      </div>
+      <hr>
+      <h1 id="primerx-webhook-support">PrimeRx Webhook Support</h1>
+      <h2 id="confirmed-from-local-onboarding-pdf">Confirmed From Local Onboarding PDF</h2>
+      <p>File reviewed:</p>
+      <p><code>/Users/bhanuprakasholeti/Downloads/PrimeRx Webhook Onboarding.pdf</code></p>
+      <p>Document metadata from extracted text:</p>
+      <ul>
+      <li>Title: <code>PrimeRx Webhook Integration Guide</code></li>
+      <li>Version: <code>1.0</code></li>
+      <li>Date: <code>6/23/2026</code></li>
+      <li>Author: <code>Khemraj Bharrat</code></li>
+      </ul>
+      <p>The document says PrimeRx webhooks provide near real-time notifications when events occur inside the PrimeRx Pharmacy Management System. When a subscribed event occurs, PrimeRx sends an HTTPS POST request with a JSON payload to a vendor-provided endpoint.</p>
+      <p>The webhook integration is described as unidirectional.</p>
+      <h2 id="webhook-authentication-options">Webhook Authentication Options</h2>
+      <p>PrimeRx supports webhook authentication methods determined during vendor implementation:</p>
+      <ul>
+      <li>Basic Authentication</li>
+      <li>Secret key authentication using a secret key ID and secret access key</li>
+      </ul>
+      <p>Security implication:</p>
+      <p>The analytics platform should store webhook secrets in a secure secret manager, never log secrets, and never expose secrets in client-side code or repositories.</p>
+      <h2 id="webhook-endpoint-requirements">Webhook Endpoint Requirements</h2>
+      <p>The vendor endpoint must:</p>
+      <ul>
+      <li>Support HTTPS with TLS 1.2 or higher</li>
+      <li>Present a valid SSL certificate</li>
+      <li>Accept HTTP POST over HTTPS</li>
+      <li>Accept JSON payloads</li>
+      <li>Return a successful response after receipt</li>
+      <li>Respond within 2 seconds</li>
+      </ul>
+      <p>Design implication:</p>
+      <p>The webhook endpoint should acknowledge quickly after validation and durable queueing. Heavy processing, API enrichment, PHI transformation, KPI updates, and alert generation should happen asynchronously.</p>
+      <h2 id="supported-webhook-events">Supported Webhook Events</h2>
+      <p>The onboarding guide lists these supported event types:</p>
+      <ul>
+      <li><code>PatientCreated</code></li>
+      <li><code>PatientInfoUpdated</code></li>
+      <li><code>RxSaved</code></li>
+      <li><code>RxDelivery</code></li>
+      <li><code>RxBilled</code></li>
+      <li><code>RxFiled</code></li>
+      <li><code>RxReversed</code></li>
+      <li><code>LabelPrinted</code></li>
+      <li><code>DPVDone</code></li>
+      <li><code>RphVDone</code></li>
+      <li><code>RxShipped</code></li>
+      <li><code>RxTransmissionRejected</code></li>
+      <li><code>RxDeleted</code></li>
+      <li><code>ERxReceived</code></li>
+      <li><code>WorkflowTransition</code></li>
+      </ul>
+      <p>Note:</p>
+      <p>The sample vendor configuration in the PDF includes <code>RxPickedUp</code>, but the supported event table does not list <code>RxPickedUp</code>. This should be clarified with PrimeRx.</p>
+      <h2 id="webhook-payload-shape">Webhook Payload Shape</h2>
+      <p>The guide says all webhook events use a common JSON structure, with an <code>Event</code> field identifying the notification type.</p>
+      <p>The sample payload includes top-level prescription fields such as:</p>
+      <ul>
+      <li><code>Event</code></li>
+      <li><code>RxNo</code></li>
+      <li><code>RefillNo</code></li>
+      <li><code>AuthRefills</code></li>
+      <li><code>DaysSupply</code></li>
+      <li><code>DateFilled</code></li>
+      <li><code>DateOrdered</code></li>
+      <li><code>Status</code></li>
+      <li><code>QtyOrdered</code></li>
+      <li><code>QtyDispensed</code></li>
+      <li><code>QtyRemaining</code></li>
+      <li><code>Sig</code></li>
+      <li><code>PickedUp</code></li>
+      <li><code>DatePicked</code></li>
+      <li><code>TimePicked</code></li>
+      <li><code>PrescriptionNotes</code></li>
+      <li><code>RxOriginCode</code></li>
+      <li><code>RxOriginDescription</code></li>
+      <li><code>DeliveryMethod</code></li>
+      <li><code>TotalRxAmount</code></li>
+      <li><code>PrimaryInsurancePaid</code></li>
+      <li><code>SecondaryInsurancePaid</code></li>
+      <li><code>TertiaryInsurancePaid</code></li>
+      <li><code>PatientCopay</code></li>
+      <li><code>PharmVerificationDone</code></li>
+      <li><code>BillType</code></li>
+      <li><code>LabelPrinted</code></li>
+      <li><code>FollowupTag</code></li>
+      <li><code>CopayPaid</code></li>
+      <li><code>QueueName</code></li>
+      </ul>
+      <p>Nested sections include:</p>
+      <ul>
+      <li><code>Drug</code></li>
+      <li><code>Patient</code></li>
+      <li><code>Prescriber</code></li>
+      <li><code>Pharmacy</code></li>
+      <li><code>Diagnosis</code></li>
+      <li><code>RxPayRecords</code></li>
+      <li><code>EPrescriptionData</code></li>
+      </ul>
+      <h2 id="webhook-data-useful-for-analytics">Webhook Data Useful For Analytics</h2>
+      <p>Webhook events are useful for:</p>
+      <ul>
+      <li>Near real-time prescription status changes</li>
+      <li>New or updated prescriptions</li>
+      <li>Billed prescriptions</li>
+      <li>Reversed prescriptions</li>
+      <li>Transmission rejections</li>
+      <li>Shipping/delivery status</li>
+      <li>Label printed status</li>
+      <li>Drug pick verification completion</li>
+      <li>Pharmacist verification completion</li>
+      <li>Workflow queue transitions</li>
+      <li>New patient events, if allowed by privacy policy</li>
+      </ul>
+      <p>For the analytics product, the most relevant events are likely:</p>
+      <ul>
+      <li><code>RxBilled</code></li>
+      <li><code>RxReversed</code></li>
+      <li><code>RxTransmissionRejected</code></li>
+      <li><code>RxSaved</code></li>
+      <li><code>RxFiled</code></li>
+      <li><code>RxDelivery</code></li>
+      <li><code>RxShipped</code></li>
+      <li><code>WorkflowTransition</code></li>
+      <li><code>DPVDone</code></li>
+      <li><code>RphVDone</code></li>
+      </ul>
+      <h2 id="phi-risk-in-webhook-payloads">PHI Risk In Webhook Payloads</h2>
+      <p>The sample payload includes PHI and direct identifiers, including:</p>
+      <ul>
+      <li>Patient number</li>
+      <li>Patient first and last name</li>
+      <li>DOB</li>
+      <li>Gender</li>
+      <li>Street address</li>
+      <li>Phone numbers</li>
+      <li>Email</li>
+      <li>Driver license number</li>
+      <li>Prescription number</li>
+      <li>Prescription notes</li>
+      <li>Prescriber contact details</li>
+      </ul>
+      <p>Design implication:</p>
+      <p>Webhook payloads must enter a restricted ingestion boundary first. The analytics database should only receive HIPAA-minimized transformed data. Direct patient identifiers should be dropped, bucketed, aggregated, or replaced with approved pseudonymous tokens before downstream processing.</p>
+      <h2 id="webhook-delivery-behavior">Webhook Delivery Behavior</h2>
+      <p>The onboarding guide states:</p>
+      <ul>
+      <li>PrimeRx sends webhook notifications when subscribed events occur.</li>
+      <li>Each notification is delivered as an HTTPS POST with JSON.</li>
+      <li>Any HTTP 2xx response is considered successful.</li>
+      <li>Any non-2xx response is considered failed.</li>
+      <li>Consumers should handle duplicate notifications gracefully.</li>
+      <li>Consumers should not rely on strict event ordering.</li>
+      </ul>
+      <p>Still to confirm:</p>
+      <ul>
+      <li>Whether PrimeRx retries failed webhook deliveries</li>
+      <li>Retry schedule and retry limit</li>
+      <li>Whether events include a unique event ID</li>
+      <li>Whether event timestamps are included beyond business dates</li>
+      <li>Whether webhook signing/HMAC is available</li>
+      <li>Whether IP allowlisting is available</li>
+      <li>Whether payload fields can be suppressed or customized</li>
+      <li>Whether webhook events can be configured per store/pharmacy</li>
+      </ul>
+      <h2 id="updated-integration-strategy">Updated Integration Strategy</h2>
+      <p>Webhooks should be used together with API polling:</p>
+      <div class="mvp-flow">
+        <div><span>1</span>Webhook event</div>
+        <div><span>2</span>Validate + accept</div>
+        <div><span>3</span>PHI minimization</div>
+        <div><span>4</span>Optional API enrichment</div>
+        <div><span>5</span>Canonical mapping</div>
+        <div><span>6</span>KPI / alert update</div>
+        <div><span>7</span>Processing audit</div>
+      </div>
+      <p>Recommended pattern:</p>
+      <ul>
+      <li>Use API sync for historical backfill, reconciliation, and daily completeness.</li>
+      <li>Use webhooks for near real-time event awareness.</li>
+      <li>Use webhook-triggered API pulls to enrich events when the webhook payload is incomplete or too PHI-heavy.</li>
+      <li>Use periodic API reconciliation to catch missed, duplicated, or out-of-order webhook events.</li>
+      </ul>
+      <h2 id="webhook-questions-for-primerx">Webhook Questions For PrimeRx</h2>
+      <ol>
+      <li>Can webhook payload fields be customized or suppressed to exclude patient identifiers?</li>
+      <li>Is HMAC/signature-based authentication supported in addition to Basic or secret key authentication?</li>
+      <li>Does every webhook include a unique event ID?</li>
+      <li>Does every webhook include an event-created timestamp?</li>
+      <li>What retry behavior applies to failed deliveries?</li>
+      <li>Can webhooks be configured per pharmacy/store?</li>
+      <li>Can different stores use different webhook endpoints or credentials?</li>
+      <li>Is <code>RxPickedUp</code> officially supported, since it appears in the sample configuration but not the supported event table?</li>
+      <li>Can webhook events be replayed for a time window if our endpoint is down?</li>
+      <li>Are webhook payload schemas versioned?</li>
+      <li>How much notice is provided before payload schema changes?</li>
+      <li>Can we receive sandbox webhook events for development?</li>
+      <li>Are IP allowlists available for PrimeRx webhook sender IPs?</li>
+      <li>Are there limits on delivery volume?</li>
+      <li>Are event ordering guarantees provided within a prescription, store, or pharmacy group?</li>
+      </ol>
+      <hr>
+      <h1 id="micro-merchant-api-questions">Micro Merchant API Questions</h1>
+      <h2 id="1-api-availability-and-access">1. API Availability and Access</h2>
+      <ol>
+      <li>What API products or integration options are available for Micro Merchant / PrimeRx?</li>
+      <li>Is API access available directly to pharmacy customers, or only to approved integration partners?</li>
+      <li>What is the process to enable API access?</li>
+      <li>Are there setup fees, monthly fees, per-call fees, or partner certification costs?</li>
+      <li>Is a Business Associate Agreement, integration agreement, or security review required?</li>
+      <li>Is there a technical contact or developer support channel for API onboarding?</li>
+      <li>Is there a sandbox, test tenant, or sample environment?</li>
+      <li>Can API access be enabled per pharmacy store, per pharmacy group, or across all stores under one organization?</li>
+      </ol>
+      <h2 id="2-api-documentation">2. API Documentation</h2>
+      <ol>
+      <li>Can Micro Merchant provide API documentation?</li>
+      <li>Does the documentation include:<ul>
+      <li>Endpoint list</li>
+      <li>Request and response examples</li>
+      <li>Authentication instructions</li>
+      <li>Data dictionary</li>
+      <li>Error codes</li>
+      <li>Rate limits</li>
+      <li>Pagination behavior</li>
+      <li>Filtering options</li>
+      <li>Webhook/event documentation, if available</li>
+      </ul>
+      </li>
+      <li>Are OpenAPI / Swagger specs available?</li>
+      <li>Are SDKs available for any programming languages?</li>
+      <li>Are sample API responses available for development planning?</li>
+      </ol>
+      <h2 id="3-authentication-and-security">3. Authentication and Security</h2>
+      <ol>
+      <li>What authentication method is used?<ul>
+      <li>OAuth 2.0</li>
+      <li>API key</li>
+      <li>Client credentials</li>
+      <li>Mutual TLS</li>
+      <li>VPN/private network</li>
+      <li>Other</li>
+      </ul>
+      </li>
+      <li>Can API credentials be scoped by store, organization, user role, or data type?</li>
+      <li>Can credentials be rotated?</li>
+      <li>Are audit logs available for API access?</li>
+      <li>Are IP allowlists required or supported?</li>
+      <li>Is all API traffic encrypted in transit?</li>
+      <li>Are there specific requirements for storing API credentials?</li>
+      <li>Can API access be read-only for analytics use cases?</li>
+      </ol>
+      <h2 id="4-data-coverage">4. Data Coverage</h2>
+      <ol>
+      <li>Which data objects are available through the API?</li>
+      <li>Does the API provide prescription/fill-level data?</li>
+      <li>Does the API provide payer, PBM, BIN, PCN, and group data?</li>
+      <li>Does the API provide reimbursement, copay, revenue, acquisition cost, and gross profit fields?</li>
+      <li>Does the API provide drug, NDC, quantity, days supply, brand/generic, compound, vaccine, DME, OTC, or specialty indicators?</li>
+      <li>Does the API provide prescriber/doctor information, including NPI and prescribing activity?</li>
+      <li>Does the API provide claim rejection, reversal, prior authorization, rebill, partial fill, and adjustment information?</li>
+      <li>Does the API provide store/location identifiers for multi-store analytics?</li>
+      <li>Does the API provide financial close, deposit, receivable, or reconciliation data?</li>
+      <li>Does the API provide employee/task/workflow data, or is that outside PrimeRx?</li>
+      <li>Does the API provide document/license/compliance data, or is that outside PrimeRx?</li>
+      </ol>
+      <h2 id="5-phi-and-data-minimization-through-api">5. PHI and Data Minimization Through API</h2>
+      <ol>
+      <li>Can API responses be configured to exclude direct patient identifiers?</li>
+      <li>Can we request only the minimum fields needed for analytics?</li>
+      <li>Can the following be excluded from API responses?<ul>
+      <li>Patient name</li>
+      <li>Patient address</li>
+      <li>Date of birth</li>
+      <li>Original prescription number</li>
+      <li>Phone number</li>
+      <li>Email</li>
+      <li>SSN</li>
+      <li>Medical record number</li>
+      <li>Account number</li>
+      <li>Prescription image</li>
+      <li>Free-text notes containing identifiers</li>
+      </ul>
+      </li>
+      <li>Can the API return age range instead of DOB?</li>
+      <li>Can the API return ZIP3, city, or market area instead of street address?</li>
+      <li>Can the API return aggregate patient cohorts instead of patient-level records?</li>
+      <li>Can the API return a vendor-generated pseudonymous patient token?</li>
+      <li>If pseudonymous tokens are available, are they stable across time and stores?</li>
+      <li>Can the token be generated without exposing the re-identification key outside the pharmacy environment?</li>
+      </ol>
+      <h2 id="6-data-freshness-and-sync-behavior">6. Data Freshness and Sync Behavior</h2>
+      <ol>
+      <li>Is the API real-time, near-real-time, or batch/report-based?</li>
+      <li>How often is API data updated?</li>
+      <li>Can we query by updated timestamp or date range?</li>
+      <li>Are change-data-capture, delta sync, or incremental sync endpoints available?</li>
+      <li>Are webhooks available for new fills, reversals, rejected claims, or updates?</li>
+      <li>Can deleted, reversed, rebilled, or corrected records be detected through the API?</li>
+      <li>Is there a recommended sync frequency for analytics platforms?</li>
+      <li>Are there rate limits that would affect daily or multi-daily syncs across multiple stores?</li>
+      </ol>
+      <h2 id="7-multi-store-api-support">7. Multi-Store API Support</h2>
+      <ol>
+      <li>Can one API connection access multiple pharmacy stores?</li>
+      <li>Does every API response include a stable store/location ID?</li>
+      <li>Are NPI, NCPDP, Tax ID, or internal store IDs available?</li>
+      <li>Are patient, payer, drug, and prescriber identifiers consistent across stores?</li>
+      <li>Can API permissions be scoped so one pharmacy group cannot access another group&#39;s data?</li>
+      <li>For future SaaS use, can each customer/pharmacy group have isolated API credentials?</li>
+      </ol>
+      <h2 id="8-api-reliability-and-operations">8. API Reliability and Operations</h2>
+      <ol>
+      <li>What uptime or availability expectations apply to the API?</li>
+      <li>Is there a status page or incident notification process?</li>
+      <li>What error codes indicate retryable vs. non-retryable failures?</li>
+      <li>Are API responses idempotent and stable enough for import replay?</li>
+      <li>Are there request IDs or correlation IDs for support troubleshooting?</li>
+      <li>How long are historical records available through the API?</li>
+      <li>Are there API versioning policies?</li>
+      <li>How much notice is provided before breaking changes?</li>
+      </ol>
+      <h2 id="9-reconciliation-and-source-of-truth">9. Reconciliation and Source of Truth</h2>
+      <ol>
+      <li>Which API endpoint should be treated as the source of truth for prescription volume?</li>
+      <li>Which endpoint should be treated as the source of truth for revenue?</li>
+      <li>Which endpoint should be treated as the source of truth for reimbursement?</li>
+      <li>Which endpoint should be treated as the source of truth for acquisition cost and gross profit?</li>
+      <li>How are rejected claims represented?</li>
+      <li>How are reversed claims represented?</li>
+      <li>How are rebills, partial fills, deletes, and adjustments represented?</li>
+      <li>Are report totals available through the API so imported data can be reconciled?</li>
+      <li>Are there known differences between API data and PrimeRx screen/report totals?</li>
+      </ol>
+      <h2 id="10-api-proof-of-concept-request">10. API Proof-of-Concept Request</h2>
+      <p>For planning and development, we should ask Micro Merchant for:</p>
+      <ol>
+      <li>API documentation</li>
+      <li>Sandbox or test credentials</li>
+      <li>Sample responses for required endpoints</li>
+      <li>Data dictionary</li>
+      <li>List of PHI fields and field-suppression options</li>
+      <li>Rate-limit and pagination rules</li>
+      <li>Multi-store access model</li>
+      <li>Historical-data access rules</li>
+      <li>Security and BAA requirements</li>
+      <li>Vendor-recommended integration pattern for analytics platforms</li>
+      </ol>
+      <hr>
+      <h2 id="1-export-availability">1. Export Availability</h2>
+      <ol>
+      <li>Does PrimeRx / Micro Merchant support periodic data exports for pharmacy operational, prescription, payer, drug, financial, and prescriber data?</li>
+      <li>Which reports or export modules are available out of the box?</li>
+      <li>Are exports available per pharmacy location, across multiple locations, or both?</li>
+      <li>Can exports include historical data, or only data from the export date forward?</li>
+      <li>How far back can historical data be exported?</li>
+      <li>Are there limits on the number of rows, date ranges, stores, or reports that can be exported at one time?</li>
+      </ol>
+      <h2 id="2-export-format">2. Export Format</h2>
+      <ol>
+      <li>What data formats are supported?<ul>
+      <li>CSV</li>
+      <li>Excel / XLSX</li>
+      <li>TXT / fixed-width</li>
+      <li>PDF</li>
+      <li>XML</li>
+      <li>JSON</li>
+      <li>Other</li>
+      </ul>
+      </li>
+      <li>Are export files structured consistently over time?</li>
+      <li>Are field names stable, or can they vary by report, store, configuration, or software version?</li>
+      <li>Is there a data dictionary that defines each exported field?</li>
+      <li>Are sample export files available for development and testing?</li>
+      <li>Can exports be generated in a de-identified or limited-field format?</li>
+      </ol>
+      <h2 id="3-exported-data-fields">3. Exported Data Fields</h2>
+      <ol>
+      <li>What prescription or fill-level fields can be exported?</li>
+      <li>Can the export include:<ul>
+      <li>Fill date or reporting date</li>
+      <li>Store/location</li>
+      <li>New/refill indicator</li>
+      <li>Transfer indicator</li>
+      <li>Drug name</li>
+      <li>NDC</li>
+      <li>Quantity</li>
+      <li>Days supply</li>
+      <li>Prescriber NPI</li>
+      <li>Insurance name</li>
+      <li>BIN / PCN / group</li>
+      <li>Gross revenue</li>
+      <li>Copay</li>
+      <li>Insurance reimbursement</li>
+      <li>Acquisition cost</li>
+      <li>Estimated gross profit</li>
+      <li>Reversal status</li>
+      <li>Rejection status</li>
+      <li>Paid status</li>
+      </ul>
+      </li>
+      <li>Can payer/PBM-level reports be exported?</li>
+      <li>Can drug profitability reports be exported?</li>
+      <li>Can prescriber or doctor-referral reports be exported?</li>
+      <li>Can patient demographic data be exported only as aggregates or de-identified cohorts?</li>
+      <li>Can claim rejection, prior authorization, reversal, and negative-margin claim reports be exported?</li>
+      <li>Can delivery, pickup, mail, compound, vaccine, DME, or OTC indicators be exported if available?</li>
+      </ol>
+      <h2 id="4-phi-privacy-and-data-minimization">4. PHI, Privacy, and Data Minimization</h2>
+      <ol>
+      <li>Can exports be configured to exclude direct patient identifiers?</li>
+      <li>Can the following fields be excluded from all exports?<ul>
+      <li>Patient name</li>
+      <li>Patient address</li>
+      <li>Date of birth</li>
+      <li>Original prescription number</li>
+      <li>Phone number</li>
+      <li>Email</li>
+      <li>SSN</li>
+      <li>Medical record number</li>
+      <li>Account number</li>
+      <li>Prescription image</li>
+      <li>Free-text notes containing patient identifiers</li>
+      </ul>
+      </li>
+      <li>Can PrimeRx generate a pseudonymous patient token or hashed identifier for retention/cohort analytics?</li>
+      <li>If pseudonymous tokens are supported, where is the key or mapping stored?</li>
+      <li>Can exports provide age range instead of DOB?</li>
+      <li>Can exports provide ZIP3, city, market area, or store trade area instead of full address?</li>
+      <li>Can reports be restricted to aggregate patient counts instead of patient-level rows?</li>
+      <li>Are there vendor guidelines for HIPAA-compliant export handling?</li>
+      </ol>
+      <h2 id="5-api--sdk--integration-support">5. API / SDK / Integration Support</h2>
+      <ol>
+      <li>Does PrimeRx / Micro Merchant provide an API?</li>
+      <li>If yes, what type of API is available?<ul>
+      <li>REST</li>
+      <li>SOAP</li>
+      <li>FHIR / HL7</li>
+      <li>Database connector</li>
+      <li>Report API</li>
+      <li>Other</li>
+      </ul>
+      </li>
+      <li>Is there an SDK or developer toolkit?</li>
+      <li>Is API access available to customers directly, or only through approved integration partners?</li>
+      <li>What authentication method is used?</li>
+      <li>Are API credentials available per pharmacy, per organization, or per user?</li>
+      <li>Are there rate limits, usage limits, or data-access restrictions?</li>
+      <li>Is there a sandbox or test environment?</li>
+      <li>Is API documentation available?</li>
+      <li>Are webhooks or event-based notifications supported?</li>
+      </ol>
+      <h2 id="6-automation-and-scheduling">6. Automation and Scheduling</h2>
+      <ol>
+      <li>Can exports be scheduled automatically?</li>
+      <li>Can exports run daily without manual user action?</li>
+      <li>Can exports run multiple times per day?</li>
+      <li>What scheduling options are supported?<ul>
+      <li>Daily</li>
+      <li>Weekly</li>
+      <li>Monthly</li>
+      <li>Custom time</li>
+      <li>End-of-day close</li>
+      </ul>
+      </li>
+      <li>Can scheduled exports be delivered to:<ul>
+      <li>SFTP folder</li>
+      <li>Secure email</li>
+      <li>Local network folder</li>
+      <li>Cloud storage</li>
+      <li>API endpoint</li>
+      <li>Vendor integration endpoint</li>
+      </ul>
+      </li>
+      <li>Can exports be automatically named with store, report type, and date?</li>
+      <li>Can failed exports trigger an alert?</li>
+      <li>Is there an export log showing when each file was generated and whether it succeeded?</li>
+      <li>Can multiple stores be configured to export on the same schedule?</li>
+      </ol>
+      <h2 id="7-data-accuracy-and-reconciliation">7. Data Accuracy and Reconciliation</h2>
+      <ol>
+      <li>Which report should be considered the source of truth for prescription volume?</li>
+      <li>Which report should be considered the source of truth for revenue?</li>
+      <li>Which report should be considered the source of truth for reimbursement?</li>
+      <li>Which report should be considered the source of truth for acquisition cost and gross profit?</li>
+      <li>How are reversed claims represented in exports?</li>
+      <li>How are rejected claims represented in exports?</li>
+      <li>How are rebills, reversals, partial fills, deleted prescriptions, and adjustments represented?</li>
+      <li>Are report totals expected to match financial close reports?</li>
+      <li>Are there known differences between operational reports and accounting/reconciliation reports?</li>
+      <li>Can exports include report-generation timestamp and report parameters?</li>
+      </ol>
+      <h2 id="8-multi-store-support">8. Multi-Store Support</h2>
+      <ol>
+      <li>Can exports include a store identifier for every row?</li>
+      <li>Is there a stable store ID, NPI, NCPDP, or other location identifier?</li>
+      <li>Can one export include all stores?</li>
+      <li>If each store exports separately, can the file naming or metadata identify the store?</li>
+      <li>Are payer, drug, prescriber, and patient identifiers consistent across stores?</li>
+      <li>Are there differences in configuration between stores that could affect report fields?</li>
+      </ol>
+      <h2 id="9-security-and-access-control">9. Security and Access Control</h2>
+      <ol>
+      <li>Who can generate exports inside PrimeRx?</li>
+      <li>Can export permissions be limited by user role?</li>
+      <li>Can export access be audited?</li>
+      <li>Are exports encrypted at rest or in transit?</li>
+      <li>Does PrimeRx support SFTP or another secure delivery method?</li>
+      <li>Are there vendor requirements for storing exported files?</li>
+      <li>Are Business Associate Agreements or integration agreements required for API/export access?</li>
+      </ol>
+      <h2 id="10-operational-support">10. Operational Support</h2>
+      <ol>
+      <li>Who from PrimeRx / Micro Merchant can support export setup?</li>
+      <li>Is there a technical integration contact?</li>
+      <li>Is there a standard implementation guide for analytics/reporting integrations?</li>
+      <li>Are there fees for API access, scheduled exports, custom reports, or integration support?</li>
+      <li>What is the expected lead time to enable exports or API access?</li>
+      <li>Are custom reports available if standard exports do not include required fields?</li>
+      <li>Can PrimeRx review our required field list and identify what is supported, unsupported, or custom?</li>
+      </ol>
+      <h2 id="11-specific-development-requests">11. Specific Development Requests</h2>
+      <ol>
+      <li>Can PrimeRx provide sample exports for:<ul>
+      <li>Prescription/fill data</li>
+      <li>Payer performance</li>
+      <li>Drug profitability</li>
+      <li>Rejections/reversals</li>
+      <li>Prescriber/doctor activity</li>
+      <li>Store summary</li>
+      <li>Financial/reimbursement summary</li>
+      </ul>
+      </li>
+      <li>Can PrimeRx provide a data dictionary for those exports?</li>
+      <li>Can PrimeRx confirm which fields contain PHI and which can be safely excluded?</li>
+      <li>Can PrimeRx confirm the best export method for daily automated analytics ingestion?</li>
+      <li>Can PrimeRx provide a recommended architecture for customers building external analytics dashboards?</li>
+      </ol>
+      <h2 id="critical-questions-to-ask-first">Critical Questions To Ask First</h2>
+      <p>If meeting time is short, ask these first:</p>
+      <ol>
+      <li>Do you support scheduled daily exports for PrimeRx / Micro Merchant data?</li>
+      <li>What export formats are supported?</li>
+      <li>What reports and fields can be exported?</li>
+      <li>Can exports exclude direct patient identifiers?</li>
+      <li>Is API or SDK access available?</li>
+      <li>Can exports be automated to SFTP, secure email, or another secure destination?</li>
+      <li>Can you provide sample exports and a data dictionary?</li>
+      <li>Are there fees, approvals, BAAs, or vendor agreements required?</li>
+      <li>How are reversals, rejected claims, rebills, and adjustments represented?</li>
+      <li>What is the recommended way to support multi-store analytics?</li>
+      </ol>
+      <h2 id="internal-follow-up-after-primerx-responds">Internal Follow-Up After PrimeRx Responds</h2>
+      <p>After receiving answers, the project team should produce:</p>
+      <ul>
+      <li>Source export inventory</li>
+      <li>Supported field matrix</li>
+      <li>Excluded PHI field list</li>
+      <li>Data dictionary</li>
+      <li>Source-to-canonical mapping</li>
+      <li>Automation approach recommendation</li>
+      <li>Import validation rules</li>
+      <li>Reconciliation strategy</li>
+      <li>Security and compliance review</li>
+      <li>MVP ingestion plan</li>
+      </ul>
+      
+    </article>
+  </main>
+</body>
+</html>

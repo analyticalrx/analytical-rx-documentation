@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PrimeRx Webhook Processing Pipeline</title>
+  <style>
+    :root {
+      --ink: #1f2933;
+      --muted: #5f6c7b;
+      --line: #d9e2ec;
+      --panel: #f8fafc;
+      --accent: #0f766e;
+      --accent-soft: #ccfbf1;
+      --risk: #b91c1c;
+      --risk-soft: #fee2e2;
+      --warn: #9a3412;
+      --warn-soft: #ffedd5;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background: #ffffff;
+      line-height: 1.55;
+    }
+
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 44px 24px 64px;
+    }
+
+    nav {
+      margin-bottom: 28px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    nav a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    header {
+      max-width: 840px;
+      padding-bottom: 26px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    section {
+      margin-top: 34px;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 22px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 17px;
+    }
+
+    p {
+      margin: 0 0 12px;
+    }
+
+    ul, ol {
+      margin: 0;
+      padding-left: 22px;
+    }
+
+    li {
+      margin: 6px 0;
+    }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: #eef2f7;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    .diagram {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      overflow-x: auto;
+    }
+
+    .diagram img {
+      display: block;
+      width: 100%;
+      min-width: 760px;
+      height: auto;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .callout {
+      padding: 16px 18px;
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+      border-radius: 6px;
+    }
+
+    .risk {
+      border-left-color: var(--risk);
+      background: var(--risk-soft);
+    }
+
+    .warn {
+      border-left-color: var(--warn);
+      background: var(--warn-soft);
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <nav><a href="index.html">Back to design index</a></nav>
+
+    <header>
+      <h1>PrimeRx Webhook Processing Pipeline</h1>
+      <p class="lead">Design for receiving PrimeRx webhook events safely, processing them asynchronously, suppressing PHI, and using them as near-real-time triggers for analytics updates.</p>
+    </header>
+
+    <section>
+      <h2>Pipeline Position</h2>
+      <div class="callout">
+        <p>Webhooks are the primary near-real-time trigger. They are not sufficient by themselves for initial historical load, missed-event recovery, daily reconciliation, or KPI rebuilds.</p>
+        <p>The full integration strategy is: <code>webhooks</code> for event awareness, <code>API</code> for enrichment and reconciliation, and <code>bulk/export</code> for backfill if PrimeRx supports it.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Current Diagram</h2>
+      <div class="diagram">
+        <img src="diagrams/webhook-processing.svg" alt="PrimeRx webhook processing pipeline">
+      </div>
+      <p class="meta">Editable source: <a href="diagrams/webhook-processing.d2">diagrams/webhook-processing.d2</a></p>
+    </section>
+
+    <section>
+      <h2>Confirmed PrimeRx Webhook Facts</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>What PrimeRx Sends</h3>
+          <ul>
+            <li>Near-real-time event notifications.</li>
+            <li>JSON payloads with a common structure.</li>
+            <li>An <code>Event</code> field that identifies the business event.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>What We Must Handle</h3>
+          <ul>
+            <li>Webhook authentication.</li>
+            <li>Duplicate deliveries.</li>
+            <li>Out-of-order events.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>What Is Still Needed</h3>
+          <ul>
+            <li>API enrichment for full details.</li>
+            <li>Bulk or API reconciliation.</li>
+            <li>PHI suppression before analytics storage.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Relevant Events</h2>
+      <p>The webhook guide lists several events. For analytics, group them into these business categories:</p>
+      <ul>
+        <li>Prescription lifecycle: saved, filed, billed, reversed, deleted.</li>
+        <li>Claim exceptions: transmission rejected.</li>
+        <li>Fulfillment: delivery, shipped, label printed.</li>
+        <li>Workflow: verification completed, queue transition.</li>
+      </ul>
+      <div class="callout warn">
+        <p>The sample vendor configuration mentions <code>RxPickedUp</code>, but the supported event table does not list it. PrimeRx should confirm whether pickup events are officially supported.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Processing Flow</h2>
+      <ol>
+        <li>Receive the event and store it in the restricted ingestion area.</li>
+        <li>Acknowledge receipt quickly so PrimeRx is not blocked by downstream processing.</li>
+        <li>Process asynchronously: de-duplicate, minimize PHI, and enrich from the API if needed.</li>
+        <li>Map the safe event into the canonical analytics model.</li>
+        <li>Update KPIs, alerts, and audit records.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>PHI Boundary</h2>
+      <div class="callout risk">
+        <p>Webhook payloads can include patient name, DOB, address, phone, email, driver license, original prescription number, prescription notes, and other direct identifiers. Raw webhook data must be treated as PHI until transformed.</p>
+      </div>
+      <p>The analytics database should only receive HIPAA-minimized data. Direct patient identifiers should be excluded unless a later compliance decision explicitly allows a different model.</p>
+    </section>
+
+    <section>
+      <h2>Idempotency And Ordering</h2>
+      <p>The pipeline must assume duplicate and out-of-order events. At design level, we need a stable way to identify the same prescription event across retries and later corrections.</p>
+      <ul>
+        <li>Store or pharmacy identity.</li>
+        <li>Prescription/fill identity.</li>
+        <li>Event type and event timing, if available.</li>
+        <li>Raw event fingerprint as a fallback.</li>
+      </ul>
+      <p>Periodic API or bulk reconciliation is still required to correct missed, duplicated, or reordered webhook events.</p>
+    </section>
+
+    <section>
+      <h2>Failure Handling</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Invalid Events</h3>
+          <ul>
+            <li>Reject or quarantine events that fail basic validation.</li>
+            <li>Keep enough metadata for vendor troubleshooting.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Data Issues</h3>
+          <ul>
+            <li>Route schema drift, unmapped fields, and PHI policy issues to review.</li>
+            <li>Do not silently drop events that affect KPIs.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Recovery</h3>
+          <ul>
+            <li>Retry temporary processing failures.</li>
+            <li>Use API or bulk reconciliation to recover missed events.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>PrimeRx Questions</h2>
+      <ul>
+        <li>Can webhook payloads exclude PHI or direct patient identifiers?</li>
+        <li>Is HMAC or signature validation supported?</li>
+        <li>Does every webhook include a unique event ID?</li>
+        <li>Does every webhook include an event-created timestamp?</li>
+        <li>What retry schedule applies to failed deliveries?</li>
+        <li>Can failed or missed webhook events be replayed?</li>
+        <li>Are webhook schemas versioned?</li>
+        <li>Can webhooks be configured per store or pharmacy group?</li>
+        <li>Is <code>RxPickedUp</code> officially supported?</li>
+        <li>Can API or bulk export be used for daily reconciliation against webhook events?</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Implementation Milestone</h2>
+      <p>The first implementation should prove this path with sandbox or sample payloads:</p>
+      <ol>
+        <li>Receive billing, reversal, and rejection events.</li>
+        <li>Persist raw events in the restricted ingestion area.</li>
+        <li>Minimize PHI and map safe fields into canonical records.</li>
+        <li>Update sample KPI and alert outputs.</li>
+        <li>Reconcile webhook-derived data against API or bulk data once that channel is confirmed.</li>
+      </ol>
+    </section>
+  </main>
+</body>
+</html>

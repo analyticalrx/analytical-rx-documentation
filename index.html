@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AnalyticalRx Design Index</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1f2933;
+      --muted: #5f6c7b;
+      --line: #d9e2ec;
+      --panel: #f8fafc;
+      --accent: #0f766e;
+      --accent-soft: #ccfbf1;
+      --warn: #9a3412;
+      --warn-soft: #ffedd5;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background: #ffffff;
+      line-height: 1.5;
+    }
+
+    main {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 48px 24px 64px;
+    }
+
+    header {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 34px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    section {
+      margin-top: 32px;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .link-card {
+      display: block;
+      min-height: 112px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      text-decoration: none;
+      color: var(--ink);
+    }
+
+    .link-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 8px 24px rgba(15, 118, 110, 0.12);
+    }
+
+    .link-card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 17px;
+    }
+
+    .link-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge.secondary {
+      background: var(--warn-soft);
+      color: var(--warn);
+    }
+
+    footer {
+      margin-top: 40px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>AnalyticalRx Design Index</h1>
+      <p>Single entry point for the current high-level design, ingestion design, PrimeRx discovery notes, and generated diagrams.</p>
+    </header>
+
+    <section>
+      <h2>HTML Review Docs</h2>
+      <div class="grid">
+        <a class="link-card" href="High_Level_Design.html">
+          <span class="badge">Current</span>
+          <strong>High-Level Design</strong>
+          <span>System architecture, layers, PHI boundary, MVP slice, build sequence, and PrimeRx questions.</span>
+        </a>
+        <a class="link-card" href="Ingestion_Pipeline_Design.html">
+          <span class="badge">Current</span>
+          <strong>PrimeRx Ingestion Pipeline</strong>
+          <span>Webhook, API, bulk/backfill, PHI filtering, validation, canonical load, and reconciliation design.</span>
+        </a>
+        <a class="link-card" href="Webhook_Processing_Pipeline.html">
+          <span class="badge">Current</span>
+          <strong>Webhook Processing Pipeline</strong>
+          <span>Webhook receiver, async processing, PHI boundary, idempotency, failure handling, and vendor questions.</span>
+        </a>
+        <a class="link-card" href="Product_Planning_and_PrimeRx_Data_Questions.html">
+          <span class="badge">Current</span>
+          <strong>Product Planning + PrimeRx Questions</strong>
+          <span>Planning notes, API questions, webhook support, and open vendor discovery items.</span>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2>Current Diagrams</h2>
+      <div class="grid">
+        <a class="link-card" href="diagrams/overall-platform.svg">
+          <span class="badge">D2</span>
+          <strong>Overall Platform Diagram</strong>
+          <span>End-to-end platform view from PrimeRx/Airtable sources through ingestion, analytics, and dashboards.</span>
+        </a>
+        <a class="link-card" href="diagrams/primerx-ingestion.svg">
+          <span class="badge">D2</span>
+          <strong>PrimeRx Ingestion Diagram</strong>
+          <span>API, webhook, and bulk/batch paths into quarantine, PHI filtering, validation, and canonical load.</span>
+        </a>
+        <a class="link-card" href="diagrams/webhook-processing.svg">
+          <span class="badge">D2</span>
+          <strong>Webhook Processing Diagram</strong>
+          <span>Webhook receiver, queue, async worker, failure paths, enrichment, and analytics outputs.</span>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2>Editable D2 Sources</h2>
+      <div class="grid">
+        <a class="link-card" href="diagrams/overall-platform.d2">
+          <span class="badge">Source</span>
+          <strong>overall-platform.d2</strong>
+          <span>Edit this file, then render to <code>diagrams/overall-platform.svg</code>.</span>
+        </a>
+        <a class="link-card" href="diagrams/primerx-ingestion.d2">
+          <span class="badge">Source</span>
+          <strong>primerx-ingestion.d2</strong>
+          <span>Edit this file, then render to <code>diagrams/primerx-ingestion.svg</code>.</span>
+        </a>
+        <a class="link-card" href="diagrams/webhook-processing.d2">
+          <span class="badge">Source</span>
+          <strong>webhook-processing.d2</strong>
+          <span>Edit this file, then render to <code>diagrams/webhook-processing.svg</code>.</span>
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      Updated for the API + webhook design review. Docs are HTML; diagrams use editable D2 sources and rendered SVG outputs.
+    </footer>
+  </main>
+</body>
+</html>

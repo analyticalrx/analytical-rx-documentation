@@ -1,0 +1,62 @@
+vars: {
+  d2-config: {
+    layout-engine: elk
+    theme-id: 101
+  }
+}
+
+direction: right
+
+classes: {
+  source: {
+    style.fill: "#eef2ff"
+    style.stroke: "#4338ca"
+  }
+  open: {
+    style.fill: "#fef3c7"
+    style.stroke: "#b45309"
+  }
+  guarded: {
+    style.fill: "#fff7ed"
+    style.stroke: "#c2410c"
+  }
+  core: {
+    style.fill: "#ecfdf5"
+    style.stroke: "#047857"
+  }
+}
+
+primerx: {
+  label: "PrimeRx Inputs"
+  class: source
+  webhooks: "Webhooks\nreal-time triggers"
+  api: "API\nlookup + sync"
+  bulk: "Bulk / Batch\nopen vendor question"
+}
+
+intake: {
+  label: "Ingestion Boundary"
+  class: guarded
+  raw: "Raw Data Holding Area"
+  privacy: "PHI Minimization"
+  quality: "Validation + De-duplication"
+}
+
+load: {
+  label: "Analytics Load"
+  class: core
+  canonical: "Canonical Pharmacy Model"
+  reconcile: "Reconciliation + Audit"
+}
+
+question: "Key PrimeRx Question\nCan they provide bulk/backfill data for initial load,\nmissed events, reconciliation, and KPI rebuilds?"
+question.class: open
+
+primerx.webhooks -> intake.raw: "new events"
+primerx.api -> intake.raw: "details / sync"
+primerx.bulk -> intake.raw: "history if available"
+intake.raw -> intake.privacy
+intake.privacy -> intake.quality
+intake.quality -> load.canonical
+load.canonical -> load.reconcile
+primerx.bulk -> question
