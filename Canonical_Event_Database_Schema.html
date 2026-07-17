@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Canonical Event Database Schema</title>
+  <style>
+    :root {
+      --ink: #1f2933;
+      --muted: #5f6c7b;
+      --line: #d9e2ec;
+      --panel: #f8fafc;
+      --code: #eef2f7;
+      --accent: #0f766e;
+      --accent-soft: #ccfbf1;
+      --warn: #9a3412;
+      --warn-soft: #ffedd5;
+      --risk: #b91c1c;
+      --risk-soft: #fee2e2;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background: #ffffff;
+      line-height: 1.58;
+    }
+
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 44px 24px 72px;
+    }
+
+    nav {
+      margin-bottom: 28px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    nav a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    header {
+      max-width: 900px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 34px 0 12px;
+      font-size: 23px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 24px 0 10px;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    p {
+      margin: 0 0 13px;
+    }
+
+    ul, ol {
+      margin: 0 0 18px;
+      padding-left: 24px;
+    }
+
+    li {
+      margin: 5px 0;
+    }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: var(--code);
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    pre {
+      overflow-x: auto;
+      margin: 18px 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    pre code {
+      padding: 0;
+      background: transparent;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--panel);
+      text-align: left;
+    }
+
+    a {
+      color: var(--accent);
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .callout {
+      margin: 16px 0;
+      padding: 14px 18px;
+      border-left: 4px solid var(--accent);
+      border-radius: 6px;
+      background: var(--accent-soft);
+    }
+
+    .warn {
+      border-left-color: var(--warn);
+      background: var(--warn-soft);
+    }
+
+    .risk {
+      border-left-color: var(--risk);
+      background: var(--risk-soft);
+    }
+
+    .diagram {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      overflow-x: auto;
+    }
+
+    .diagram img {
+      display: block;
+      width: 100%;
+      min-width: 780px;
+      height: auto;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      padding: 16px 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <nav><a href="index.html">Back to design index</a></nav>
+
+    <header>
+      <h1>Canonical Event Database Schema</h1>
+      <p class="lead">MVP database design for storing PrimeRx webhook/API events as audit-ready, PHI-minimized canonical records.</p>
+    </header>
+
+    <section>
+      <h2>Purpose</h2>
+      <p>This document defines the first database schema for the webhook processing pipeline. It gives the processor Lambda a clear destination for processed events without mixing raw PrimeRx payloads, restricted source identifiers, and analytics-facing records.</p>
+      <div class="callout">
+        <p>The core rule: store real <code>RxNo</code> and <code>RefillNo</code> only in restricted operational tables. Dashboards and analytics use <code>prescription_reference_token</code> and <code>fill_reference_token</code>.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>MVP Decisions</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Decision</th>
+            <th>Recommendation</th>
+            <th>Reason</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Database</td>
+            <td>PostgreSQL-compatible database such as RDS PostgreSQL or Aurora PostgreSQL</td>
+            <td>Works well for structured audit, canonical records, relational joins, and later analytics marts.</td>
+          </tr>
+          <tr>
+            <td>Storage zones</td>
+            <td><code>ops</code> schema for restricted operational data, <code>analytics</code> schema for PHI-minimized records, <code>core</code> schema for tenant/pharmacy references</td>
+            <td>Prevents accidental mixing of source identifiers and dashboard-facing data.</td>
+          </tr>
+          <tr>
+            <td>Raw payload retention</td>
+            <td>Optional restricted S3 archive with DB pointer and payload hash</td>
+            <td>Allows replay/troubleshooting without copying raw PHI into analytics tables.</td>
+          </tr>
+          <tr>
+            <td>Source identifiers</td>
+            <td>Store real <code>RxNo</code> and <code>RefillNo</code> in <code>ops.source_prescription_reference_restricted</code></td>
+            <td>API enrichment needs real vendor identifiers. Tokens alone cannot call PrimeRx.</td>
+          </tr>
+          <tr>
+            <td>Canonical model</td>
+            <td>Start with one <code>analytics.canonical_pharmacy_event</code> table</td>
+            <td>Good enough for MVP dashboards and reconciliation before building full fact/dimension marts.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Schema Boundary Diagram</h2>
+      <div class="diagram">
+        <img src="diagrams/canonical-event-schema.svg" alt="Canonical event database schema boundary">
+      </div>
+      <p class="meta">Editable source: <a href="diagrams/canonical-event-schema.d2">diagrams/canonical-event-schema.d2</a></p>
+    </section>
+
+    <section>
+      <h2>Tables</h2>
+      <div class="grid">
+        <div class="card">
+          <h3><code>core.tenant</code></h3>
+          <p>One row per pharmacy group or customer tenant. Every operational and analytics row must belong to a tenant.</p>
+        </div>
+        <div class="card">
+          <h3><code>core.pharmacy</code></h3>
+          <p>One row per store/pharmacy location. Stores source pharmacy IDs, NPI/NCPDP when available, and tenant ownership.</p>
+        </div>
+        <div class="card">
+          <h3><code>ops.raw_payload_archive</code></h3>
+          <p>Pointer to restricted raw payload storage, not the raw JSON itself. Stores hash, size, source, and retention metadata.</p>
+        </div>
+        <div class="card">
+          <h3><code>ops.webhook_event_audit</code></h3>
+          <p>Lifecycle record for each received event: received, queued, processing, processed, failed, duplicate, or needs enrichment.</p>
+        </div>
+        <div class="card">
+          <h3><code>ops.source_prescription_reference_restricted</code></h3>
+          <p>Restricted source lookup table containing real <code>RxNo</code> and <code>RefillNo</code>. Used by backend jobs for API enrichment and reconciliation.</p>
+        </div>
+        <div class="card">
+          <h3><code>analytics.canonical_pharmacy_event</code></h3>
+          <p>PHI-minimized event facts used by dashboards, reconciliation, and future data marts.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Canonical Event Fields</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Field group</th>
+            <th>Columns</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Tenant/store</td>
+            <td><code>tenant_id</code>, <code>pharmacy_id</code></td>
+            <td>Required on every row. These support tenant isolation, store-level dashboards, and row-level security later.</td>
+          </tr>
+          <tr>
+            <td>Lineage</td>
+            <td><code>audit_event_id</code>, <code>source_system</code>, <code>source_event_type</code></td>
+            <td>Links each canonical row back to the processing audit record.</td>
+          </tr>
+          <tr>
+            <td>Canonical type</td>
+            <td><code>canonical_event_type</code></td>
+            <td>Normalized event type such as <code>claim_billed</code>, <code>claim_reversed</code>, or <code>claim_rejected</code>.</td>
+          </tr>
+          <tr>
+            <td>Safe continuity</td>
+            <td><code>prescription_reference_token</code>, <code>fill_reference_token</code>, <code>patient_reference_token</code></td>
+            <td>Tokens only. Real source identifiers stay in the restricted <code>ops</code> schema.</td>
+          </tr>
+          <tr>
+            <td>Status</td>
+            <td><code>rx_status</code>, <code>claim_status</code>, <code>fulfillment_status</code>, <code>queue_status</code></td>
+            <td>Nullable because not every event includes every status.</td>
+          </tr>
+          <tr>
+            <td>Drug/payer/prescriber</td>
+            <td><code>drug_ndc</code>, <code>drug_name</code>, <code>payer_name</code>, <code>payer_bin</code>, <code>payer_pcn</code>, <code>prescriber_npi</code></td>
+            <td>Allowed for analytics if available and PHI policy permits. These may be enriched from API later.</td>
+          </tr>
+          <tr>
+            <td>Financial</td>
+            <td><code>total_amount</code>, <code>insurance_paid_amount</code>, <code>patient_pay_amount</code>, <code>copay_paid_amount</code>, <code>gross_profit_estimate</code></td>
+            <td>Nullable until we confirm whether webhooks include reliable financials or API enrichment is required.</td>
+          </tr>
+          <tr>
+            <td>Quality</td>
+            <td><code>enrichment_status</code>, <code>data_quality_status</code></td>
+            <td>Allows dashboards to distinguish complete rows from partial webhook-only rows.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Token Strategy</h2>
+      <p>The processor should generate stable HMAC tokens using a secret owned by the backend, not a plain SHA hash. Tokens must include tenant and pharmacy context so the same source identifier in two tenants does not produce the same token.</p>
+      <pre><code>prescription_reference_token = HMAC_SHA256(secret, tenant_id + pharmacy_id + rx_no)
+fill_reference_token         = HMAC_SHA256(secret, tenant_id + pharmacy_id + rx_no + refill_no)
+patient_reference_token      = HMAC_SHA256(secret, tenant_id + pharmacy_id + source_patient_id)</code></pre>
+      <div class="callout warn">
+        <p><code>patient_reference_token</code> should stay nullable until the security/compliance policy approves patient-level continuity for refill/adherence analytics.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Idempotency Strategy</h2>
+      <p>The audit table owns idempotency. The processor should create one canonical row only after the event is accepted as non-duplicate.</p>
+      <ol>
+        <li>Use PrimeRx event ID if PrimeRx provides one.</li>
+        <li>Otherwise use tenant, pharmacy, source event type, source event timestamp, <code>RxNo</code>, and <code>RefillNo</code>.</li>
+        <li>If no stable event identity exists, use the receiver request ID and raw payload hash as fallback.</li>
+      </ol>
+      <p>The database enforces <code>unique (tenant_id, source_system, idempotency_key)</code> on <code>ops.webhook_event_audit</code>.</p>
+    </section>
+
+    <section>
+      <h2>PHI Exclusion Rules</h2>
+      <div class="callout risk">
+        <p>The canonical analytics schema must not store patient first name, patient last name, full DOB, full address, phone number, email, driver license, insurance member ID, prescription images, or free-text notes.</p>
+      </div>
+      <p>If a field is needed for debugging or API lookup, it belongs in the restricted operational layer, not in <code>analytics.canonical_pharmacy_event</code>.</p>
+    </section>
+
+    <section>
+      <h2>Access Model</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Allowed access</th>
+            <th>Not allowed</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Webhook processor</td>
+            <td>Write <code>ops.webhook_event_audit</code>, <code>ops.source_prescription_reference_restricted</code>, and <code>analytics.canonical_pharmacy_event</code></td>
+            <td>Logging raw payloads or exposing source identifiers to dashboards</td>
+          </tr>
+          <tr>
+            <td>API enrichment worker</td>
+            <td>Read restricted source references, call PrimeRx API, write safe enriched fields back to canonical records</td>
+            <td>Writing direct patient identifiers to analytics tables</td>
+          </tr>
+          <tr>
+            <td>Dashboard/API application</td>
+            <td>Read <code>analytics</code> schema records for authorized tenant/pharmacy only</td>
+            <td>Reading <code>ops.source_prescription_reference_restricted</code> or raw payload archive</td>
+          </tr>
+          <tr>
+            <td>Data engineer</td>
+            <td>Read canonical records and build analytics marts/views after access approval</td>
+            <td>Using raw PrimeRx payloads as dashboard source tables</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>For production, tenant filtering should be enforced with database roles and row-level security or an equivalent application-layer control. The MVP schema includes <code>tenant_id</code> and <code>pharmacy_id</code> on every table so that control can be added without changing the model.</p>
+    </section>
+
+    <section>
+      <h2>Example Processing Write</h2>
+      <ol>
+        <li>Receiver writes a metadata audit row with status <code>received</code> and optionally stores raw payload in restricted archive.</li>
+        <li>Processor validates payload and creates/updates <code>ops.source_prescription_reference_restricted</code> with real <code>RxNo</code>, <code>RefillNo</code>, and tokens.</li>
+        <li>Processor updates audit status to <code>processing</code>.</li>
+        <li>Processor suppresses PHI and maps safe fields into <code>analytics.canonical_pharmacy_event</code>.</li>
+        <li>Processor updates audit status to <code>processed</code>, <code>failed</code>, <code>duplicate</code>, or <code>needs_enrichment</code>.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>SQL Draft</h2>
+      <p>The executable first-pass DDL lives here: <a href="schemas/mvp_canonical_event_schema.sql"><code>schemas/mvp_canonical_event_schema.sql</code></a>.</p>
+      <p>This SQL is a starting point for engineering review. Before production use, the team should add migrations, database roles, row-level security policy, backups, and environment-specific retention settings.</p>
+    </section>
+
+    <section>
+      <h2>Open Questions</h2>
+      <ul>
+        <li>Does PrimeRx provide a stable webhook event ID?</li>
+        <li>Does every prescription-level event include store/pharmacy identity, <code>RxNo</code>, and <code>RefillNo</code>?</li>
+        <li>Are financial fields reliable in webhooks, or should they be treated as API-enriched fields?</li>
+        <li>Should we retain raw payloads in restricted S3 for MVP, and for how long?</li>
+        <li>When will security approve or reject patient-level pseudonymous continuity for refill/adherence analytics?</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

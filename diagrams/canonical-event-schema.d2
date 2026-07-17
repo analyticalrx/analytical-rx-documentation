@@ -1,0 +1,63 @@
+direction: right
+
+classes: {
+  source: {
+    style.fill: "#eef2ff"
+    style.stroke: "#4f46e5"
+  }
+  restricted: {
+    style.fill: "#fff7ed"
+    style.stroke: "#c2410c"
+  }
+  safe: {
+    style.fill: "#ecfdf5"
+    style.stroke: "#047857"
+  }
+  neutral: {
+    style.fill: "#f8fafc"
+    style.stroke: "#64748b"
+  }
+}
+
+primerx: "PrimeRx Webhook / API" {
+  class: source
+}
+
+receiver: "Webhook Receiver + SQS" {
+  class: neutral
+}
+
+raw: "Restricted Raw Payload Archive\nS3 pointer + payload hash\nshort retention" {
+  class: restricted
+}
+
+audit: "ops.webhook_event_audit\nstatus, idempotency, retry state\nno raw PHI payload" {
+  class: restricted
+}
+
+source_ref: "ops.source_prescription_reference_restricted\nreal RxNo + RefillNo\nbackend-only API lookup" {
+  class: restricted
+}
+
+canonical: "analytics.canonical_pharmacy_event\nPHI-minimized event facts\nprescription/fill tokens" {
+  class: safe
+}
+
+dashboards: "Dashboards + Analytics\nquery canonical tables only" {
+  class: safe
+}
+
+enrichment: "API Enrichment Worker\nuses restricted source reference\nupdates canonical facts" {
+  class: neutral
+}
+
+primerx -> receiver: "POST event"
+receiver -> raw: "optional archive"
+receiver -> audit: "receipt + processing audit"
+audit -> source_ref: "restricted source IDs"
+source_ref -> canonical: "tokens only"
+audit -> canonical: "one processed event"
+canonical -> dashboards: "safe reporting"
+source_ref -> enrichment: "RxNo / RefillNo"
+enrichment -> primerx: "detail lookup"
+enrichment -> canonical: "safe enrichment"
