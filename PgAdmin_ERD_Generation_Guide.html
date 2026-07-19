@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>pgAdmin ERD Generation Guide</title>
+  <style>
+    :root {
+      --ink: #1f2933;
+      --muted: #5f6c7b;
+      --line: #d9e2ec;
+      --panel: #f8fafc;
+      --code: #eef2f7;
+      --accent: #0f766e;
+      --accent-soft: #ccfbf1;
+      --warn: #9a3412;
+      --warn-soft: #ffedd5;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background: #ffffff;
+      line-height: 1.56;
+    }
+
+    main {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 44px 24px 72px;
+    }
+
+    nav {
+      margin-bottom: 28px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    nav a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    header {
+      max-width: 900px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 34px 0 12px;
+      font-size: 23px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0 0 13px;
+    }
+
+    ol, ul {
+      margin: 0 0 18px;
+      padding-left: 24px;
+    }
+
+    li {
+      margin: 6px 0;
+    }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: var(--code);
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    pre {
+      overflow-x: auto;
+      margin: 18px 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    pre code {
+      padding: 0;
+      background: transparent;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--panel);
+      text-align: left;
+    }
+
+    a {
+      color: var(--accent);
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .callout {
+      margin: 16px 0;
+      padding: 14px 18px;
+      border-left: 4px solid var(--accent);
+      border-radius: 6px;
+      background: var(--accent-soft);
+    }
+
+    .warn {
+      border-left-color: var(--warn);
+      background: var(--warn-soft);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <nav><a href="index.html">Back to design index</a></nav>
+
+    <header>
+      <h1>pgAdmin ERD Generation Guide</h1>
+      <p class="lead">Steps to generate the canonical event database ER diagram from the PostgreSQL schema using pgAdmin.</p>
+    </header>
+
+    <section>
+      <h2>Purpose</h2>
+      <p>pgAdmin creates ER diagrams from a live PostgreSQL database. To generate the diagram, first create the MVP schema in a development database, then use pgAdmin's ERD tool to generate and export the diagram.</p>
+      <div class="callout">
+        <p>Use a local or development database only. Do not run the draft schema in a production database without migration review.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Files Used</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a href="schemas/mvp_canonical_event_schema.sql"><code>schemas/mvp_canonical_event_schema.sql</code></a></td>
+            <td>SQL DDL used to create the tables and foreign key relationships in PostgreSQL.</td>
+          </tr>
+          <tr>
+            <td><a href="Canonical_Event_Table_Dictionary.html"><code>Canonical_Event_Table_Dictionary.html</code></a></td>
+            <td>Field definitions and access restrictions to review alongside the pgAdmin ERD.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>pgAdmin installed.</li>
+        <li>Access to a PostgreSQL development database.</li>
+        <li>Permission to create schemas, tables, indexes, and the <code>pgcrypto</code> extension in that development database.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Step 1: Create A Development Database</h2>
+      <p>Create or choose a non-production database, for example:</p>
+      <pre><code>analytical_rx_design</code></pre>
+      <p>This database is only for visualizing and validating the table relationships.</p>
+    </section>
+
+    <section>
+      <h2>Step 2: Run The Schema SQL</h2>
+      <ol>
+        <li>Open pgAdmin.</li>
+        <li>Connect to the PostgreSQL server.</li>
+        <li>Select the development database.</li>
+        <li>Open <code>Query Tool</code>.</li>
+        <li>Open or paste <code>schemas/mvp_canonical_event_schema.sql</code>.</li>
+        <li>Execute the SQL.</li>
+        <li>Refresh the database tree in pgAdmin.</li>
+      </ol>
+      <p>After execution, pgAdmin should show these schemas:</p>
+      <pre><code>core
+ops
+analytics</code></pre>
+    </section>
+
+    <section>
+      <h2>Step 3: Generate The ERD</h2>
+      <ol>
+        <li>Select the database in pgAdmin.</li>
+        <li>Open the ERD tool from pgAdmin.</li>
+        <li>Generate the ERD for the database so pgAdmin fetches all tables and foreign key links.</li>
+        <li>Use <code>Auto align</code> to arrange the diagram.</li>
+        <li>Use <code>Show details</code> if you want to include more or fewer column details.</li>
+        <li>Use <code>Cardinality Notation</code> and choose Crow's Foot notation if preferred.</li>
+      </ol>
+      <div class="callout">
+        <p>pgAdmin can generate an ERD from an existing database, schema, or table. For this MVP schema, database-level generation is easiest because the foreign keys cross <code>core</code>, <code>ops</code>, and <code>analytics</code>.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Step 4: Export The Diagram</h2>
+      <ol>
+        <li>Use pgAdmin's ERD <code>Save As</code> option if you want a reusable pgAdmin ERD project file.</li>
+        <li>Use <code>Download image</code> to export the diagram as an image for sharing.</li>
+        <li>Name the exported image something like <code>canonical-event-pgadmin-erd.png</code>.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Expected Relationships</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Relationship</th>
+            <th>Meaning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>core.tenant</code> to <code>core.pharmacy</code></td>
+            <td>One tenant can have many pharmacies.</td>
+          </tr>
+          <tr>
+            <td><code>core.tenant</code> to <code>ops.raw_payload_archive</code></td>
+            <td>Raw payload metadata belongs to one tenant.</td>
+          </tr>
+          <tr>
+            <td><code>core.pharmacy</code> to <code>ops.raw_payload_archive</code></td>
+            <td>Raw payload metadata may be linked to one pharmacy when known.</td>
+          </tr>
+          <tr>
+            <td><code>core.pharmacy</code> to <code>ops.source_prescription_reference_restricted</code></td>
+            <td>Restricted prescription/fill source references belong to one pharmacy.</td>
+          </tr>
+          <tr>
+            <td><code>ops.source_prescription_reference_restricted</code> to <code>ops.webhook_event_audit</code></td>
+            <td>An audit event can link to the restricted prescription/fill reference used for API enrichment.</td>
+          </tr>
+          <tr>
+            <td><code>ops.raw_payload_archive</code> to <code>ops.webhook_event_audit</code></td>
+            <td>An audit event can link to raw payload archive metadata if raw retention is enabled.</td>
+          </tr>
+          <tr>
+            <td><code>ops.webhook_event_audit</code> to <code>analytics.canonical_pharmacy_event</code></td>
+            <td>One processed audit event should create at most one canonical event row.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>If pgAdmin Does Not Show Relationships</h2>
+      <ul>
+        <li>Confirm the SQL ran successfully.</li>
+        <li>Confirm the foreign keys exist under each table's constraints.</li>
+        <li>Refresh the database tree before generating the ERD.</li>
+        <li>Generate ERD for the full database, not only one schema, because the model uses cross-schema foreign keys.</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>
