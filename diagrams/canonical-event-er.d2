@@ -1,0 +1,74 @@
+direction: right
+
+core_tenant: {
+  shape: sql_table
+  id: uuid {constraint: primary_key}
+  tenant_key: text
+  display_name: text
+  status: text
+}
+
+core_pharmacy: {
+  shape: sql_table
+  id: uuid {constraint: primary_key}
+  tenant_id: uuid {constraint: foreign_key}
+  pharmacy_key: text
+  source_system: text
+  source_pharmacy_id: text
+}
+
+ops_raw_payload_archive: {
+  shape: sql_table
+  id: uuid {constraint: primary_key}
+  tenant_id: uuid {constraint: foreign_key}
+  pharmacy_id: uuid {constraint: foreign_key}
+  raw_payload_reference: text
+  raw_payload_sha256: text
+}
+
+ops_source_reference: {
+  shape: sql_table
+  id: uuid {constraint: primary_key}
+  tenant_id: uuid {constraint: foreign_key}
+  pharmacy_id: uuid {constraint: foreign_key}
+  rx_no: text {constraint: restricted}
+  refill_no: text {constraint: restricted}
+  prescription_reference_token: text
+  fill_reference_token: text
+}
+
+ops_webhook_event_audit: {
+  shape: sql_table
+  id: uuid {constraint: primary_key}
+  tenant_id: uuid {constraint: foreign_key}
+  pharmacy_id: uuid {constraint: foreign_key}
+  source_reference_id: uuid {constraint: foreign_key}
+  raw_payload_archive_id: uuid {constraint: foreign_key}
+  idempotency_key: text
+  status: text
+}
+
+analytics_canonical_event: {
+  shape: sql_table
+  id: uuid {constraint: primary_key}
+  tenant_id: uuid {constraint: foreign_key}
+  pharmacy_id: uuid {constraint: foreign_key}
+  audit_event_id: uuid {constraint: foreign_key}
+  canonical_event_type: text
+  prescription_reference_token: text
+  fill_reference_token: text
+  enrichment_status: text
+}
+
+core_tenant.id -> core_pharmacy.tenant_id: "1 to many"
+core_tenant.id -> ops_raw_payload_archive.tenant_id: "1 to many"
+core_pharmacy.id -> ops_raw_payload_archive.pharmacy_id: "1 to many"
+core_tenant.id -> ops_source_reference.tenant_id: "1 to many"
+core_pharmacy.id -> ops_source_reference.pharmacy_id: "1 to many"
+core_tenant.id -> ops_webhook_event_audit.tenant_id: "1 to many"
+core_pharmacy.id -> ops_webhook_event_audit.pharmacy_id: "1 to many"
+ops_source_reference.id -> ops_webhook_event_audit.source_reference_id: "optional"
+ops_raw_payload_archive.id -> ops_webhook_event_audit.raw_payload_archive_id: "optional"
+core_tenant.id -> analytics_canonical_event.tenant_id: "1 to many"
+core_pharmacy.id -> analytics_canonical_event.pharmacy_id: "1 to many"
+ops_webhook_event_audit.id -> analytics_canonical_event.audit_event_id: "1 to 1"

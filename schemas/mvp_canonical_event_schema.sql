@@ -58,12 +58,10 @@ create table if not exists ops.source_prescription_reference_restricted (
   refill_no text,
   prescription_reference_token text not null,
   fill_reference_token text,
-  patient_reference_token text,
   first_seen_at timestamptz not null default now(),
   last_seen_at timestamptz not null default now(),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  unique (tenant_id, prescription_reference_token),
   unique (tenant_id, fill_reference_token)
 );
 
@@ -133,7 +131,6 @@ create table if not exists analytics.canonical_pharmacy_event (
   business_date date,
   prescription_reference_token text,
   fill_reference_token text,
-  patient_reference_token text,
   rx_status text,
   claim_status text,
   fulfillment_status text,
@@ -149,7 +146,6 @@ create table if not exists analytics.canonical_pharmacy_event (
   insurance_paid_amount numeric(12,2),
   patient_pay_amount numeric(12,2),
   copay_paid_amount numeric(12,2),
-  gross_profit_estimate numeric(12,2),
   reversal_flag boolean not null default false,
   rejection_code text,
   rejection_reason_category text,
@@ -167,7 +163,8 @@ create index if not exists idx_pharmacy_tenant on core.pharmacy (tenant_id);
 create unique index if not exists uq_pharmacy_source_id
   on core.pharmacy (tenant_id, source_system, (coalesce(source_pharmacy_id, '')));
 create index if not exists idx_raw_payload_tenant_received on ops.raw_payload_archive (tenant_id, received_at);
-create index if not exists idx_source_ref_tokens on ops.source_prescription_reference_restricted (tenant_id, prescription_reference_token, fill_reference_token);
+create index if not exists idx_source_ref_prescription_token on ops.source_prescription_reference_restricted (tenant_id, prescription_reference_token);
+create index if not exists idx_source_ref_fill_token on ops.source_prescription_reference_restricted (tenant_id, fill_reference_token);
 create unique index if not exists uq_source_ref_rx_fill
   on ops.source_prescription_reference_restricted (tenant_id, pharmacy_id, source_system, rx_no, (coalesce(refill_no, '')));
 create index if not exists idx_source_ref_rx on ops.source_prescription_reference_restricted (tenant_id, pharmacy_id, source_system, rx_no, refill_no);
