@@ -152,6 +152,10 @@
       height: auto;
     }
 
+    .diagram.full img {
+      min-width: 1700px;
+    }
+
     .meta {
       color: var(--muted);
       font-size: 14px;
@@ -177,6 +181,14 @@
 
     <section>
       <h2>ER Diagram</h2>
+      <p>The PostgreSQL-derived ERD is the exact database view. It includes all tables, all columns, key markers, and foreign key connections from the live local schema.</p>
+      <div class="diagram full">
+        <img src="diagrams/canonical-event-postgres-erd.svg" alt="Full PostgreSQL canonical event ER diagram with all columns and relationships">
+      </div>
+      <p class="meta">Open directly for zooming: <a href="diagrams/canonical-event-postgres-erd.svg">SVG</a> | <a href="diagrams/canonical-event-postgres-erd.png">PNG</a> | <a href="diagrams/canonical-event-postgres-erd.dot">Graphviz source</a>. Generator: <a href="scripts/generate_postgres_erd.rb"><code>scripts/generate_postgres_erd.rb</code></a>.</p>
+
+      <h3>Simplified Design View</h3>
+      <p>The simplified diagram is easier for design review because it hides some column-level detail and emphasizes table responsibility.</p>
       <div class="diagram">
         <img src="diagrams/canonical-event-er.svg" alt="Canonical event database ER diagram">
       </div>

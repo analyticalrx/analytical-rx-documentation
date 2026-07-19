@@ -176,6 +176,14 @@
             <td><a href="Canonical_Event_Table_Dictionary.html"><code>Canonical_Event_Table_Dictionary.html</code></a></td>
             <td>Field definitions and access restrictions to review alongside the pgAdmin ERD.</td>
           </tr>
+          <tr>
+            <td><a href="pgadmin/analytical-rx-local-server.json"><code>pgadmin/analytical-rx-local-server.json</code></a></td>
+            <td>pgAdmin server registration file for this local design database.</td>
+          </tr>
+          <tr>
+            <td><a href="scripts/generate_postgres_erd.rb"><code>scripts/generate_postgres_erd.rb</code></a></td>
+            <td>Optional CLI generator that reads the live PostgreSQL schema and creates a full-column ERD with Graphviz.</td>
+          </tr>
         </tbody>
       </table>
     </section>
@@ -183,21 +191,50 @@
     <section>
       <h2>Prerequisites</h2>
       <ul>
-        <li>pgAdmin installed.</li>
+        <li>PostgreSQL client/server tools installed.</li>
+        <li>Graphviz installed if generating the checked-in ERD files from the command line.</li>
+        <li>pgAdmin 4 installed.</li>
         <li>Access to a PostgreSQL development database.</li>
         <li>Permission to create schemas, tables, indexes, and the <code>pgcrypto</code> extension in that development database.</li>
       </ul>
     </section>
 
     <section>
+      <h2>Current Local Setup</h2>
+      <p>This laptop has PostgreSQL, Graphviz, and pgAdmin installed. The design database has already been created and loaded from the schema SQL.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Setting</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>pgAdmin server name</td><td><code>AnalyticalRx Local Design</code></td></tr>
+          <tr><td>Host</td><td><code>localhost</code></td></tr>
+          <tr><td>Port</td><td><code>5432</code></td></tr>
+          <tr><td>Database</td><td><code>analytical_rx_design</code></td></tr>
+          <tr><td>Username</td><td><code>bhanuprakasholeti</code></td></tr>
+          <tr><td>Schemas</td><td><code>core</code>, <code>ops</code>, <code>analytics</code></td></tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <p>If pgAdmin asks for a password on this local Homebrew PostgreSQL setup, try leaving it blank. If that does not work, create or reset the local database user password and update the pgAdmin server registration.</p>
+      </div>
+    </section>
+
+    <section>
       <h2>Step 1: Create A Development Database</h2>
       <p>Create or choose a non-production database, for example:</p>
-      <pre><code>analytical_rx_design</code></pre>
+      <pre><code>createdb analytical_rx_design</code></pre>
       <p>This database is only for visualizing and validating the table relationships.</p>
     </section>
 
     <section>
       <h2>Step 2: Run The Schema SQL</h2>
+      <p>From the command line, the schema can be loaded with:</p>
+      <pre><code>psql -d analytical_rx_design -v ON_ERROR_STOP=1 -f schemas/mvp_canonical_event_schema.sql</code></pre>
+      <p>Or use pgAdmin:</p>
       <ol>
         <li>Open pgAdmin.</li>
         <li>Connect to the PostgreSQL server.</li>
@@ -214,13 +251,28 @@ analytics</code></pre>
     </section>
 
     <section>
-      <h2>Step 3: Generate The ERD</h2>
+      <h2>Step 3: Open The Database In pgAdmin</h2>
+      <ol>
+        <li>Open <code>pgAdmin 4</code>.</li>
+        <li>In the left browser tree, open <code>Servers</code>.</li>
+        <li>Select <code>AnalyticalRx Local Design</code>.</li>
+        <li>Open <code>Databases</code>, then select <code>analytical_rx_design</code>.</li>
+      </ol>
+      <p>If the server is not visible, import <code>pgadmin/analytical-rx-local-server.json</code> using pgAdmin's import server option or this desktop command:</p>
+      <pre><code>/Applications/pgAdmin\ 4.app/Contents/Frameworks/Python.framework/Versions/3.13/bin/python3.13 \
+  /Applications/pgAdmin\ 4.app/Contents/Resources/web/setup.py \
+  load-servers pgadmin/analytical-rx-local-server.json \
+  --sqlite-path ~/.pgadmin/pgadmin4.db</code></pre>
+    </section>
+
+    <section>
+      <h2>Step 4: Generate The ERD In pgAdmin</h2>
       <ol>
         <li>Select the database in pgAdmin.</li>
-        <li>Open the ERD tool from pgAdmin.</li>
+        <li>Open the ERD tool from pgAdmin. Depending on pgAdmin version, use the <code>Tools</code> menu or right-click the database and choose the ERD option.</li>
         <li>Generate the ERD for the database so pgAdmin fetches all tables and foreign key links.</li>
         <li>Use <code>Auto align</code> to arrange the diagram.</li>
-        <li>Use <code>Show details</code> if you want to include more or fewer column details.</li>
+        <li>Use <code>Show details</code> to include columns in the visual model.</li>
         <li>Use <code>Cardinality Notation</code> and choose Crow's Foot notation if preferred.</li>
       </ol>
       <div class="callout">
@@ -229,12 +281,41 @@ analytics</code></pre>
     </section>
 
     <section>
-      <h2>Step 4: Export The Diagram</h2>
+      <h2>Step 5: Export The Diagram</h2>
       <ol>
         <li>Use pgAdmin's ERD <code>Save As</code> option if you want a reusable pgAdmin ERD project file.</li>
         <li>Use <code>Download image</code> to export the diagram as an image for sharing.</li>
         <li>Name the exported image something like <code>canonical-event-pgadmin-erd.png</code>.</li>
       </ol>
+    </section>
+
+    <section>
+      <h2>Generated ERD Files</h2>
+      <p>A full-column ERD was also generated from the live PostgreSQL database using <code>psql</code> and Graphviz. These files are useful when someone wants to review the exact model without opening pgAdmin.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a href="diagrams/canonical-event-postgres-erd.svg"><code>diagrams/canonical-event-postgres-erd.svg</code></a></td>
+            <td>Zoomable full-column ERD with all tables, columns, key markers, and foreign key connections.</td>
+          </tr>
+          <tr>
+            <td><a href="diagrams/canonical-event-postgres-erd.png"><code>diagrams/canonical-event-postgres-erd.png</code></a></td>
+            <td>PNG export for quick review or attaching to documents.</td>
+          </tr>
+          <tr>
+            <td><a href="diagrams/canonical-event-postgres-erd.dot"><code>diagrams/canonical-event-postgres-erd.dot</code></a></td>
+            <td>Graphviz source generated from PostgreSQL metadata.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>Regenerate these files after schema changes with:</p>
+      <pre><code>ruby scripts/generate_postgres_erd.rb</code></pre>
     </section>
 
     <section>
