@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Safe IAM Agent Setup Guide</title>
+  <style>
+    :root {
+      --ink: #1f2933;
+      --muted: #5f6c7b;
+      --line: #d9e2ec;
+      --panel: #f8fafc;
+      --code: #eef2f7;
+      --accent: #0f766e;
+      --accent-soft: #ccfbf1;
+      --warn: #9a3412;
+      --warn-soft: #ffedd5;
+      --risk: #b91c1c;
+      --risk-soft: #fee2e2;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background: #ffffff;
+      line-height: 1.56;
+    }
+
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 44px 24px 72px;
+    }
+
+    nav {
+      margin-bottom: 28px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    nav a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    header {
+      max-width: 940px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 34px 0 12px;
+      font-size: 23px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 24px 0 10px;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    p {
+      margin: 0 0 13px;
+    }
+
+    ul, ol {
+      margin: 0 0 18px;
+      padding-left: 24px;
+    }
+
+    li {
+      margin: 5px 0;
+    }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: var(--code);
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    pre {
+      overflow-x: auto;
+      margin: 18px 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    pre code {
+      padding: 0;
+      background: transparent;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--panel);
+      text-align: left;
+    }
+
+    a {
+      color: var(--accent);
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .callout {
+      margin: 16px 0;
+      padding: 14px 18px;
+      border-left: 4px solid var(--accent);
+      border-radius: 6px;
+      background: var(--accent-soft);
+    }
+
+    .warn {
+      border-left-color: var(--warn);
+      background: var(--warn-soft);
+    }
+
+    .risk {
+      border-left-color: var(--risk);
+      background: var(--risk-soft);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <nav><a href="index.html">Back to design index</a></nav>
+
+    <header>
+      <h1>Safe IAM Agent Setup Guide</h1>
+      <p class="lead">A controlled way to let an assistant diagnose and apply IAM-only changes for the AnalyticalRx AWS development account.</p>
+    </header>
+
+    <section>
+      <h2>Purpose</h2>
+      <p>This guide defines how to create a safe IAM-focused agent that can help with access-denied issues, policy reviews, role setup, and permission troubleshooting without giving the agent broad AWS administrator access.</p>
+      <div class="callout risk">
+        <p>Do not give this agent <code>AdministratorAccess</code>. The agent should not create users, create access keys, change MFA, manage billing, manage organizations, read secrets, or touch production data.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Recommended Model</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Decision</th>
+            <th>Recommendation</th>
+            <th>Reason</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Account scope</td>
+            <td>Use only in the AWS development account.</td>
+            <td>IAM mistakes are high impact. Keep production/client data out of scope.</td>
+          </tr>
+          <tr>
+            <td>Agent identity</td>
+            <td>Prefer an IAM Identity Center permission set assigned only to Bhanu. If not available, use a dedicated IAM user named <code>analytical-rx-iam-agent</code>.</td>
+            <td>A separate identity makes audit logs clear and avoids mixing agent actions with normal human console actions.</td>
+          </tr>
+          <tr>
+            <td>Change style</td>
+            <td>Managed policies only. Avoid inline user/group policies.</td>
+            <td>Managed policies are easier to review, version, roll back, and attach consistently.</td>
+          </tr>
+          <tr>
+            <td>Resource naming</td>
+            <td>Only manage policies and roles named <code>analytical-rx-*</code> or <code>AnalyticalRx*</code>.</td>
+            <td>Prevents the agent from modifying unrelated AWS account permissions.</td>
+          </tr>
+          <tr>
+            <td>Human approval</td>
+            <td>The agent proposes a policy diff first. Bhanu approves before the agent applies the change.</td>
+            <td>IAM changes should be deliberate even in a development account.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>What The Agent Can Help With</h2>
+      <ul>
+        <li>Read an AWS access denied error and identify the missing action, principal, and resource.</li>
+        <li>Inspect current user group policies, role trust policies, and managed policy versions.</li>
+        <li>Generate small IAM policy updates for developer access.</li>
+        <li>Validate IAM policy JSON using IAM Access Analyzer.</li>
+        <li>Create or update AnalyticalRx Lambda execution roles with a permissions boundary.</li>
+        <li>Attach approved AnalyticalRx managed policies to the approved developer group.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>What The Agent Must Not Do</h2>
+      <ul>
+        <li>Do not attach <code>AdministratorAccess</code> or <code>IAMFullAccess</code>.</li>
+        <li>Do not create, delete, or modify IAM users.</li>
+        <li>Do not create, rotate, disable, or delete access keys.</li>
+        <li>Do not change console passwords, MFA devices, or account password policy.</li>
+        <li>Do not manage AWS Organizations, account billing, root access, or service control policies.</li>
+        <li>Do not read application secrets or database credentials.</li>
+        <li>Do not delete roles or managed policies. Leave cleanup to a human administrator.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Setup Overview</h2>
+      <ol>
+        <li>Create a permissions boundary for roles that the agent is allowed to create.</li>
+        <li>Create the IAM agent change policy from the template below.</li>
+        <li>Create the agent identity or permission set.</li>
+        <li>Attach the IAM agent change policy to the agent identity.</li>
+        <li>Configure a local AWS CLI profile named <code>analyticalrx-iam-agent</code>.</li>
+        <li>Use the agent in proposal-first mode: inspect, propose, validate, apply after approval.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Policy 1: Role Permissions Boundary</h2>
+      <p>Create this customer managed policy first. Name it <code>analytical-rx-role-permissions-boundary</code>. It limits the maximum permissions of roles created by the agent.</p>
+      <pre><code>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowWebhookRuntimeBasics",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "sqs:GetQueueAttributes",
+        "sqs:GetQueueUrl",
+        "sqs:SendMessage",
+        "sqs:ReceiveMessage",
+        "sqs:DeleteMessage",
+        "sqs:ChangeMessageVisibility",
+        "kms:Decrypt",
+        "secretsmanager:GetSecretValue",
+        "xray:PutTraceSegments",
+        "xray:PutTelemetryRecords"
+      ],
+      "Resource": "*"
+    }
+  ]
+}</code></pre>
+      <div class="callout warn">
+        <p>This boundary does not grant permissions by itself. It only sets a maximum ceiling for roles created by the agent. The actual Lambda execution roles still need attached runtime policies.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Policy 2: IAM Agent Change Policy</h2>
+      <p>Create a customer managed policy named <code>analytical-rx-iam-agent-change-policy</code>. Replace <code>ACCOUNT_ID</code> and <code>DEV_GROUP_NAME</code> before saving.</p>
+      <pre><code>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadIamForTroubleshooting",
+      "Effect": "Allow",
+      "Action": [
+        "sts:GetCallerIdentity",
+        "iam:Get*",
+        "iam:List*",
+        "iam:SimulatePrincipalPolicy",
+        "iam:SimulateCustomPolicy",
+        "iam:GenerateServiceLastAccessedDetails",
+        "iam:GetServiceLastAccessedDetails",
+        "access-analyzer:ValidatePolicy"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ManageAnalyticalRxManagedPolicies",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreatePolicy",
+        "iam:CreatePolicyVersion",
+        "iam:DeletePolicyVersion",
+        "iam:SetDefaultPolicyVersion",
+        "iam:TagPolicy",
+        "iam:UntagPolicy"
+      ],
+      "Resource": [
+        "arn:aws:iam::ACCOUNT_ID:policy/analytical-rx-*",
+        "arn:aws:iam::ACCOUNT_ID:policy/AnalyticalRx*"
+      ]
+    },
+    {
+      "Sid": "AttachApprovedPoliciesToDevGroup",
+      "Effect": "Allow",
+      "Action": [
+        "iam:AttachGroupPolicy",
+        "iam:DetachGroupPolicy"
+      ],
+      "Resource": "arn:aws:iam::ACCOUNT_ID:group/DEV_GROUP_NAME",
+      "Condition": {
+        "ArnLike": {
+          "iam:PolicyARN": [
+            "arn:aws:iam::ACCOUNT_ID:policy/analytical-rx-*",
+            "arn:aws:iam::ACCOUNT_ID:policy/AnalyticalRx*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "CreateBoundedAnalyticalRxRoles",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole"
+      ],
+      "Resource": "arn:aws:iam::ACCOUNT_ID:role/analytical-rx-*",
+      "Condition": {
+        "StringEquals": {
+          "iam:PermissionsBoundary": "arn:aws:iam::ACCOUNT_ID:policy/analytical-rx-role-permissions-boundary"
+        }
+      }
+    },
+    {
+      "Sid": "ManageAnalyticalRxRoles",
+      "Effect": "Allow",
+      "Action": [
+        "iam:GetRole",
+        "iam:UpdateRole",
+        "iam:UpdateAssumeRolePolicy",
+        "iam:PutRolePermissionsBoundary",
+        "iam:TagRole",
+        "iam:UntagRole"
+      ],
+      "Resource": "arn:aws:iam::ACCOUNT_ID:role/analytical-rx-*"
+    },
+    {
+      "Sid": "AttachApprovedPoliciesToAnalyticalRxRoles",
+      "Effect": "Allow",
+      "Action": [
+        "iam:AttachRolePolicy",
+        "iam:DetachRolePolicy"
+      ],
+      "Resource": "arn:aws:iam::ACCOUNT_ID:role/analytical-rx-*",
+      "Condition": {
+        "ArnLike": {
+          "iam:PolicyARN": [
+            "arn:aws:iam::ACCOUNT_ID:policy/analytical-rx-*",
+            "arn:aws:iam::ACCOUNT_ID:policy/AnalyticalRx*",
+            "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+            "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole",
+            "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "DenyDangerousIdentityAndCredentialAdministration",
+      "Effect": "Deny",
+      "Action": [
+        "iam:CreateUser",
+        "iam:DeleteUser",
+        "iam:UpdateUser",
+        "iam:CreateAccessKey",
+        "iam:UpdateAccessKey",
+        "iam:DeleteAccessKey",
+        "iam:CreateLoginProfile",
+        "iam:UpdateLoginProfile",
+        "iam:DeleteLoginProfile",
+        "iam:CreateGroup",
+        "iam:DeleteGroup",
+        "iam:UpdateGroup",
+        "iam:PutGroupPolicy",
+        "iam:DeleteGroupPolicy",
+        "iam:AttachUserPolicy",
+        "iam:DetachUserPolicy",
+        "iam:PutUserPolicy",
+        "iam:DeleteUserPolicy",
+        "iam:EnableMFADevice",
+        "iam:DeactivateMFADevice",
+        "iam:DeleteVirtualMFADevice",
+        "iam:ResyncMFADevice",
+        "iam:UpdateAccountPasswordPolicy",
+        "iam:DeleteAccountPasswordPolicy",
+        "iam:DeleteRole",
+        "iam:DeletePolicy",
+        "iam:DeleteRolePermissionsBoundary",
+        "organizations:*",
+        "account:*"
+      ],
+      "Resource": "*"
+    }
+  ]
+}</code></pre>
+      <div class="callout warn">
+        <p>Do not put the agent identity in the same developer group it manages. Keep the agent identity separate so it cannot accidentally modify the policies that grant its own access.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Optional Read-Only Mode</h2>
+      <p>For the first few days, use a read-only agent before enabling change mode. Attach AWS managed policy <code>IAMReadOnlyAccess</code> plus this small custom policy:</p>
+      <pre><code>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PolicyAnalysisOnly",
+      "Effect": "Allow",
+      "Action": [
+        "sts:GetCallerIdentity",
+        "iam:SimulatePrincipalPolicy",
+        "iam:SimulateCustomPolicy",
+        "access-analyzer:ValidatePolicy"
+      ],
+      "Resource": "*"
+    }
+  ]
+}</code></pre>
+      <p>Read-only mode lets the agent diagnose missing permissions and generate suggested policy JSON, but Bhanu must apply the changes manually.</p>
+    </section>
+
+    <section>
+      <h2>Known Limitation</h2>
+      <p>The change policy restricts which IAM policies and roles the agent can edit by name and ARN. It does not prove that every new policy document is business-safe. For example, an agent with policy update access could technically create a broad policy version under an approved policy name unless the human approval workflow catches it.</p>
+      <div class="callout warn">
+        <p>Use read-only mode if you want the strongest safety. In read-only mode, the agent can inspect AWS and write the policy JSON for you, but only Bhanu can paste and apply the change in the AWS console.</p>
+      </div>
+      <p>Use change mode only in the development account, only with explicit approval, and only after reviewing IAM Access Analyzer findings.</p>
+    </section>
+
+    <section>
+      <h2>Local AWS CLI Profile</h2>
+      <p>Configure the agent profile locally. Do not paste access keys into chat or documentation.</p>
+      <pre><code>aws configure --profile analyticalrx-iam-agent</code></pre>
+      <p>Use the profile only when doing IAM support work:</p>
+      <pre><code>export AWS_PROFILE=analyticalrx-iam-agent
+export AWS_REGION=us-east-1
+aws sts get-caller-identity</code></pre>
+      <p>If using IAM Identity Center instead of long-lived access keys, configure the profile with AWS SSO and sign in before use.</p>
+    </section>
+
+    <section>
+      <h2>Agent Operating Rules</h2>
+      <ol>
+        <li>Confirm identity with <code>aws sts get-caller-identity</code>.</li>
+        <li>Inspect the current principal, group, role, and policy versions.</li>
+        <li>Identify the exact missing action and target resource from the access denied message.</li>
+        <li>Propose the smallest policy diff that fixes the issue.</li>
+        <li>Validate the proposed policy with IAM Access Analyzer.</li>
+        <li>Show Bhanu the diff and validation result.</li>
+        <li>Apply only after explicit approval.</li>
+        <li>After applying, re-run the failing operation or IAM simulation if possible.</li>
+        <li>Record the changed policy name, version, and reason in the final response.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Useful Commands</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Command</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>aws sts get-caller-identity</code></td>
+            <td>Confirms the agent is using the intended AWS identity.</td>
+          </tr>
+          <tr>
+            <td><code>aws iam list-attached-group-policies --group-name DEV_GROUP_NAME</code></td>
+            <td>Lists policies currently attached to the developer group.</td>
+          </tr>
+          <tr>
+            <td><code>aws iam get-policy-version --policy-arn POLICY_ARN --version-id VERSION_ID</code></td>
+            <td>Reads the exact JSON for a managed policy version before editing.</td>
+          </tr>
+          <tr>
+            <td><code>aws accessanalyzer validate-policy --policy-document file://policy.json --policy-type IDENTITY_POLICY</code></td>
+            <td>Runs IAM Access Analyzer checks before saving a policy.</td>
+          </tr>
+          <tr>
+            <td><code>aws iam simulate-principal-policy --policy-source-arn PRINCIPAL_ARN --action-names ACTION_NAME</code></td>
+            <td>Checks whether a principal is allowed to call a specific AWS action.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Approval Checklist</h2>
+      <p>Before approving an IAM change from the agent, confirm:</p>
+      <ul>
+        <li>The change is for the development account only.</li>
+        <li>The policy name starts with <code>analytical-rx-</code> or <code>AnalyticalRx</code>.</li>
+        <li>The change does not add <code>Action: "*"</code> or <code>iam:*</code>.</li>
+        <li>The change does not attach <code>AdministratorAccess</code>, <code>IAMFullAccess</code>, or billing/organization permissions.</li>
+        <li>The change does not allow credential administration such as access key creation or MFA changes.</li>
+        <li>The policy passed IAM Access Analyzer validation or the remaining findings were reviewed intentionally.</li>
+        <li>The agent has shown what it will change before applying it.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Audit And Rollback</h2>
+      <ul>
+        <li>Use managed policy versions so changes can be rolled back by setting the previous version as default.</li>
+        <li>Keep CloudTrail enabled for IAM management events so policy and role changes are auditable.</li>
+        <li>When the AWS limit of managed policy versions is reached, delete only an old non-default version after human approval.</li>
+        <li>Review the agent identity monthly and remove it when the team no longer needs IAM assistance.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Example Request To The Agent</h2>
+      <pre><code>My teammate is getting AccessDenied for iam:GetAccountSummary.
+Use the analyticalrx-iam-agent profile.
+Inspect the current dev group policies, propose the smallest policy change,
+validate it with IAM Access Analyzer, and wait for my approval before applying.</code></pre>
+    </section>
+
+    <section>
+      <h2>References</h2>
+      <ul>
+        <li><a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html">AWS IAM security best practices</a></li>
+        <li><a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html">AWS IAM permissions boundaries</a></li>
+        <li><a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-policy-validation.html">Validate policies with IAM Access Analyzer</a></li>
+        <li><a href="https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-event-reference-record-contents.html">AWS CloudTrail event record contents</a></li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>
