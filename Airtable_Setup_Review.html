@@ -169,10 +169,12 @@
 
     <section>
       <h2>Review Scope</h2>
-      <p>Codex accessed Airtable metadata only: table names, field names, field types, linked-record relationships, and views. No record values were fetched.</p>
+      <p>Codex accessed Airtable metadata only through the API: table names, field names, field types, linked-record relationships, and views. No record values were fetched.</p>
+      <p>Two Airtable UI screenshots were also reviewed to capture interface and automation intent that is not available from the schema metadata response.</p>
       <div class="callout risk">
         <p>Do not fetch Airtable records until the client confirms whether the base contains PHI, whether Airtable is covered by the right HIPAA configuration, and what data we are allowed to migrate or inspect.</p>
       </div>
+      <p>Detailed interface page metadata and screenshot-based automation findings are available in <a href="Airtable_Interface_Automation_Report.html"><code>Airtable_Interface_Automation_Report.html</code></a>.</p>
       <p>The base contains <strong>19 tables</strong>. It is not only an analytics dashboard model. It is a lightweight pharmacy operating system covering stores, employees, tasks, compliance, SOPs, documents, doctor outreach, vendors, financial reporting, and KPI tracking.</p>
     </section>
 
@@ -232,6 +234,134 @@
           </tr>
         </tbody>
       </table>
+    </section>
+
+    <section>
+      <h2>Interface Screenshot Findings</h2>
+      <p>The interface screenshot shows that Airtable is already being used as a role-oriented product surface, not only as a backend spreadsheet. This matters because our software should replicate the user workflows, not just the table structure.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Observed interface</th>
+            <th>What is visible</th>
+            <th>Implication for AnalyticalRx</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>Daily Sales Dashboard</code></td>
+            <td>Dashboard titled <code>Daily Sales Insights</code> with filters for store and date range.</td>
+            <td>Phase 1 dashboard should support store/date filtering as a standard interaction pattern.</td>
+          </tr>
+          <tr>
+            <td>Daily sales KPI cards</td>
+            <td>Total sales, total prescriptions filled, vaccines administered, and front-end/OTC sales.</td>
+            <td>These are concrete MVP dashboard metrics. They map directly to <code>Daily Sales</code> and later PrimeRx/POS-derived facts.</td>
+          </tr>
+          <tr>
+            <td>Daily sales trend charts</td>
+            <td>Total daily sales over time, prescription volume by store, vaccine count over time, front-end/OTC sales by store, and total sales by day of week.</td>
+            <td>Starter dashboards need time-series and store-comparison charts, not only summary totals.</td>
+          </tr>
+          <tr>
+            <td>Other visible interfaces</td>
+            <td><code>KPI Dashboard</code>, <code>Technician Interface</code>, <code>Bookkeeper Interface</code>, and <code>Owner Interface</code>.</td>
+            <td>The product should plan for role-specific navigation and permissions. Owner, bookkeeper, technician, and general KPI views should not all expose the same data/actions.</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <p>Only one interface page was visible in the screenshot. We still need screenshots or screen share walkthroughs of the KPI, technician, bookkeeper, and owner interfaces before treating the UI scope as complete.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Automation Screenshot Findings</h2>
+      <p>The automations screenshot shows a significant workflow layer. All visible automations appear to be switched <code>OFF</code>, so we should confirm whether they are prototypes, paused production workflows, or intended future behavior.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Automation</th>
+            <th>Visible trigger / summary</th>
+            <th>Software equivalent</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Copy Values from Financial Periods/Rx Metrics to KPI Scorecard</td>
+            <td>When a record is created in <code>Financial Periods</code>, find records, then create a record in <code>KPI Scorecard</code>.</td>
+            <td>KPI scorecard generation or synchronization job.</td>
+          </tr>
+          <tr>
+            <td>New-Store Onboarding Auto-Clone</td>
+            <td>When a record matches conditions, find records, then run one more action.</td>
+            <td>Create onboarding tasks from templates when a new store is added or reaches a setup status.</td>
+          </tr>
+          <tr>
+            <td>Monday Owner Digest Email</td>
+            <td>Scheduled time, find records, plus five more actions.</td>
+            <td>Weekly owner digest with open tasks, compliance issues, financial/KPI summary, or store alerts.</td>
+          </tr>
+          <tr>
+            <td>KPI Status Alert and Notification</td>
+            <td>When a record matches conditions, find records, then one more action.</td>
+            <td>Alert when KPI status changes or crosses threshold.</td>
+          </tr>
+          <tr>
+            <td>Doctor Office Follow-Up Notification</td>
+            <td>When a record matches conditions, find records, then one more action.</td>
+            <td>Reminder workflow for doctor office outreach and follow-up dates.</td>
+          </tr>
+          <tr>
+            <td>Lapse Risk Alert Automation</td>
+            <td>When a record matches conditions, find records, then one more action.</td>
+            <td>CRM/outreach alert when a doctor office has not been visited recently or referral activity has lapsed.</td>
+          </tr>
+          <tr>
+            <td>Compliance to Unified Calendar Feed</td>
+            <td>When a record is created, create a record.</td>
+            <td>Calendar event generation for compliance due dates or renewals.</td>
+          </tr>
+          <tr>
+            <td>Scheduled Task Generation from Templates</td>
+            <td>Scheduled time, find records, plus three more actions.</td>
+            <td>Recurring task engine based on task templates and frequency rules.</td>
+          </tr>
+          <tr>
+            <td>Compliance due soon notification</td>
+            <td>Scheduled time, find records, plus two more actions.</td>
+            <td>Compliance reminder notifications before due dates.</td>
+          </tr>
+          <tr>
+            <td>Document/license expiring - weekly</td>
+            <td>Scheduled time, find records, plus three more actions.</td>
+            <td>Weekly expiring document and employee license reminder workflow.</td>
+          </tr>
+          <tr>
+            <td>Task overdue - daily notification</td>
+            <td>Scheduled time, find records, plus two more actions.</td>
+            <td>Daily overdue task notification workflow.</td>
+          </tr>
+          <tr>
+            <td>Recurring Task Generator</td>
+            <td>When a record matches conditions, find records, then one more action.</td>
+            <td>Create follow-up recurring tasks when a task or template rule reaches the next cycle.</td>
+          </tr>
+          <tr>
+            <td>Task Completion Update</td>
+            <td>When a record matches conditions, update a record.</td>
+            <td>Automatic status/completed-at update when completion criteria are met.</td>
+          </tr>
+          <tr>
+            <td>Daily Task Due Email Notification</td>
+            <td>Scheduled time, find records, plus two more actions.</td>
+            <td>Daily due task email or in-app notification workflow.</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout warn">
+        <p>The screenshot shows automation names and high-level step summaries only. We still need the exact conditions, target tables, email recipients, message templates, and any script logic before implementing these workflows.</p>
+      </div>
     </section>
 
     <section>
@@ -412,6 +542,16 @@
             <td>These match what the client already tracks and can work before advanced analytics are ready.</td>
             <td><code>Financial Periods</code>, <code>Rx Metrics</code>, <code>AR Aging</code>, <code>KPI Scorecard</code>, <code>Daily Sales</code></td>
           </tr>
+          <tr>
+            <td>Role-specific product views</td>
+            <td>Airtable already separates owner, bookkeeper, technician, KPI, and daily sales experiences. The product should preserve those mental models.</td>
+            <td><code>Daily Sales Dashboard</code>, <code>KPI Dashboard</code>, <code>Technician Interface</code>, <code>Bookkeeper Interface</code>, <code>Owner Interface</code></td>
+          </tr>
+          <tr>
+            <td>Basic workflow automation</td>
+            <td>The visible Airtable automations define important reminders, task generation, KPI sync, and digest behavior that should become backend scheduled jobs or notification rules.</td>
+            <td>Automations screenshot: task due/overdue reminders, compliance/document/license reminders, KPI status alerts, owner digest, onboarding clone, recurring task generator.</td>
+          </tr>
         </tbody>
       </table>
     </section>
@@ -442,6 +582,10 @@
       <ol>
         <li>Which Airtable tables are actively used today, and which are prototype/sample tables?</li>
         <li>Which Airtable views are operationally important and must be mirrored in the product dashboard?</li>
+        <li>Can the client provide screenshots or walkthroughs for <code>KPI Dashboard</code>, <code>Technician Interface</code>, <code>Bookkeeper Interface</code>, and <code>Owner Interface</code>?</li>
+        <li>Which visible automations are actually used today, and why are the visible automations currently switched off?</li>
+        <li>For each automation, what are the exact trigger conditions, target fields, recipients, and message templates?</li>
+        <li>Do any automations call external systems, use script actions, or send data outside Airtable?</li>
         <li>Are any record values or attachments in this base PHI or otherwise sensitive?</li>
         <li>Can the client provide a sanitized export for development and mapping?</li>
         <li>Which fields are manually entered, calculated in Airtable, or imported from another system?</li>

@@ -51,6 +51,27 @@ business: {
   daily_sales: "Daily Sales"
 }
 
+interfaces: {
+  label: "Airtable Interfaces"
+  shape: rectangle
+
+  daily_sales_dashboard: "Daily Sales Dashboard"
+  kpi_dashboard: "KPI Dashboard"
+  technician: "Technician Interface"
+  bookkeeper: "Bookkeeper Interface"
+  owner: "Owner Interface"
+}
+
+automations: {
+  label: "Airtable Automations"
+  shape: rectangle
+
+  scheduled: "Scheduled notifications + digests"
+  record_triggered: "Record-triggered updates"
+  task_generation: "Task generation"
+  kpi_copy: "KPI scorecard population"
+}
+
 software: {
   label: "AnalyticalRx Software Model"
   shape: rectangle
@@ -59,6 +80,7 @@ software: {
   workflow: "Tasks + Compliance Workflows"
   document_store: "Document Metadata + Secure Files"
   reporting: "Starter Dashboards"
+  automation_engine: "Notifications + Workflow Rules"
   canonical: "PrimeRx Canonical Events"
 }
 
@@ -71,6 +93,12 @@ pharmacy -> growth: "store outreach"
 people -> growth: "assigned rep"
 pharmacy -> business: "store metrics"
 people -> business.daily_sales: "created by"
+business -> interfaces: "dashboard pages"
+operations -> interfaces: "role-specific work queues"
+compliance -> interfaces: "compliance views"
+operations -> automations: "tasks and reminders"
+compliance -> automations: "renewals and due dates"
+business -> automations: "KPI updates and digests"
 
 pharmacy -> software.master_data
 people -> software.master_data
@@ -79,4 +107,6 @@ compliance -> software.workflow
 compliance.documents -> software.document_store
 growth -> software.reporting
 business -> software.reporting
+interfaces -> software.reporting
+automations -> software.automation_engine
 software.canonical -> software.reporting: "Phase 2 enrichment"
