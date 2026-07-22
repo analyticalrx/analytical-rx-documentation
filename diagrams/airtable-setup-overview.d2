@@ -1,0 +1,82 @@
+direction: right
+
+pharmacy: {
+  label: "Pharmacies\nStore master"
+  shape: rectangle
+}
+
+people: {
+  label: "People\nStaff and roles"
+  shape: rectangle
+}
+
+operations: {
+  label: "Operations"
+  shape: rectangle
+
+  tasks: "Tasks"
+  templates: "Task Templates"
+  onboarding: "Onboarding Steps"
+}
+
+compliance: {
+  label: "Compliance + Documents"
+  shape: rectangle
+
+  items: "Compliance Items"
+  logs: "Compliance Logs"
+  sops: "SOPs"
+  acknowledgments: "SOP Acknowledgments"
+  documents: "Documents"
+  licenses: "Employee Licenses"
+}
+
+growth: {
+  label: "Doctor Outreach"
+  shape: rectangle
+
+  offices: "Doctor Offices"
+  visits: "Doctor Visits"
+}
+
+business: {
+  label: "Business + Finance"
+  shape: rectangle
+
+  vendors: "Vendors"
+  financials: "Financial Periods"
+  rx_metrics: "Rx Metrics"
+  ar_aging: "AR Aging"
+  kpis: "KPI Scorecard"
+  daily_sales: "Daily Sales"
+}
+
+software: {
+  label: "AnalyticalRx Software Model"
+  shape: rectangle
+
+  master_data: "Tenant + Store + Staff"
+  workflow: "Tasks + Compliance Workflows"
+  document_store: "Document Metadata + Secure Files"
+  reporting: "Starter Dashboards"
+  canonical: "PrimeRx Canonical Events"
+}
+
+pharmacy -> people: "home store / works at"
+pharmacy -> operations: "store work"
+people -> operations: "assignee"
+pharmacy -> compliance: "store requirements"
+people -> compliance: "owners / acknowledgments"
+pharmacy -> growth: "store outreach"
+people -> growth: "assigned rep"
+pharmacy -> business: "store metrics"
+people -> business.daily_sales: "created by"
+
+pharmacy -> software.master_data
+people -> software.master_data
+operations -> software.workflow
+compliance -> software.workflow
+compliance.documents -> software.document_store
+growth -> software.reporting
+business -> software.reporting
+software.canonical -> software.reporting: "Phase 2 enrichment"
