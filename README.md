@@ -4,11 +4,15 @@ This repository tracks the current AnalyticalRx product architecture and PrimeRx
 
 Start here:
 
-- `index.html` - main review index for all HTML docs and diagrams
-- `High_Level_Design.html` - platform high-level design
-- `Ingestion_Pipeline_Design.html` - PrimeRx ingestion design
-- `Webhook_Processing_Pipeline.html` - webhook processing design
-- `Product_Planning_and_PrimeRx_Data_Questions.html` - product planning notes and PrimeRx questions
-- `AnalyticalRx_Teammate_Setup_Guide.docx` - teammate GitHub setup guide
+- `index.html` - main review index for all docs, diagrams, drafts, and generated artifacts
+- `prd/` - non-technical product requirements document drafts and review artifacts
+- `architecture/` - high-level design and product planning / PrimeRx discovery notes
+- `ingestion/` - PrimeRx ingestion and webhook processing designs
+- `database/` and `schemas/` - canonical event schema docs, SQL DDL/migrations, ERD guide, and table dictionary
+- `airtable/` - archived Airtable reference docs for product intent across tables, interfaces, and automations; this is not a migration source or live dependency
+- `operations/` - AWS/IAM and operational setup notes
+- `team-setup/` - teammate setup document
+- `project-tasks/` - GitHub issue/task draft content
+- `presentations/` - client presentation decks
 
 Diagrams are stored in `diagrams/` with editable `.d2` sources and rendered `.svg` outputs.

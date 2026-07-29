@@ -39,7 +39,19 @@ source_ref: "ops.source_prescription_reference_restricted\nreal RxNo + RefillNo\
   class: restricted
 }
 
-canonical: "analytics.canonical_pharmacy_event\nPHI-minimized event facts\nprescription/fill tokens" {
+drug_lookup: "core.drug\nnormalized drug lookup\nlinked by drug_id" {
+  class: safe
+}
+
+payer_lookup: "core.payer\nnormalized payer lookup\nlinked through payment rows" {
+  class: safe
+}
+
+canonical: "analytics.canonical_pharmacy_event\nPHI-minimized event facts\ndrug_id + prescription/fill tokens" {
+  class: safe
+}
+
+payments: "analytics.canonical_event_payer_payment\npayer-event bridge\ncanonical_event_id + payer_id\ncash uses null payer_id" {
   class: safe
 }
 
@@ -56,8 +68,17 @@ receiver -> raw: "optional archive"
 receiver -> audit: "receipt + processing audit"
 audit -> source_ref: "restricted source IDs"
 source_ref -> canonical: "tokens only"
+receiver -> drug_lookup: "drug upsert"
+receiver -> payer_lookup: "payer upsert"
 audit -> canonical: "one processed event"
+drug_lookup -> canonical: "drug_id FK"
+canonical -> payments: "canonical_event_id FK"
+payer_lookup -> payments: "payer_id FK when insurance"
 canonical -> dashboards: "safe reporting"
+payments -> dashboards: "safe payment breakdown"
 source_ref -> enrichment: "RxNo / RefillNo"
 enrichment -> primerx: "detail lookup"
-enrichment -> canonical: "safe enrichment"
+enrichment -> drug_lookup: "safe drug updates"
+enrichment -> payer_lookup: "safe payer updates"
+enrichment -> canonical: "safe event enrichment"
+enrichment -> payments: "safe payment enrichment"

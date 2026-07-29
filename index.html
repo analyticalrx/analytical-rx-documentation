@@ -125,67 +125,167 @@
   <main>
     <header>
       <h1>AnalyticalRx Design Index</h1>
-      <p>Single entry point for the current high-level design, ingestion design, PrimeRx discovery notes, and generated diagrams.</p>
+      <p>Single entry point for product requirements, architecture, ingestion, database, Airtable reverse-engineering, operations, task drafts, presentations, and diagrams.</p>
     </header>
 
     <section>
-      <h2>HTML Review Docs</h2>
+      <h2>Start Here</h2>
       <div class="grid">
-        <a class="link-card" href="High_Level_Design.html">
-          <span class="badge">Current</span>
+        <a class="link-card" href="prd/product-requirements-document.html">
+          <span class="badge">PRD</span>
+          <strong>Product Requirements Document</strong>
+          <span>Reader-friendly PRD draft covering the problem statement, background, product goals, delivery phases, Phase 1 in-progress scope, Phase 2 plan, and appendices.</span>
+        </a>
+        <a class="link-card" href="prd/phase-2-product-design.html">
+          <span class="badge">PRD</span>
+          <strong>Phase 2 Product Design</strong>
+          <span>Separate Phase 2 draft for workflow automation, doctor CRM, refill queues, alerts, optional emails, role access, and dashboard improvements.</span>
+        </a>
+        <a class="link-card" href="architecture/high-level-design.html">
+          <span class="badge">Architecture</span>
           <strong>High-Level Design</strong>
-          <span>System architecture, layers, PHI boundary, MVP slice, build sequence, and PrimeRx questions.</span>
+          <span>System architecture, layers, PHI boundary, MVP slice, build sequence, and open PrimeRx questions.</span>
         </a>
-        <a class="link-card" href="Ingestion_Pipeline_Design.html">
-          <span class="badge">Current</span>
-          <strong>PrimeRx Ingestion Pipeline</strong>
-          <span>Webhook, API, bulk/backfill, PHI filtering, validation, canonical load, and reconciliation design.</span>
-        </a>
-        <a class="link-card" href="Webhook_Processing_Pipeline.html">
-          <span class="badge">Current</span>
-          <strong>Webhook Processing Pipeline</strong>
-          <span>Webhook receiver, async processing, PHI boundary, idempotency, failure handling, and vendor questions.</span>
-        </a>
-        <a class="link-card" href="Canonical_Event_Database_Schema.html">
-          <span class="badge">Current</span>
-          <strong>Canonical Event Database Schema</strong>
-          <span>PostgreSQL schema for raw references, audit/idempotency, restricted source IDs, and PHI-minimized canonical events.</span>
-        </a>
-        <a class="link-card" href="Canonical_Event_Table_Dictionary.html">
-          <span class="badge">Current</span>
-          <strong>Canonical Event Table Dictionary</strong>
-          <span>ER diagram, field-level definitions, table access rules, and restrictions for webhook canonical storage.</span>
-        </a>
-        <a class="link-card" href="PgAdmin_ERD_Generation_Guide.html">
-          <span class="badge">Current</span>
-          <strong>pgAdmin ERD Generation Guide</strong>
-          <span>Steps to load the PostgreSQL schema into pgAdmin and export the ERD from the live database model.</span>
-        </a>
-        <a class="link-card" href="Product_Planning_and_PrimeRx_Data_Questions.html">
-          <span class="badge">Current</span>
+        <a class="link-card" href="architecture/product-planning-primerx-data-questions.html">
+          <span class="badge">Planning</span>
           <strong>Product Planning + PrimeRx Questions</strong>
-          <span>Planning notes, API questions, webhook support, and open vendor discovery items.</span>
+          <span>Planning notes, API questions, webhook support, SFTP discovery, and open vendor discovery items.</span>
         </a>
-        <a class="link-card" href="Safe_IAM_Agent_Setup_Guide.html">
-          <span class="badge">Current</span>
-          <strong>Safe IAM Agent Setup Guide</strong>
-          <span>Guardrails, policies, and workflow for an IAM-only assistant that can diagnose and apply approved AWS access changes.</span>
-        </a>
-        <a class="link-card" href="Airtable_Setup_Review.html">
-          <span class="badge">Current</span>
-          <strong>Airtable Setup Review</strong>
-          <span>Metadata-only review of the client Airtable base, product modules, relationships, and software replication approach.</span>
-        </a>
-        <a class="link-card" href="Airtable_Interface_Automation_Report.html">
-          <span class="badge">Current</span>
-          <strong>Airtable Interface + Automation Report</strong>
-          <span>Detailed interface pages, visible dashboard fields, chart logic, and screenshot-observed automation workflows.</span>
+        <a class="link-card" href="presentations/analyticalrx-client-demo-phase1-phase2.pptx">
+          <span class="badge secondary">Deck</span>
+          <strong>Client Demo Deck</strong>
+          <span>Phase 1 and Phase 2 presentation used for client review.</span>
         </a>
       </div>
     </section>
 
     <section>
-      <h2>Current Diagrams</h2>
+      <h2>Ingestion</h2>
+      <div class="grid">
+        <a class="link-card" href="ingestion/ingestion-pipeline-design.html">
+          <span class="badge">Ingestion</span>
+          <strong>PrimeRx Ingestion Pipeline</strong>
+          <span>Webhook, API, bulk/backfill, PHI filtering, validation, canonical load, and reconciliation design.</span>
+        </a>
+        <a class="link-card" href="ingestion/webhook-processing-pipeline.html">
+          <span class="badge">Ingestion</span>
+          <strong>Webhook Processing Pipeline</strong>
+          <span>Webhook receiver, async processing, PHI boundary, idempotency, failure handling, and vendor questions.</span>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2>Database</h2>
+      <div class="grid">
+        <a class="link-card" href="database/canonical-event-schema-review-guide.html">
+          <span class="badge">Database</span>
+          <strong>Canonical Event Schema Review Guide</strong>
+          <span>Start here for teammate review: Phase 1 scope, source-of-truth rules, table relationships, access model, retention, and review checklist.</span>
+        </a>
+        <a class="link-card" href="database/canonical-event-database-schema.html">
+          <span class="badge">Database</span>
+          <strong>Canonical Event Database Schema</strong>
+          <span>PostgreSQL schema for raw references, audit/idempotency, restricted source IDs, drug/payer lookups, payment rows, and PHI-minimized canonical events.</span>
+        </a>
+        <a class="link-card" href="database/canonical-event-table-dictionary.html">
+          <span class="badge">Database</span>
+          <strong>Canonical Event Table Dictionary</strong>
+          <span>ER diagram, field-level definitions, table access rules, and restrictions for webhook canonical storage.</span>
+        </a>
+        <a class="link-card" href="database/pgadmin-erd-generation-guide.html">
+          <span class="badge">Database</span>
+          <strong>pgAdmin ERD Generation Guide</strong>
+          <span>Steps to load the PostgreSQL schema into pgAdmin and export the ERD from the live database model.</span>
+        </a>
+        <a class="link-card" href="schemas/mvp_canonical_event_schema.sql">
+          <span class="badge secondary">Schema</span>
+          <strong>MVP Canonical Event SQL</strong>
+          <span>Executable first-pass PostgreSQL DDL for the canonical event, drug, payer, and payment storage model.</span>
+        </a>
+        <a class="link-card" href="schemas/migrations/2026-07-24-drug-payer-event-fields.sql">
+          <span class="badge secondary">Schema</span>
+          <strong>Drug/Payer Migration SQL</strong>
+          <span>Incremental migration for an existing local design DB with the added drug, payer, payment, and event fields.</span>
+        </a>
+        <a class="link-card" href="schemas/migrations/2026-07-24-remove-canonical-drug-payer-snapshots.sql">
+          <span class="badge secondary">Schema</span>
+          <strong>Canonical Snapshot Cleanup SQL</strong>
+          <span>Cleanup migration that removes duplicate drug/payer snapshot columns from canonical tables.</span>
+        </a>
+        <a class="link-card" href="schemas/migrations/2026-07-29-raw-payload-retention-default.sql">
+          <span class="badge secondary">Schema</span>
+          <strong>Raw Payload Retention SQL</strong>
+          <span>Migration that applies the MVP 30-day retention default for restricted raw payload archive metadata.</span>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2>Airtable Reverse Engineering</h2>
+      <div class="grid">
+        <a class="link-card" href="airtable/index.html">
+          <span class="badge">Airtable</span>
+          <strong>Airtable Documentation Index</strong>
+          <span>Archived reference for Airtable tables, interfaces, automations, software mapping, and future-phase product intent.</span>
+        </a>
+        <a class="link-card" href="airtable/tables.html">
+          <span class="badge">Airtable</span>
+          <strong>Airtable Tables</strong>
+          <span>Reference table/module intent, fields, select options, linked relationships, views, and security notes.</span>
+        </a>
+        <a class="link-card" href="airtable/interfaces.html">
+          <span class="badge">Airtable</span>
+          <strong>Airtable Interfaces</strong>
+          <span>Reference role-oriented dashboards, widgets, aggregations, chart logic, source tables, and future UI direction.</span>
+        </a>
+        <a class="link-card" href="airtable/automations.html">
+          <span class="badge">Airtable</span>
+          <strong>Airtable Automations</strong>
+          <span>Workflow intent from screenshots, including triggers, actions, idempotency, notifications, and validation gaps.</span>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2>Operations And Team Setup</h2>
+      <div class="grid">
+        <a class="link-card" href="operations/safe-iam-agent-setup-guide.html">
+          <span class="badge">AWS</span>
+          <strong>Safe IAM Agent Setup Guide</strong>
+          <span>Guardrails, policies, and workflow for an IAM-only assistant that can diagnose and apply approved AWS access changes.</span>
+        </a>
+        <a class="link-card" href="team-setup/analyticalrx-teammate-setup-guide.docx">
+          <span class="badge secondary">Setup</span>
+          <strong>Teammate GitHub Setup Guide</strong>
+          <span>Word document for team members to set up GitHub access and clone the documentation repo.</span>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2>Project Task Drafts</h2>
+      <div class="grid">
+        <a class="link-card" href="project-tasks/webhook-pipeline-github-task-drafts.md">
+          <span class="badge secondary">Draft</span>
+          <strong>Webhook Pipeline Task Drafts</strong>
+          <span>Detailed GitHub issue drafts for API Gateway, Lambda receiver, SQS, processor Lambda, and pipeline setup.</span>
+        </a>
+        <a class="link-card" href="project-tasks/analytics-data-engineering-task-drafts.md">
+          <span class="badge secondary">Draft</span>
+          <strong>Analytics Data Engineering Task Drafts</strong>
+          <span>Draft issue content for future analytics/data engineering review and planning.</span>
+        </a>
+        <a class="link-card" href="project-tasks/phase-1-phase-2-github-issue-gap-plan.md">
+          <span class="badge secondary">Draft</span>
+          <strong>Phase 1 / Phase 2 Issue Gap Plan</strong>
+          <span>Issue gap analysis from the PRD, including Phase 1 tasks to create, Phase 2 planned tasks, and data engineering backlog status guidance.</span>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2>Diagrams</h2>
       <div class="grid">
         <a class="link-card" href="diagrams/overall-platform.svg">
           <span class="badge">D2</span>
@@ -226,43 +326,53 @@
     </section>
 
     <section>
-      <h2>Editable D2 Sources</h2>
+      <h2>Editable Sources And Scripts</h2>
       <div class="grid">
         <a class="link-card" href="diagrams/overall-platform.d2">
           <span class="badge">Source</span>
-          <strong>overall-platform.d2</strong>
+          <strong>Overall Platform D2</strong>
           <span>Edit this file, then render to <code>diagrams/overall-platform.svg</code>.</span>
         </a>
         <a class="link-card" href="diagrams/primerx-ingestion.d2">
           <span class="badge">Source</span>
-          <strong>primerx-ingestion.d2</strong>
+          <strong>PrimeRx Ingestion D2</strong>
           <span>Edit this file, then render to <code>diagrams/primerx-ingestion.svg</code>.</span>
         </a>
         <a class="link-card" href="diagrams/webhook-processing.d2">
           <span class="badge">Source</span>
-          <strong>webhook-processing.d2</strong>
+          <strong>Webhook Processing D2</strong>
           <span>Edit this file, then render to <code>diagrams/webhook-processing.svg</code>.</span>
         </a>
         <a class="link-card" href="diagrams/canonical-event-schema.d2">
           <span class="badge">Source</span>
-          <strong>canonical-event-schema.d2</strong>
+          <strong>Canonical Event Schema D2</strong>
           <span>Edit this file, then render to <code>diagrams/canonical-event-schema.svg</code>.</span>
         </a>
         <a class="link-card" href="diagrams/canonical-event-er.d2">
           <span class="badge">Source</span>
-          <strong>canonical-event-er.d2</strong>
+          <strong>Canonical Event ER D2</strong>
           <span>Edit this file, then render to <code>diagrams/canonical-event-er.svg</code>.</span>
         </a>
         <a class="link-card" href="diagrams/airtable-setup-overview.d2">
           <span class="badge">Source</span>
-          <strong>airtable-setup-overview.d2</strong>
+          <strong>Airtable Setup D2</strong>
           <span>Edit this file, then render to <code>diagrams/airtable-setup-overview.svg</code>.</span>
+        </a>
+        <a class="link-card" href="scripts/generate_airtable_docs.rb">
+          <span class="badge secondary">Script</span>
+          <strong>Airtable Docs Generator</strong>
+          <span>Regenerates Airtable table, interface, and automation docs from saved Airtable metadata.</span>
+        </a>
+        <a class="link-card" href="scripts/generate_postgres_erd.rb">
+          <span class="badge secondary">Script</span>
+          <strong>Postgres ERD Generator</strong>
+          <span>Generates the PostgreSQL-derived canonical event ERD artifacts.</span>
         </a>
       </div>
     </section>
 
     <footer>
-      Updated for the API + webhook design review. Docs are HTML; diagrams use editable D2 sources plus PostgreSQL-derived ERD outputs where exact database detail is needed.
+      Documentation is grouped by topic. HTML docs are review artifacts, diagrams use editable D2 sources, and database artifacts keep exact schema details in SQL and generated ERDs.
     </footer>
   </main>
 </body>

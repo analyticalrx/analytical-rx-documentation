@@ -17,6 +17,27 @@ core_pharmacy: {
   source_pharmacy_id: text
 }
 
+core_drug: {
+  shape: sql_table
+  id: uuid {constraint: primary_key}
+  tenant_id: uuid {constraint: foreign_key}
+  source_system: text
+  source_drug_id: text
+  ndc: text
+  drug_name: text
+}
+
+core_payer: {
+  shape: sql_table
+  id: uuid {constraint: primary_key}
+  tenant_id: uuid {constraint: foreign_key}
+  source_system: text
+  source_payer_id: text
+  payer_type: text
+  payer_bin: text
+  payer_pcn: text
+}
+
 ops_raw_payload_archive: {
   shape: sql_table
   id: uuid {constraint: primary_key}
@@ -54,13 +75,36 @@ analytics_canonical_event: {
   tenant_id: uuid {constraint: foreign_key}
   pharmacy_id: uuid {constraint: foreign_key}
   audit_event_id: uuid {constraint: foreign_key}
+  drug_id: uuid {constraint: foreign_key}
   canonical_event_type: text
   prescription_reference_token: text
   fill_reference_token: text
+  bill_type: text
+  days_supply: integer
   enrichment_status: text
 }
 
+analytics_event_payment: {
+  shape: sql_table
+  id: uuid {constraint: primary_key}
+  tenant_id: uuid {constraint: foreign_key}
+  pharmacy_id: uuid {constraint: foreign_key}
+  canonical_event_id: uuid {constraint: foreign_key}
+  payer_id: uuid {constraint: foreign_key}
+  payment_type: text
+  payer_sequence: text
+  paid_amount: numeric
+}
+
+payer_event_link_note: "Payer-event link\nNo payer_id on canonical event\nUse payment.canonical_event_id + payment.payer_id" {
+  style.fill: "#fff7ed"
+  style.stroke: "#c2410c"
+  style.stroke-dash: 4
+}
+
 core_tenant.id -> core_pharmacy.tenant_id: "1 to many"
+core_tenant.id -> core_drug.tenant_id: "1 to many"
+core_tenant.id -> core_payer.tenant_id: "1 to many"
 core_tenant.id -> ops_raw_payload_archive.tenant_id: "1 to many"
 core_pharmacy.id -> ops_raw_payload_archive.pharmacy_id: "1 to many"
 core_tenant.id -> ops_source_reference.tenant_id: "1 to many"
@@ -72,3 +116,7 @@ ops_raw_payload_archive.id -> ops_webhook_event_audit.raw_payload_archive_id: "o
 core_tenant.id -> analytics_canonical_event.tenant_id: "1 to many"
 core_pharmacy.id -> analytics_canonical_event.pharmacy_id: "1 to many"
 ops_webhook_event_audit.id -> analytics_canonical_event.audit_event_id: "1 to 1"
+core_drug.id -> analytics_canonical_event.drug_id: "optional"
+analytics_canonical_event.id -> analytics_event_payment.canonical_event_id: "1 to many"
+core_payer.id -> analytics_event_payment.payer_id: "optional; null for cash"
+payer_event_link_note -> analytics_event_payment: "bridge table"

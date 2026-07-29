@@ -3,6 +3,83 @@ digraph canonical_event_erd {
   node [shape=plain, fontname="Helvetica"];
   edge [fontname="Helvetica", fontsize=9, color="#475569", arrowsize=0.7];
 
+  "analytics.canonical_event_payer_payment" [label=<
+    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" COLOR="#047857">
+      <TR><TD BGCOLOR="#dcfce7" COLSPAN="3"><B>analytics.canonical_event_payer_payment</B></TD></TR>
+      <TR><TD BGCOLOR="#f8fafc"><B>Key</B></TD><TD BGCOLOR="#f8fafc"><B>Column</B></TD><TD BGCOLOR="#f8fafc"><B>Type</B></TD></TR>
+      <TR>
+        <TD>PK NN</TD>
+        <TD PORT="id" ALIGN="LEFT">id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD>FK NN</TD>
+        <TD PORT="tenant_id" ALIGN="LEFT">tenant_id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD>FK NN</TD>
+        <TD PORT="pharmacy_id" ALIGN="LEFT">pharmacy_id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD>FK NN</TD>
+        <TD PORT="canonical_event_id" ALIGN="LEFT">canonical_event_id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD>FK</TD>
+        <TD PORT="payer_id" ALIGN="LEFT">payer_id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="payment_type" ALIGN="LEFT">payment_type</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="payer_sequence" ALIGN="LEFT">payer_sequence</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="billed_amount" ALIGN="LEFT">billed_amount</TD>
+        <TD ALIGN="LEFT">numeric(12,2)</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="paid_amount" ALIGN="LEFT">paid_amount</TD>
+        <TD ALIGN="LEFT">numeric(12,2)</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="patient_responsibility_amount" ALIGN="LEFT">patient_responsibility_amount</TD>
+        <TD ALIGN="LEFT">numeric(12,2)</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="copay_paid_amount" ALIGN="LEFT">copay_paid_amount</TD>
+        <TD ALIGN="LEFT">numeric(12,2)</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="payment_status" ALIGN="LEFT">payment_status</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="created_at" ALIGN="LEFT">created_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="updated_at" ALIGN="LEFT">updated_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+    </TABLE>
+  >];
+
   "analytics.canonical_pharmacy_event" [label=<
     <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" COLOR="#047857">
       <TR><TD BGCOLOR="#dcfce7" COLSPAN="3"><B>analytics.canonical_pharmacy_event</B></TD></TR>
@@ -84,57 +161,12 @@ digraph canonical_event_erd {
       </TR>
       <TR>
         <TD></TD>
-        <TD PORT="drug_ndc" ALIGN="LEFT">drug_ndc</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="drug_name" ALIGN="LEFT">drug_name</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="drug_generic_name" ALIGN="LEFT">drug_generic_name</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="payer_name" ALIGN="LEFT">payer_name</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="payer_bin" ALIGN="LEFT">payer_bin</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="payer_pcn" ALIGN="LEFT">payer_pcn</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
         <TD PORT="prescriber_npi" ALIGN="LEFT">prescriber_npi</TD>
         <TD ALIGN="LEFT">text</TD>
       </TR>
       <TR>
         <TD></TD>
         <TD PORT="total_amount" ALIGN="LEFT">total_amount</TD>
-        <TD ALIGN="LEFT">numeric(12,2)</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="insurance_paid_amount" ALIGN="LEFT">insurance_paid_amount</TD>
-        <TD ALIGN="LEFT">numeric(12,2)</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="patient_pay_amount" ALIGN="LEFT">patient_pay_amount</TD>
-        <TD ALIGN="LEFT">numeric(12,2)</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="copay_paid_amount" ALIGN="LEFT">copay_paid_amount</TD>
         <TD ALIGN="LEFT">numeric(12,2)</TD>
       </TR>
       <TR>
@@ -161,6 +193,325 @@ digraph canonical_event_erd {
         <TD>NN</TD>
         <TD PORT="data_quality_status" ALIGN="LEFT">data_quality_status</TD>
         <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="created_at" ALIGN="LEFT">created_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="updated_at" ALIGN="LEFT">updated_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD>FK</TD>
+        <TD PORT="drug_id" ALIGN="LEFT">drug_id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="date_ordered" ALIGN="LEFT">date_ordered</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="date_filled" ALIGN="LEFT">date_filled</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="date_dispensed" ALIGN="LEFT">date_dispensed</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="date_picked_up" ALIGN="LEFT">date_picked_up</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="picked_up_flag" ALIGN="LEFT">picked_up_flag</TD>
+        <TD ALIGN="LEFT">boolean</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="days_supply" ALIGN="LEFT">days_supply</TD>
+        <TD ALIGN="LEFT">integer</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="auth_refills" ALIGN="LEFT">auth_refills</TD>
+        <TD ALIGN="LEFT">integer</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="total_refills" ALIGN="LEFT">total_refills</TD>
+        <TD ALIGN="LEFT">integer</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="quantity_ordered" ALIGN="LEFT">quantity_ordered</TD>
+        <TD ALIGN="LEFT">numeric(12,3)</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="quantity_dispensed" ALIGN="LEFT">quantity_dispensed</TD>
+        <TD ALIGN="LEFT">numeric(12,3)</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="quantity_remaining" ALIGN="LEFT">quantity_remaining</TD>
+        <TD ALIGN="LEFT">numeric(12,3)</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="order_status" ALIGN="LEFT">order_status</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="refill_queue_status" ALIGN="LEFT">refill_queue_status</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="verification_status" ALIGN="LEFT">verification_status</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="label_printed_flag" ALIGN="LEFT">label_printed_flag</TD>
+        <TD ALIGN="LEFT">boolean</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="copay_collected_flag" ALIGN="LEFT">copay_collected_flag</TD>
+        <TD ALIGN="LEFT">boolean</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="delivery_method" ALIGN="LEFT">delivery_method</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="bill_type" ALIGN="LEFT">bill_type</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="rx_origin_code" ALIGN="LEFT">rx_origin_code</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="rx_origin_description" ALIGN="LEFT">rx_origin_description</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="ingredient_cost_amount" ALIGN="LEFT">ingredient_cost_amount</TD>
+        <TD ALIGN="LEFT">numeric(12,2)</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="dispensing_fee_amount" ALIGN="LEFT">dispensing_fee_amount</TD>
+        <TD ALIGN="LEFT">numeric(12,2)</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="other_fee_amount" ALIGN="LEFT">other_fee_amount</TD>
+        <TD ALIGN="LEFT">numeric(12,2)</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="other_amount" ALIGN="LEFT">other_amount</TD>
+        <TD ALIGN="LEFT">numeric(12,2)</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="tax_amount" ALIGN="LEFT">tax_amount</TD>
+        <TD ALIGN="LEFT">numeric(12,2)</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="discount_amount" ALIGN="LEFT">discount_amount</TD>
+        <TD ALIGN="LEFT">numeric(12,2)</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="amount_due" ALIGN="LEFT">amount_due</TD>
+        <TD ALIGN="LEFT">numeric(12,2)</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="enriched_at" ALIGN="LEFT">enriched_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+    </TABLE>
+  >];
+
+  "core.drug" [label=<
+    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" COLOR="#2563eb">
+      <TR><TD BGCOLOR="#dbeafe" COLSPAN="3"><B>core.drug</B></TD></TR>
+      <TR><TD BGCOLOR="#f8fafc"><B>Key</B></TD><TD BGCOLOR="#f8fafc"><B>Column</B></TD><TD BGCOLOR="#f8fafc"><B>Type</B></TD></TR>
+      <TR>
+        <TD>PK NN</TD>
+        <TD PORT="id" ALIGN="LEFT">id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD>FK NN</TD>
+        <TD PORT="tenant_id" ALIGN="LEFT">tenant_id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="source_system" ALIGN="LEFT">source_system</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="source_drug_id" ALIGN="LEFT">source_drug_id</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="ndc" ALIGN="LEFT">ndc</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="drug_name" ALIGN="LEFT">drug_name</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="generic_name" ALIGN="LEFT">generic_name</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="brand_name" ALIGN="LEFT">brand_name</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="is_brand" ALIGN="LEFT">is_brand</TD>
+        <TD ALIGN="LEFT">boolean</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="strength" ALIGN="LEFT">strength</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="strength_unit" ALIGN="LEFT">strength_unit</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="form" ALIGN="LEFT">form</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="manufacturer_name" ALIGN="LEFT">manufacturer_name</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="drug_class" ALIGN="LEFT">drug_class</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="unit_of_measure" ALIGN="LEFT">unit_of_measure</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="quantity_per_pack" ALIGN="LEFT">quantity_per_pack</TD>
+        <TD ALIGN="LEFT">numeric(12,3)</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="first_seen_at" ALIGN="LEFT">first_seen_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="last_seen_at" ALIGN="LEFT">last_seen_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="created_at" ALIGN="LEFT">created_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="updated_at" ALIGN="LEFT">updated_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+    </TABLE>
+  >];
+
+  "core.payer" [label=<
+    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" COLOR="#2563eb">
+      <TR><TD BGCOLOR="#dbeafe" COLSPAN="3"><B>core.payer</B></TD></TR>
+      <TR><TD BGCOLOR="#f8fafc"><B>Key</B></TD><TD BGCOLOR="#f8fafc"><B>Column</B></TD><TD BGCOLOR="#f8fafc"><B>Type</B></TD></TR>
+      <TR>
+        <TD>PK NN</TD>
+        <TD PORT="id" ALIGN="LEFT">id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD>FK NN</TD>
+        <TD PORT="tenant_id" ALIGN="LEFT">tenant_id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="source_system" ALIGN="LEFT">source_system</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="source_payer_id" ALIGN="LEFT">source_payer_id</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="payer_type" ALIGN="LEFT">payer_type</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="payer_name" ALIGN="LEFT">payer_name</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="payer_bin" ALIGN="LEFT">payer_bin</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="payer_pcn" ALIGN="LEFT">payer_pcn</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="first_seen_at" ALIGN="LEFT">first_seen_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="last_seen_at" ALIGN="LEFT">last_seen_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
       </TR>
       <TR>
         <TD>NN</TD>
@@ -530,9 +881,16 @@ digraph canonical_event_erd {
     </TABLE>
   >];
 
+  "analytics.canonical_event_payer_payment":canonical_event_id:e -> "analytics.canonical_pharmacy_event":id:w [label="canonical_event_id", tooltip="canonical_event_payer_payment_canonical_event_id_fkey"];
+  "analytics.canonical_event_payer_payment":payer_id:e -> "core.payer":id:w [label="payer_id", tooltip="canonical_event_payer_payment_payer_id_fkey"];
+  "analytics.canonical_event_payer_payment":pharmacy_id:e -> "core.pharmacy":id:w [label="pharmacy_id", tooltip="canonical_event_payer_payment_pharmacy_id_fkey"];
+  "analytics.canonical_event_payer_payment":tenant_id:e -> "core.tenant":id:w [label="tenant_id", tooltip="canonical_event_payer_payment_tenant_id_fkey"];
   "analytics.canonical_pharmacy_event":audit_event_id:e -> "ops.webhook_event_audit":id:w [label="audit_event_id", tooltip="canonical_pharmacy_event_audit_event_id_fkey"];
+  "analytics.canonical_pharmacy_event":drug_id:e -> "core.drug":id:w [label="drug_id", tooltip="canonical_pharmacy_event_drug_id_fkey"];
   "analytics.canonical_pharmacy_event":pharmacy_id:e -> "core.pharmacy":id:w [label="pharmacy_id", tooltip="canonical_pharmacy_event_pharmacy_id_fkey"];
   "analytics.canonical_pharmacy_event":tenant_id:e -> "core.tenant":id:w [label="tenant_id", tooltip="canonical_pharmacy_event_tenant_id_fkey"];
+  "core.drug":tenant_id:e -> "core.tenant":id:w [label="tenant_id", tooltip="drug_tenant_id_fkey"];
+  "core.payer":tenant_id:e -> "core.tenant":id:w [label="tenant_id", tooltip="payer_tenant_id_fkey"];
   "core.pharmacy":tenant_id:e -> "core.tenant":id:w [label="tenant_id", tooltip="pharmacy_tenant_id_fkey"];
   "ops.raw_payload_archive":pharmacy_id:e -> "core.pharmacy":id:w [label="pharmacy_id", tooltip="raw_payload_archive_pharmacy_id_fkey"];
   "ops.raw_payload_archive":tenant_id:e -> "core.tenant":id:w [label="tenant_id", tooltip="raw_payload_archive_tenant_id_fkey"];

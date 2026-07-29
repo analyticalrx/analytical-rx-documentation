@@ -1,0 +1,945 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Airtable Automations</title>
+  <style>
+:root {
+  --ink: #1f2933;
+  --muted: #5f6c7b;
+  --line: #d9e2ec;
+  --panel: #f8fafc;
+  --code: #eef2f7;
+  --accent: #0f766e;
+  --accent-soft: #ccfbf1;
+  --warn: #9a3412;
+  --warn-soft: #ffedd5;
+  --risk: #b91c1c;
+  --risk-soft: #fee2e2;
+}
+
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  color: var(--ink);
+  background: #ffffff;
+  line-height: 1.56;
+}
+
+main {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 44px 24px 72px;
+}
+
+nav {
+  margin-bottom: 28px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+nav a,
+a {
+  color: var(--accent);
+}
+
+nav a {
+  text-decoration: none;
+  font-weight: 700;
+}
+
+header {
+  max-width: 980px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+h1 {
+  margin: 0 0 10px;
+  font-size: 34px;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+h2 {
+  margin: 34px 0 12px;
+  font-size: 23px;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+h3 {
+  margin: 24px 0 10px;
+  font-size: 18px;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+p {
+  margin: 0 0 13px;
+}
+
+ul,
+ol {
+  margin: 0 0 18px;
+  padding-left: 24px;
+}
+
+li {
+  margin: 5px 0;
+}
+
+code {
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: var(--code);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 18px 0;
+  font-size: 13px;
+}
+
+th,
+td {
+  border: 1px solid var(--line);
+  padding: 8px 10px;
+  vertical-align: top;
+}
+
+th {
+  background: var(--panel);
+  text-align: left;
+}
+
+.lead {
+  color: var(--muted);
+  font-size: 18px;
+}
+
+.meta {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.callout {
+  margin: 16px 0;
+  padding: 14px 18px;
+  border-left: 4px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent-soft);
+}
+
+.warn {
+  border-left-color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.risk {
+  border-left-color: var(--risk);
+  background: var(--risk-soft);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.link-card {
+  display: block;
+  min-height: 112px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.link-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(15, 118, 110, 0.12);
+}
+
+.link-card strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 17px;
+}
+
+.link-card span {
+  display: block;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.badge,
+.tag {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.tag {
+  margin: 0 0 0 6px;
+}
+
+.badge.secondary,
+.tag.warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+  border-left: 0;
+}
+
+.tag.risk {
+  background: var(--risk-soft);
+  color: var(--risk);
+  border-left: 0;
+}
+
+.diagram {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.diagram img,
+.screenshot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.screenshot {
+  margin: 18px 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.screenshot figcaption {
+  padding: 10px 12px;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.toc {
+  columns: 2;
+  column-gap: 36px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+@media (max-width: 760px) {
+  .toc {
+    columns: 1;
+  }
+
+  table {
+    font-size: 12px;
+  }
+}
+    .screenshot img { max-height: 680px; object-fit: contain; background: #ffffff; }
+
+
+  </style>
+</head>
+<body>
+  <main>
+    <nav><a href="../index.html">Back to design index</a> | <a href="index.html">Airtable docs</a></nav>
+    <header>
+      <h1>Airtable Automations</h1>
+      <p class="lead">Detailed automation replication plan using screenshot evidence, field dependencies, idempotency, notification behavior, and validation gaps.</p>
+    </header>
+<section>
+  <h2>Source And Scope</h2>
+  <p>Automation data comes from the Airtable automation screenshots captured from the client base. Airtable MCP CLI version <code>0.2.6</code> did not expose a tool for listing full automation definitions, and the direct metadata endpoint check did not return automation configuration.</p>
+  <div class="callout warn">
+    <p>Every visible automation appears to be switched <code>OFF</code>, and some action cards show warning indicators. Treat this as a future-phase workflow reference for intended behavior, not proof that the current Airtable automations are active, complete, or production requirements to copy exactly.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Software Building Blocks Needed</h2>
+  <table>
+    <tbody>
+      <tr><th>Rule engine</th><td>Runs record-triggered rules when a source record is created or updated.</td></tr>
+      <tr><th>Scheduler</th><td>Runs tenant-scoped daily and weekly jobs in the tenant's configured timezone.</td></tr>
+      <tr><th>Task service</th><td>Creates and updates operational tasks from templates, compliance items, onboarding steps, and recurring task rules.</td></tr>
+      <tr><th>Notification service</th><td>Sends email notifications from templates and resolves recipients from tenant users, roles, stores, and notification groups.</td></tr>
+      <tr><th>KPI calculation service</th><td>Creates or updates KPI scorecard rows from financial periods and prescription metrics.</td></tr>
+      <tr><th>Audit and run logs</th><td>Stores automation runs, source records evaluated, outputs, skipped records, notifications, and errors.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>Cross-Cutting Rules</h2>
+  <ul>
+        <li>Every automation must be scoped by tenant_id and, where applicable, pharmacy_id.</li>
+        <li>Dates should be stored in UTC, while business schedules run in tenant timezone.</li>
+        <li>Each scheduled job needs an idempotency key so re-runs do not create duplicate tasks or send duplicate emails.</li>
+        <li>Record-triggered automations need an idempotency key based on source record and intended output.</li>
+        <li>All recipients should be resolved from users, roles, or notification groups. Do not migrate hard-coded personal email addresses from Airtable.</li>
+        <li>Each automation should support enabled, disabled, and dry_run modes per tenant.</li>
+        <li>Automation failures should not block the user-facing workflow that created or updated the source record.</li>
+        <li>Each automation should write run logs even when zero records are matched.</li>
+        <li>Notification emails should avoid exposing unnecessary PHI.</li>
+      </ul>
+</section>
+
+<section>
+  <h2>Automation Inventory</h2>
+  <table>
+    <thead><tr><th>Automation</th><th>Screenshot</th><th>Confidence</th><th>Status</th><th>Trigger</th><th>Product intent</th></tr></thead>
+    <tbody>
+      <tr><td><a href="#auto-01">Copy Values from Financial Periods/Rx Metrics to KPI Scorecard</a></td><td><a href="assets/automation-screenshots/airtable-automation-01.png">airtable-automation-01.png</a></td><td><span class="tag warn">Medium</span></td><td><code>OFF</code></td><td>When a record is created in Financial Periods.</td><td>When monthly financial data is entered or imported for a pharmacy, automatically prepare KPI scorecard records so dashboards can show revenue, margin, DIR fee, payroll, and prescription performance without manual copying.</td></tr>
+        <tr><td><a href="#auto-02">New-Store Onboarding Auto-Clone</a></td><td><a href="assets/automation-screenshots/airtable-automation-02.png">airtable-automation-02.png</a></td><td><span class="tag warn">Medium</span></td><td><code>OFF</code></td><td>When a record matches conditions. The source table is not visible, but intent suggests Pharmacies or Onboarding Steps.</td><td>When a pharmacy enters onboarding, clone a standard checklist of onboarding steps for that specific store.</td></tr>
+        <tr><td><a href="#auto-03">Monday Owner Digest Email</a></td><td><a href="assets/automation-screenshots/airtable-automation-03.png">airtable-automation-03.png</a></td><td><span class="tag warn">Medium</span></td><td><code>OFF</code></td><td>Every week on Monday at 5:15 PM IST.</td><td>Send owners a weekly summary of operational risk, compliance risk, task backlog, KPI exceptions, and expiring business records.</td></tr>
+        <tr><td><a href="#auto-04">KPI Status Alert and Notification</a></td><td><a href="assets/automation-screenshots/airtable-automation-04.png">airtable-automation-04.png</a></td><td><span class="tag warn">Medium</span></td><td><code>OFF</code></td><td>When a record matches conditions where Status is Off Track.</td><td>Alert the operations team when a KPI becomes off track so the issue can be reviewed before the next owner digest.</td></tr>
+        <tr><td><a href="#auto-05">Doctor Office Follow-Up Notification</a></td><td><a href="assets/automation-screenshots/airtable-automation-05.png">airtable-automation-05.png</a></td><td><span class="tag warn">Medium</span></td><td><code>OFF</code></td><td>When a record matches conditions where Next Follow-up is today.</td><td>Remind the assigned representative to follow up with a doctor office on the scheduled follow-up date.</td></tr>
+        <tr><td><a href="#auto-06">Lapse Risk Alert Automation</a></td><td><a href="assets/automation-screenshots/airtable-automation-06.png">airtable-automation-06.png</a></td><td><span class="tag warn">Medium</span></td><td><code>OFF</code></td><td>When a record matches conditions where Lapse Risk is At Risk.</td><td>Alert the assigned representative or manager when a doctor office relationship is at risk of lapsing.</td></tr>
+        <tr><td><a href="#auto-07">Compliance to Unified Calendar Feed</a></td><td><a href="assets/automation-screenshots/airtable-automation-07.png">airtable-automation-07.png</a></td><td><span class="tag ">High</span></td><td><code>OFF</code></td><td>When a record is created in Compliance Items.</td><td>Every compliance requirement should become a trackable task/calendar item so it appears in operational views and reminders.</td></tr>
+        <tr><td><a href="#auto-08">Scheduled Task Generation from Templates</a></td><td><a href="assets/automation-screenshots/airtable-automation-08.png">airtable-automation-08.png</a></td><td><span class="tag warn">Medium</span></td><td><code>OFF</code></td><td>Every day at 11:30 AM IST.</td><td>Generate routine operational tasks from reusable task templates.</td></tr>
+        <tr><td><a href="#auto-09">Compliance due soon notification</a></td><td><a href="assets/automation-screenshots/airtable-automation-09.png">airtable-automation-09.png</a></td><td><span class="tag warn">Medium</span></td><td><code>OFF</code></td><td>Every day at 12:30 PM IST.</td><td>Notify responsible users when compliance requirements are due soon or due now.</td></tr>
+        <tr><td><a href="#auto-10">Document/license expiring - weekly</a></td><td><a href="assets/automation-screenshots/airtable-automation-10.png">airtable-automation-10.png</a></td><td><span class="tag warn">Medium</span></td><td><code>OFF</code></td><td>Every week on Monday at 12:30 PM IST.</td><td>Give owners/operators a weekly view of expiring business-critical documents, employee licenses, and vendor contracts.</td></tr>
+        <tr><td><a href="#auto-11">Task overdue - daily notification</a></td><td><a href="assets/automation-screenshots/airtable-automation-11.png">airtable-automation-11.png</a></td><td><span class="tag warn">Medium</span></td><td><code>OFF</code></td><td>Every day at 12:30 PM IST.</td><td>Remind assignees or managers about tasks that are past due and still open.</td></tr>
+        <tr><td><a href="#auto-12">Recurring Task Generator</a></td><td><a href="assets/automation-screenshots/airtable-automation-12.png">airtable-automation-12.png</a></td><td><span class="tag warn">Medium</span></td><td><code>OFF</code></td><td>When a task record matches conditions where Status is Done and Recurrence is set.</td><td>When a recurring task is completed, create the next instance automatically.</td></tr>
+        <tr><td><a href="#auto-13">Task Completion Update</a></td><td><a href="assets/automation-screenshots/airtable-automation-13.png">airtable-automation-13.png</a></td><td><span class="tag risk">Low</span></td><td><code>OFF</code></td><td>When a task record matches conditions where Status is Done.</td><td>Ambiguous. It may normalize task status, stamp completion metadata, or update a related task/status field.</td></tr>
+        <tr><td><a href="#auto-14">Daily Task Due Email Notification</a></td><td><a href="assets/automation-screenshots/airtable-automation-14.png">airtable-automation-14.png</a></td><td><span class="tag warn">Medium</span></td><td><code>OFF</code></td><td>Every day at 2:30 PM IST.</td><td>Remind assigned users about tasks due today.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="auto-01">
+  <h2>Copy Values from Financial Periods/Rx Metrics to KPI Scorecard <span class="tag warn">Medium</span></h2>
+  <figure class="screenshot">
+    <a href="assets/automation-screenshots/airtable-automation-01.png"><img src="assets/automation-screenshots/airtable-automation-01.png" alt="Copy Values from Financial Periods/Rx Metrics to KPI Scorecard screenshot"></a>
+    <figcaption>Source screenshot: airtable-automation-01.png</figcaption>
+  </figure>
+  <table>
+    <tbody>
+      <tr><th>Observed status</th><td><code>OFF</code></td></tr>
+      <tr><th>Observed trigger</th><td>When a record is created in Financial Periods.</td></tr>
+      <tr><th>Observed actions</th><td>Find matching Rx Metrics records using Store and Month, then create a KPI Scorecard record. The exact target field mapping is not visible.</td></tr>
+      <tr><th>Product intent</th><td>When monthly financial data is entered or imported for a pharmacy, automatically prepare KPI scorecard records so dashboards can show revenue, margin, DIR fee, payroll, and prescription performance without manual copying.</td></tr>
+      <tr><th>Primary tables</th><td><code>Financial Periods</code>, <code>Rx Metrics</code>, <code>KPI Scorecard</code>, <code>Pharmacies</code></td></tr>
+      <tr><th>Backend trigger type</th><td>Record-created event plus a manual re-sync button for a month/store. Later, update-triggered recalculation should also be supported.</td></tr>
+      <tr><th>Suggested idempotency key</th><td><code>tenant_id + pharmacy_id + month + kpi_name. Use upsert, not blind insert.</code></td></tr>
+    </tbody>
+  </table>
+  <h3>Likely Field Mapping / Logic</h3>
+  <ul>
+        <li>Monthly Revenue: Financial Periods.Total Revenue or sum of revenue fields.</li>
+        <li>Rx Volume: likely Rx Metrics.New Rx + Rx Metrics.Refills. Confirm exact meaning.</li>
+        <li>Gross Margin %: Financial Periods.Gross Margin %.</li>
+        <li>EBITDA Margin %: likely Financial Periods.EBITDA / Financial Periods.Total Revenue.</li>
+        <li>Payroll % of Revenue: likely Financial Periods.Payroll / Financial Periods.Total Revenue.</li>
+        <li>DIR Fees %: likely Financial Periods.DIR Fees / Financial Periods.Total Revenue or Rx Metrics.DIR Fees / Rx Revenue. Confirm denominator.</li>
+        <li>New Rx Patients: not directly present. Rx Metrics.New Rx may not mean unique new patients.</li>
+        <li>New Active Offices: may require Doctor Offices data, not Financial Periods/Rx Metrics.</li>
+      </ul>
+  <h3>Implementation Details</h3>
+  <ul>
+        <li>Load the related pharmacy and month when a financial period is created.</li>
+        <li>Find matching Rx Metrics by same tenant, pharmacy, and month.</li>
+        <li>Create or update one KPI Scorecard row per KPI definition unless the client confirms Airtable only uses one generic row.</li>
+        <li>Calculate Actual, Target, Variance, Variance %, Status, Prior Period Actual, and Growth % in backend code or database logic.</li>
+        <li>If matching Rx Metrics is missing, create financial-only KPI rows and log missing Rx dependencies, or skip Rx-dependent KPIs based on product decision.</li>
+        <li>Keep formula ownership in the application, not in the dashboard layer.</li>
+      </ul>
+  <h3>Validation Needed</h3>
+  <ul>
+        <li>Exact Airtable create-record field mapping for KPI Scorecard.</li>
+        <li>Whether the automation creates one KPI row or multiple KPI rows per month/store.</li>
+        <li>Target values and thresholds for On Track, Needs Attention, and Off Track.</li>
+        <li>Whether updates to Financial Periods or Rx Metrics should re-run the sync.</li>
+      </ul>
+</section>
+
+<section id="auto-02">
+  <h2>New-Store Onboarding Auto-Clone <span class="tag warn">Medium</span></h2>
+  <figure class="screenshot">
+    <a href="assets/automation-screenshots/airtable-automation-02.png"><img src="assets/automation-screenshots/airtable-automation-02.png" alt="New-Store Onboarding Auto-Clone screenshot"></a>
+    <figcaption>Source screenshot: airtable-automation-02.png</figcaption>
+  </figure>
+  <table>
+    <tbody>
+      <tr><th>Observed status</th><td><code>OFF</code></td></tr>
+      <tr><th>Observed trigger</th><td>When a record matches conditions. The source table is not visible, but intent suggests Pharmacies or Onboarding Steps.</td></tr>
+      <tr><th>Observed actions</th><td>Find records where New Store is empty, repeat for each record, then create records in Onboarding Steps.</td></tr>
+      <tr><th>Product intent</th><td>When a pharmacy enters onboarding, clone a standard checklist of onboarding steps for that specific store.</td></tr>
+      <tr><th>Primary tables</th><td><code>Pharmacies</code>, <code>Onboarding Steps</code>, <code>People</code></td></tr>
+      <tr><th>Backend trigger type</th><td>Record-created or status-changed rule on pharmacy/store. Clean trigger: pharmacy status changes to Onboarding.</td></tr>
+      <tr><th>Suggested idempotency key</th><td><code>tenant_id + pharmacy_id + onboarding_template_id, or tenant_id + pharmacy_id + step_title + sequence.</code></td></tr>
+    </tbody>
+  </table>
+  <h3>Likely Field Mapping / Logic</h3>
+  <ul>
+        <li>Onboarding Steps.Step Title copies from template step title.</li>
+        <li>Onboarding Steps.New Store links to the newly onboarding pharmacy.</li>
+        <li>Category, Sequence, Document, and Notes copy from the template row.</li>
+        <li>Status defaults to Not Started.</li>
+        <li>Assignee should resolve from role/store rules.</li>
+        <li>Due Date should be calculated from onboarding start date plus an offset; current Airtable table does not expose a clear offset field.</li>
+      </ul>
+  <h3>Implementation Details</h3>
+  <ul>
+        <li>Separate reusable onboarding templates from generated store-specific onboarding steps.</li>
+        <li>Provide a manual Generate onboarding checklist action in addition to the automatic trigger.</li>
+        <li>Prevent duplicate checklist generation for the same store/template version.</li>
+        <li>Log skipped templates when no responsible user can be resolved.</li>
+        <li>Allow admins to regenerate missing steps without deleting completed steps.</li>
+      </ul>
+  <h3>Validation Needed</h3>
+  <ul>
+        <li>Exact source table and trigger condition.</li>
+        <li>How template rows are identified today. New Store is empty appears to be the template marker.</li>
+        <li>Whether due dates are copied, calculated, or manually filled after clone.</li>
+        <li>Whether onboarding applies to all pharmacies or only pharmacies with status Onboarding.</li>
+      </ul>
+</section>
+
+<section id="auto-03">
+  <h2>Monday Owner Digest Email <span class="tag warn">Medium</span></h2>
+  <figure class="screenshot">
+    <a href="assets/automation-screenshots/airtable-automation-03.png"><img src="assets/automation-screenshots/airtable-automation-03.png" alt="Monday Owner Digest Email screenshot"></a>
+    <figcaption>Source screenshot: airtable-automation-03.png</figcaption>
+  </figure>
+  <table>
+    <tbody>
+      <tr><th>Observed status</th><td><code>OFF</code></td></tr>
+      <tr><th>Observed trigger</th><td>Every week on Monday at 5:15 PM IST.</td></tr>
+      <tr><th>Observed actions</th><td>Five find-record actions followed by a send-email action. Visible searches include overdue tasks, upcoming due items, off-track KPI records, and expiration records.</td></tr>
+      <tr><th>Product intent</th><td>Send owners a weekly summary of operational risk, compliance risk, task backlog, KPI exceptions, and expiring business records.</td></tr>
+      <tr><th>Primary tables</th><td><code>Tasks</code>, <code>Compliance Items</code>, <code>KPI Scorecard</code>, <code>Documents</code>, <code>Employee Licenses</code>, <code>Vendors</code>, <code>People</code>, <code>Pharmacies</code></td></tr>
+      <tr><th>Backend trigger type</th><td>Weekly scheduled tenant job.</td></tr>
+      <tr><th>Suggested idempotency key</th><td><code>tenant_id + automation_key + monday_date + recipient_user_id.</code></td></tr>
+    </tbody>
+  </table>
+  <h3>Likely Field Mapping / Logic</h3>
+  <ul>
+        <li>Overdue tasks: Due Date before today and status not complete/cancelled.</li>
+        <li>Upcoming tasks or compliance items: records due within the configured upcoming window. Screenshot appears to show a 30-day condition, but it is truncated.</li>
+        <li>Off-track KPIs: KPI Scorecard rows where Status is Off Track.</li>
+        <li>Expiring documents: Documents where Expiration Date is within the configured threshold.</li>
+        <li>Expiring employee licenses: Employee Licenses where Expiration Date is within the configured threshold.</li>
+        <li>Expiring vendor contracts: Vendors where Contract End is within the configured threshold.</li>
+      </ul>
+  <h3>Implementation Details</h3>
+  <ul>
+        <li>Generate one digest per tenant, or one per owner/admin if owners only manage certain stores.</li>
+        <li>Group results by store and then by category.</li>
+        <li>Include counts and top urgent items in the email body. Link each item back to the app.</li>
+        <li>Store rendered digest metadata in notification history for audit and resend.</li>
+        <li>Do not send empty digests unless the client wants a nothing-due confirmation.</li>
+        <li>Use a configurable tenant timezone and send time. Do not hard-code IST.</li>
+      </ul>
+  <h3>Validation Needed</h3>
+  <ul>
+        <li>Exact five Airtable find-record queries.</li>
+        <li>Email subject/body and whether the owner digest is one email or multiple emails.</li>
+        <li>Who should receive it: owner/admins, operations managers, bookkeepers, store managers, or another group.</li>
+        <li>Whether the digest should include all stores or only stores assigned to each recipient.</li>
+      </ul>
+</section>
+
+<section id="auto-04">
+  <h2>KPI Status Alert and Notification <span class="tag warn">Medium</span></h2>
+  <figure class="screenshot">
+    <a href="assets/automation-screenshots/airtable-automation-04.png"><img src="assets/automation-screenshots/airtable-automation-04.png" alt="KPI Status Alert and Notification screenshot"></a>
+    <figcaption>Source screenshot: airtable-automation-04.png</figcaption>
+  </figure>
+  <table>
+    <tbody>
+      <tr><th>Observed status</th><td><code>OFF</code></td></tr>
+      <tr><th>Observed trigger</th><td>When a record matches conditions where Status is Off Track.</td></tr>
+      <tr><th>Observed actions</th><td>Find people where Role is Operations Manager, then send an email.</td></tr>
+      <tr><th>Product intent</th><td>Alert the operations team when a KPI becomes off track so the issue can be reviewed before the next owner digest.</td></tr>
+      <tr><th>Primary tables</th><td><code>KPI Scorecard</code>, <code>People</code>, <code>Pharmacies</code></td></tr>
+      <tr><th>Backend trigger type</th><td>Record state-change rule on KPI Scorecard status.</td></tr>
+      <tr><th>Suggested idempotency key</th><td><code>tenant_id + kpi_scorecard_id + status + status_changed_at_date + recipient_user_id.</code></td></tr>
+    </tbody>
+  </table>
+  <h3>Likely Field Mapping / Logic</h3>
+  <ul>
+        <li>Recipient lookup: People.Role includes Operations Manager.</li>
+        <li>Alert context: KPI, Store, Month, Actual, Target, Variance, Variance %, Status.</li>
+      </ul>
+  <h3>Implementation Details</h3>
+  <ul>
+        <li>Trigger only on transition into Off Track, not on every save while already off track.</li>
+        <li>Resolve recipients by role and store visibility.</li>
+        <li>Include KPI name, store, month, actual, target, variance, and dashboard link.</li>
+        <li>Throttle notifications so one bad import does not send many duplicate emails.</li>
+        <li>Add alert history on the KPI record or in a notification log.</li>
+      </ul>
+  <h3>Validation Needed</h3>
+  <ul>
+        <li>Whether Needs Attention should also notify or only Off Track.</li>
+        <li>Whether alerts go to operations managers, owners, store managers, or all of them.</li>
+        <li>Whether the Airtable warning icon means the recipient lookup is currently broken.</li>
+      </ul>
+</section>
+
+<section id="auto-05">
+  <h2>Doctor Office Follow-Up Notification <span class="tag warn">Medium</span></h2>
+  <figure class="screenshot">
+    <a href="assets/automation-screenshots/airtable-automation-05.png"><img src="assets/automation-screenshots/airtable-automation-05.png" alt="Doctor Office Follow-Up Notification screenshot"></a>
+    <figcaption>Source screenshot: airtable-automation-05.png</figcaption>
+  </figure>
+  <table>
+    <tbody>
+      <tr><th>Observed status</th><td><code>OFF</code></td></tr>
+      <tr><th>Observed trigger</th><td>When a record matches conditions where Next Follow-up is today.</td></tr>
+      <tr><th>Observed actions</th><td>Find a person where Full Name matches Assigned Rep, then send an email.</td></tr>
+      <tr><th>Product intent</th><td>Remind the assigned representative to follow up with a doctor office on the scheduled follow-up date.</td></tr>
+      <tr><th>Primary tables</th><td><code>Doctor Offices</code>, <code>Doctor Visits</code>, <code>People</code>, <code>Pharmacies</code></td></tr>
+      <tr><th>Backend trigger type</th><td>Daily scheduled reminder or record state rule. Scheduled reminder is safer for date-based triggers.</td></tr>
+      <tr><th>Suggested idempotency key</th><td><code>tenant_id + doctor_office_id + follow_up_date + recipient_user_id.</code></td></tr>
+    </tbody>
+  </table>
+  <h3>Likely Field Mapping / Logic</h3>
+  <ul>
+        <li>Doctor Offices.Assigned Rep should become a user/person reference, not a string name match.</li>
+        <li>Reminder context: office name, doctor name, specialty, store, last visit date, next action, next follow-up.</li>
+      </ul>
+  <h3>Implementation Details</h3>
+  <ul>
+        <li>Send only when Next Follow-up equals today in tenant timezone.</li>
+        <li>After a visit is logged, update the office&#39;s next follow-up date from the Doctor Visit record.</li>
+        <li>Track notification history so repeated same-day reminders do not spam the representative.</li>
+        <li>Support escalation if follow-up becomes overdue.</li>
+      </ul>
+  <h3>Validation Needed</h3>
+  <ul>
+        <li>Whether the source record is Doctor Offices or Doctor Visits.</li>
+        <li>Whether reminders send at start of day, exact time, or immediately when Next Follow-up becomes today.</li>
+        <li>Whether reminders should also notify a manager if overdue.</li>
+      </ul>
+</section>
+
+<section id="auto-06">
+  <h2>Lapse Risk Alert Automation <span class="tag warn">Medium</span></h2>
+  <figure class="screenshot">
+    <a href="assets/automation-screenshots/airtable-automation-06.png"><img src="assets/automation-screenshots/airtable-automation-06.png" alt="Lapse Risk Alert Automation screenshot"></a>
+    <figcaption>Source screenshot: airtable-automation-06.png</figcaption>
+  </figure>
+  <table>
+    <tbody>
+      <tr><th>Observed status</th><td><code>OFF</code></td></tr>
+      <tr><th>Observed trigger</th><td>When a record matches conditions where Lapse Risk is At Risk.</td></tr>
+      <tr><th>Observed actions</th><td>Find records related to Assigned Rep, then send an email. The find-record label is truncated and ambiguous.</td></tr>
+      <tr><th>Product intent</th><td>Alert the assigned representative or manager when a doctor office relationship is at risk of lapsing.</td></tr>
+      <tr><th>Primary tables</th><td><code>Doctor Offices</code>, <code>Doctor Visits</code>, <code>People</code>, <code>Tasks</code></td></tr>
+      <tr><th>Backend trigger type</th><td>Record state-change rule on Doctor Office lapse risk plus a scheduled daily reconciliation job to catch formula-derived changes.</td></tr>
+      <tr><th>Suggested idempotency key</th><td><code>tenant_id + doctor_office_id + lapse_risk_status + recipient_user_id + alert_period.</code></td></tr>
+    </tbody>
+  </table>
+  <h3>Likely Field Mapping / Logic</h3>
+  <ul>
+        <li>Likely risk inputs: Last Visit Date, Days Since Last Visit, Lapse Risk, Assigned Rep, Est Monthly Rx.</li>
+        <li>Recipient lookup: assigned rep and optionally store manager or operations manager.</li>
+      </ul>
+  <h3>Implementation Details</h3>
+  <ul>
+        <li>Define lapse risk explicitly in software instead of relying on hidden Airtable formulas.</li>
+        <li>Trigger only when risk moves from normal to At Risk, or once per configured reminder period while still at risk.</li>
+        <li>Email should include office, doctor, store, last visit date, days since last visit, estimated monthly Rx, and next recommended action.</li>
+        <li>Consider creating a follow-up task automatically if no open task already exists.</li>
+      </ul>
+  <h3>Validation Needed</h3>
+  <ul>
+        <li>Exact formula for Lapse Risk.</li>
+        <li>Whether alert recipients are assigned reps, managers, or both.</li>
+        <li>Whether an automatic task should be created or only email should be sent.</li>
+        <li>Whether the warning icon indicates a broken recipient lookup.</li>
+      </ul>
+</section>
+
+<section id="auto-07">
+  <h2>Compliance to Unified Calendar Feed <span class="tag ">High</span></h2>
+  <figure class="screenshot">
+    <a href="assets/automation-screenshots/airtable-automation-07.png"><img src="assets/automation-screenshots/airtable-automation-07.png" alt="Compliance to Unified Calendar Feed screenshot"></a>
+    <figcaption>Source screenshot: airtable-automation-07.png</figcaption>
+  </figure>
+  <table>
+    <tbody>
+      <tr><th>Observed status</th><td><code>OFF</code></td></tr>
+      <tr><th>Observed trigger</th><td>When a record is created in Compliance Items.</td></tr>
+      <tr><th>Observed actions</th><td>Create a record in Tasks.</td></tr>
+      <tr><th>Product intent</th><td>Every compliance requirement should become a trackable task/calendar item so it appears in operational views and reminders.</td></tr>
+      <tr><th>Primary tables</th><td><code>Compliance Items</code>, <code>Tasks</code>, <code>People</code>, <code>Pharmacies</code></td></tr>
+      <tr><th>Backend trigger type</th><td>Record-created rule on Compliance Items.</td></tr>
+      <tr><th>Suggested idempotency key</th><td><code>tenant_id + compliance_item_id + task_source.</code></td></tr>
+    </tbody>
+  </table>
+  <h3>Likely Field Mapping / Logic</h3>
+  <ul>
+        <li>Tasks.Title: Compliance Items.Requirement.</li>
+        <li>Tasks.Description: issuing authority, license number, renewal lead time, cost, and notes when present.</li>
+        <li>Tasks.Store: Compliance Items.Store.</li>
+        <li>Tasks.Category: Compliance.</li>
+        <li>Tasks.Priority: default based on due date or category.</li>
+        <li>Tasks.Status: Open or To Do. We should choose one canonical status.</li>
+        <li>Tasks.Assignee: Compliance Items.Owner.</li>
+        <li>Tasks.Due Date: Compliance Items.Due Date.</li>
+        <li>Tasks.Recurrence: Compliance Items.Frequency.</li>
+        <li>Tasks.Source: Compliance.</li>
+      </ul>
+  <h3>Implementation Details</h3>
+  <ul>
+        <li>Create the compliance task immediately after compliance item creation.</li>
+        <li>If owner is empty, route to a tenant compliance admin queue instead of failing silently.</li>
+        <li>When the compliance item due date changes, decide whether to update the linked task due date.</li>
+        <li>Keep a direct source reference from task to compliance item.</li>
+      </ul>
+  <h3>Validation Needed</h3>
+  <ul>
+        <li>Exact Airtable field mappings for created task.</li>
+        <li>Whether a compliance item creates one task only or recurring future tasks too.</li>
+        <li>Whether this feeds an actual calendar integration or just Airtable task dashboards.</li>
+      </ul>
+</section>
+
+<section id="auto-08">
+  <h2>Scheduled Task Generation from Templates <span class="tag warn">Medium</span></h2>
+  <figure class="screenshot">
+    <a href="assets/automation-screenshots/airtable-automation-08.png"><img src="assets/automation-screenshots/airtable-automation-08.png" alt="Scheduled Task Generation from Templates screenshot"></a>
+    <figcaption>Source screenshot: airtable-automation-08.png</figcaption>
+  </figure>
+  <table>
+    <tbody>
+      <tr><th>Observed status</th><td><code>OFF</code></td></tr>
+      <tr><th>Observed trigger</th><td>Every day at 11:30 AM IST.</td></tr>
+      <tr><th>Observed actions</th><td>Find task templates from a grid view, repeat over each record, find active stores, find people by responsible role, then create records in Tasks.</td></tr>
+      <tr><th>Product intent</th><td>Generate routine operational tasks from reusable task templates.</td></tr>
+      <tr><th>Primary tables</th><td><code>Task Templates</code>, <code>Tasks</code>, <code>Pharmacies</code>, <code>People</code></td></tr>
+      <tr><th>Backend trigger type</th><td>Daily scheduled tenant job.</td></tr>
+      <tr><th>Suggested idempotency key</th><td><code>tenant_id + template_id + pharmacy_id + scheduled_period_start.</code></td></tr>
+    </tbody>
+  </table>
+  <h3>Likely Field Mapping / Logic</h3>
+  <ul>
+        <li>Process templates where Template Active is checked.</li>
+        <li>If Store Scope is All Stores, generate one task per active pharmacy.</li>
+        <li>Resolve assignee by Responsible Role and store assignment.</li>
+        <li>Calculate due date as scheduled date plus Days Offset.</li>
+        <li>Set task title, description, category, priority, recurrence/frequency, and source from the template.</li>
+      </ul>
+  <h3>Implementation Details</h3>
+  <ul>
+        <li>Use a recurrence engine so daily/weekly/monthly/quarterly/annual templates generate in the correct period.</li>
+        <li>Maintain a generated-task link back to the template.</li>
+        <li>Before creating a task, check for an existing task for the same template, store, and period.</li>
+        <li>If multiple users match the responsible role, assignment behavior needs product confirmation.</li>
+        <li>If no user matches the responsible role, create the task unassigned and log a configuration warning.</li>
+      </ul>
+  <h3>Validation Needed</h3>
+  <ul>
+        <li>Exact grid view used by Airtable&#39;s first find-record action.</li>
+        <li>Whether the job runs daily but only creates tasks on frequency boundaries.</li>
+        <li>Whether templates are global, tenant-specific, or store-specific.</li>
+        <li>Exact behavior for missed runs and backfills.</li>
+      </ul>
+</section>
+
+<section id="auto-09">
+  <h2>Compliance due soon notification <span class="tag warn">Medium</span></h2>
+  <figure class="screenshot">
+    <a href="assets/automation-screenshots/airtable-automation-09.png"><img src="assets/automation-screenshots/airtable-automation-09.png" alt="Compliance due soon notification screenshot"></a>
+    <figcaption>Source screenshot: airtable-automation-09.png</figcaption>
+  </figure>
+  <table>
+    <tbody>
+      <tr><th>Observed status</th><td><code>OFF</code></td></tr>
+      <tr><th>Observed trigger</th><td>Every day at 12:30 PM IST.</td></tr>
+      <tr><th>Observed actions</th><td>Find compliance records where due date is on or before a configured day threshold, repeat over records, find related owner/assignee records, then send an email.</td></tr>
+      <tr><th>Product intent</th><td>Notify responsible users when compliance requirements are due soon or due now.</td></tr>
+      <tr><th>Primary tables</th><td><code>Compliance Items</code>, <code>People</code>, <code>Pharmacies</code>, <code>Tasks</code></td></tr>
+      <tr><th>Backend trigger type</th><td>Daily scheduled tenant job.</td></tr>
+      <tr><th>Suggested idempotency key</th><td><code>tenant_id + compliance_item_id + due_date + reminder_stage + recipient_user_id.</code></td></tr>
+    </tbody>
+  </table>
+  <h3>Likely Field Mapping / Logic</h3>
+  <ul>
+        <li>Use Renewal Lead Time Days when present; otherwise use a tenant default.</li>
+        <li>Include Requirement, Store, Category, Due Date, Owner, and item/task link.</li>
+        <li>Exclude Completed and N/A statuses.</li>
+      </ul>
+  <h3>Implementation Details</h3>
+  <ul>
+        <li>Send reminders for On Track, Due Soon, or Overdue records.</li>
+        <li>Escalate overdue items after a configurable number of days.</li>
+        <li>Update status to Due Soon or Overdue through a separate calculation rule if needed.</li>
+        <li>Avoid duplicate emails for the same compliance item and reminder stage.</li>
+      </ul>
+  <h3>Validation Needed</h3>
+  <ul>
+        <li>Exact due-soon threshold. Screenshot text is truncated.</li>
+        <li>Whether notification goes to Compliance Item Owner, store manager, operations manager, or all.</li>
+        <li>Whether compliance reminders should create tasks, send email only, or both.</li>
+      </ul>
+</section>
+
+<section id="auto-10">
+  <h2>Document/license expiring - weekly <span class="tag warn">Medium</span></h2>
+  <figure class="screenshot">
+    <a href="assets/automation-screenshots/airtable-automation-10.png"><img src="assets/automation-screenshots/airtable-automation-10.png" alt="Document/license expiring - weekly screenshot"></a>
+    <figcaption>Source screenshot: airtable-automation-10.png</figcaption>
+  </figure>
+  <table>
+    <tbody>
+      <tr><th>Observed status</th><td><code>OFF</code></td></tr>
+      <tr><th>Observed trigger</th><td>Every week on Monday at 12:30 PM IST.</td></tr>
+      <tr><th>Observed actions</th><td>Find documents expiring before a 60-day threshold, find licenses expiring by another threshold, find vendor contracts ending by a threshold, then send an email.</td></tr>
+      <tr><th>Product intent</th><td>Give owners/operators a weekly view of expiring business-critical documents, employee licenses, and vendor contracts.</td></tr>
+      <tr><th>Primary tables</th><td><code>Documents</code>, <code>Employee Licenses</code>, <code>Vendors</code>, <code>People</code>, <code>Pharmacies</code></td></tr>
+      <tr><th>Backend trigger type</th><td>Weekly scheduled tenant job.</td></tr>
+      <tr><th>Suggested idempotency key</th><td><code>tenant_id + automation_key + monday_date + recipient_user_id.</code></td></tr>
+    </tbody>
+  </table>
+  <h3>Likely Field Mapping / Logic</h3>
+  <ul>
+        <li>Documents: Expiration Date and Permission Level.</li>
+        <li>Employee Licenses: Expiration Date, License Type, Status, Employee.</li>
+        <li>Vendors: Contract End, Vendor Name, Store, Auto-Renew, Annual Value.</li>
+      </ul>
+  <h3>Implementation Details</h3>
+  <ul>
+        <li>Use configurable thresholds by record type.</li>
+        <li>Group output by store and source table.</li>
+        <li>Highlight expired records separately from expiring-soon records.</li>
+        <li>Respect document permission level when linking records in email.</li>
+        <li>Include auto-renew vendor contracts but clearly mark them.</li>
+        <li>Consider creating renewal tasks automatically if the client wants enforcement, not just reminders.</li>
+      </ul>
+  <h3>Validation Needed</h3>
+  <ul>
+        <li>Exact thresholds for each source table.</li>
+        <li>Recipients and whether they vary by store.</li>
+        <li>Whether document permissions affect who can receive links.</li>
+      </ul>
+</section>
+
+<section id="auto-11">
+  <h2>Task overdue - daily notification <span class="tag warn">Medium</span></h2>
+  <figure class="screenshot">
+    <a href="assets/automation-screenshots/airtable-automation-11.png"><img src="assets/automation-screenshots/airtable-automation-11.png" alt="Task overdue - daily notification screenshot"></a>
+    <figcaption>Source screenshot: airtable-automation-11.png</figcaption>
+  </figure>
+  <table>
+    <tbody>
+      <tr><th>Observed status</th><td><code>OFF</code></td></tr>
+      <tr><th>Observed trigger</th><td>Every day at 12:30 PM IST.</td></tr>
+      <tr><th>Observed actions</th><td>Find tasks where due date is before today and other status filters apply, repeat over each record, find assignee records, then send an email.</td></tr>
+      <tr><th>Product intent</th><td>Remind assignees or managers about tasks that are past due and still open.</td></tr>
+      <tr><th>Primary tables</th><td><code>Tasks</code>, <code>People</code>, <code>Pharmacies</code></td></tr>
+      <tr><th>Backend trigger type</th><td>Daily scheduled tenant job.</td></tr>
+      <tr><th>Suggested idempotency key</th><td><code>tenant_id + task_id + overdue_date + recipient_user_id.</code></td></tr>
+    </tbody>
+  </table>
+  <h3>Likely Field Mapping / Logic</h3>
+  <ul>
+        <li>Active statuses: likely Open, To Do, In Progress, and Blocked.</li>
+        <li>Excluded statuses: Done, Completed, and Cancelled.</li>
+        <li>Email context: title, store, category, priority, due date, overdue days, app link.</li>
+      </ul>
+  <h3>Implementation Details</h3>
+  <ul>
+        <li>Send to assigned users first.</li>
+        <li>Escalate to store manager or operations manager after a configured number of overdue days.</li>
+        <li>Use notification history to avoid repeat emails more frequently than intended.</li>
+        <li>For unassigned overdue tasks, route to store manager or operations queue.</li>
+      </ul>
+  <h3>Validation Needed</h3>
+  <ul>
+        <li>Exact status filter in Airtable.</li>
+        <li>Whether blocked tasks notify assignees, managers, or both.</li>
+        <li>Whether reminders continue every day until completed.</li>
+      </ul>
+</section>
+
+<section id="auto-12">
+  <h2>Recurring Task Generator <span class="tag warn">Medium</span></h2>
+  <figure class="screenshot">
+    <a href="assets/automation-screenshots/airtable-automation-12.png"><img src="assets/automation-screenshots/airtable-automation-12.png" alt="Recurring Task Generator screenshot"></a>
+    <figcaption>Source screenshot: airtable-automation-12.png</figcaption>
+  </figure>
+  <table>
+    <tbody>
+      <tr><th>Observed status</th><td><code>OFF</code></td></tr>
+      <tr><th>Observed trigger</th><td>When a task record matches conditions where Status is Done and Recurrence is set.</td></tr>
+      <tr><th>Observed actions</th><td>Find records where Task Title or Title matches, then create a record in Tasks.</td></tr>
+      <tr><th>Product intent</th><td>When a recurring task is completed, create the next instance automatically.</td></tr>
+      <tr><th>Primary tables</th><td><code>Tasks</code>, <code>Task Templates</code></td></tr>
+      <tr><th>Backend trigger type</th><td>Record state-change rule on Task completion.</td></tr>
+      <tr><th>Suggested idempotency key</th><td><code>tenant_id + completed_task_id + recurrence + next_due_date.</code></td></tr>
+    </tbody>
+  </table>
+  <h3>Likely Field Mapping / Logic</h3>
+  <ul>
+        <li>Daily: next due date is current due date plus 1 day.</li>
+        <li>Weekly: next due date is current due date plus 1 week.</li>
+        <li>Monthly: next due date is same day next month, with end-of-month handling.</li>
+        <li>Quarterly: next due date is plus 3 months.</li>
+        <li>Annual or Yearly: next due date is plus 1 year.</li>
+        <li>Biennial: next due date is plus 2 years.</li>
+        <li>One-time or None: do not generate a next task.</li>
+      </ul>
+  <h3>Implementation Details</h3>
+  <ul>
+        <li>Trigger only once when task transitions into completed state.</li>
+        <li>Copy title, description, store, category, priority, assignee, recurrence, source, and related links.</li>
+        <li>Set new task status to Open or To Do.</li>
+        <li>Do not copy proof-of-completion attachments to the next task unless requested.</li>
+        <li>Link previous and next tasks so users can view recurrence history.</li>
+        <li>Prevent duplicate next tasks if a completed task is edited again.</li>
+      </ul>
+  <h3>Validation Needed</h3>
+  <ul>
+        <li>Whether Airtable finds a Task Template row or an existing Task row before creating the next task.</li>
+        <li>Whether next due date is based on completed date or original due date.</li>
+        <li>Whether recurrence stops after a configured end date or count.</li>
+      </ul>
+</section>
+
+<section id="auto-13">
+  <h2>Task Completion Update <span class="tag risk">Low</span></h2>
+  <figure class="screenshot">
+    <a href="assets/automation-screenshots/airtable-automation-13.png"><img src="assets/automation-screenshots/airtable-automation-13.png" alt="Task Completion Update screenshot"></a>
+    <figcaption>Source screenshot: airtable-automation-13.png</figcaption>
+  </figure>
+  <table>
+    <tbody>
+      <tr><th>Observed status</th><td><code>OFF</code></td></tr>
+      <tr><th>Observed trigger</th><td>When a task record matches conditions where Status is Done.</td></tr>
+      <tr><th>Observed actions</th><td>Update record: Status. The screenshot does not show the new value or any other field update.</td></tr>
+      <tr><th>Product intent</th><td>Ambiguous. It may normalize task status, stamp completion metadata, or update a related task/status field.</td></tr>
+      <tr><th>Primary tables</th><td><code>Tasks</code></td></tr>
+      <tr><th>Backend trigger type</th><td>Record state-change rule on Task status.</td></tr>
+      <tr><th>Suggested idempotency key</th><td><code>tenant_id + task_id + completion_status_transition.</code></td></tr>
+    </tbody>
+  </table>
+  <h3>Likely Field Mapping / Logic</h3>
+  <ul>
+        <li>If task is marked Done, set Completed At to current date/time if empty.</li>
+        <li>If Airtable uses both Done and Completed, normalize to one canonical completed status.</li>
+        <li>If a task has related tasks, confirm whether completing one task should update a parent or linked task.</li>
+      </ul>
+  <h3>Implementation Details</h3>
+  <ul>
+        <li>Do not implement a rule that simply says when Status is Done, update Status without confirming the intended new value.</li>
+        <li>Use a transition guard so the rule only fires when status changes from non-complete to complete.</li>
+        <li>Write completion actor, completed timestamp, and source of update in audit logs.</li>
+      </ul>
+  <h3>Validation Needed</h3>
+  <ul>
+        <li>Exact update-record field mapping.</li>
+        <li>Whether the action sets Completed At, changes Done to Completed, or updates another linked record.</li>
+        <li>Whether this automation overlaps with Recurring Task Generator.</li>
+      </ul>
+</section>
+
+<section id="auto-14">
+  <h2>Daily Task Due Email Notification <span class="tag warn">Medium</span></h2>
+  <figure class="screenshot">
+    <a href="assets/automation-screenshots/airtable-automation-14.png"><img src="assets/automation-screenshots/airtable-automation-14.png" alt="Daily Task Due Email Notification screenshot"></a>
+    <figcaption>Source screenshot: airtable-automation-14.png</figcaption>
+  </figure>
+  <table>
+    <tbody>
+      <tr><th>Observed status</th><td><code>OFF</code></td></tr>
+      <tr><th>Observed trigger</th><td>Every day at 2:30 PM IST.</td></tr>
+      <tr><th>Observed actions</th><td>Find tasks where due date is today and status filters apply, repeat over each task, find assignee records, then send an email.</td></tr>
+      <tr><th>Product intent</th><td>Remind assigned users about tasks due today.</td></tr>
+      <tr><th>Primary tables</th><td><code>Tasks</code>, <code>People</code>, <code>Pharmacies</code></td></tr>
+      <tr><th>Backend trigger type</th><td>Daily scheduled tenant job.</td></tr>
+      <tr><th>Suggested idempotency key</th><td><code>tenant_id + task_id + due_date + recipient_user_id.</code></td></tr>
+    </tbody>
+  </table>
+  <h3>Likely Field Mapping / Logic</h3>
+  <ul>
+        <li>Find tasks where Due Date equals today in tenant timezone.</li>
+        <li>Exclude completed/cancelled tasks.</li>
+        <li>Send to assignees. If no assignee exists, route to store manager or operations queue.</li>
+        <li>Email context: title, store, category, priority, due date, app link.</li>
+      </ul>
+  <h3>Implementation Details</h3>
+  <ul>
+        <li>Do not send both due-today and overdue emails for the same task on the same day.</li>
+        <li>Consider batching multiple due-today tasks for the same recipient into one email.</li>
+        <li>Use configurable send time per tenant.</li>
+        <li>Write delivery attempts and suppression decisions to notification history.</li>
+      </ul>
+  <h3>Validation Needed</h3>
+  <ul>
+        <li>Exact status filter in Airtable.</li>
+        <li>Whether notification should happen at 2:30 PM or earlier in the user&#39;s workday.</li>
+        <li>Whether multiple tasks should be sent as one digest or one email per task.</li>
+      </ul>
+</section>
+
+
+<section>
+  <h2>Suggested Minimal Database Support</h2>
+  <table>
+    <tbody>
+      <tr><th>automation_rules</th><td>Tenant-scoped rule configuration: key, name, trigger type, schedule, timezone, enabled flag, dry-run flag, and rule-specific JSON config.</td></tr>
+      <tr><th>automation_runs</th><td>One row per execution with start/end timestamps, status, matched count, created count, updated count, notification count, skipped count, and error summary.</td></tr>
+      <tr><th>automation_run_items</th><td>Optional detail rows per source record processed. Useful when a digest or scheduled job handles many records.</td></tr>
+      <tr><th>notification_templates</th><td>Tenant-scoped email templates for owner digest, KPI alert, follow-up reminder, due-soon reminder, overdue reminder, and due-today reminder.</td></tr>
+      <tr><th>notification_deliveries</th><td>Delivery log with recipient, subject, channel, source automation, source record, delivery status, provider message id, and sent timestamp.</td></tr>
+      <tr><th>role_notification_settings</th><td>Defines who receives each notification class by tenant, pharmacy, role, and notification type.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>Phase 1 Replication Priority</h2>
+  <ol>
+        <li>Build task creation/update foundation first: Tasks, Task Templates, assignments, due dates, status transitions, and recurrence.</li>
+        <li>Implement compliance-to-task creation because it is simple and high value.</li>
+        <li>Implement due-today and overdue task reminders because they validate scheduler, recipient resolution, and notification logs.</li>
+        <li>Implement scheduled task generation from templates after duplicate prevention is in place.</li>
+        <li>Implement KPI scorecard sync after Financial Periods and Rx Metrics import paths are defined.</li>
+        <li>Implement doctor-office follow-up and lapse-risk alerts after the doctor office module is modeled.</li>
+        <li>Implement owner digest last because it aggregates many other modules and depends on their data quality.</li>
+      </ol>
+</section>
+
+<section>
+  <h2>Open Client Questions</h2>
+  <ol>
+        <li>Which currently OFF Airtable automations are actually used by the business today?</li>
+        <li>Can the client export or screen-share the detailed step configuration for each automation, including filters, field mappings, email bodies, and recipients?</li>
+        <li>What timezone should production schedules use for each pharmacy group?</li>
+        <li>Should reminders be one email per item or one batched digest per user?</li>
+        <li>Which roles should receive owner/operator alerts, and should recipients vary by store?</li>
+        <li>Should automations create tasks, send emails, or both for compliance and expiration workflows?</li>
+        <li>What are the exact KPI formulas and target thresholds?</li>
+        <li>Should task statuses be normalized? Airtable currently shows both Done and Completed.</li>
+        <li>Should recurring tasks be based on original due date or actual completion date?</li>
+        <li>Do any Airtable automations include scripts or integrations that are not visible in the screenshots?</li>
+      </ol>
+</section>
+
+  </main>
+</body>
+</html>

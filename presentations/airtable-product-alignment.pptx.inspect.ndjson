@@ -1,0 +1,284 @@
+{"kind":"deck","id":"pr/fxd34c","name":"Deck"}
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/y90nupkv","slide":1,"title":"AnalyticalRx","textShapes":7}
+{"kind":"textbox","id":"sh/sryl4zqx","slide":1,"name":"Rectangle 6","text":"AnalyticalRx","textPreview":"AnalyticalRx","textChars":12,"textLines":1,"bbox":[42,34,300,28]}
+{"kind":"textbox","id":"sh/547294r6","slide":1,"name":"Rectangle 1","text":"Airtable intent is becoming the product blueprint","textPreview":"Airtable intent is becoming the product blueprint","textChars":49,"textLines":1,"bbox":[42,132,790,230]}
+{"kind":"textbox","id":"sh/k3yl0zql","slide":1,"name":"Rectangle 2","text":"Mapping the current Airtable setup to AnalyticalRx product components, and showing where the custom platform adds stronger data, workflow, and analytics capabilities.","textPreview":"Mapping the current Airtable setup to AnalyticalRx product components, and showing where the custom platform adds stronger data, workflow...","textChars":166,"textLines":1,"bbox":[42,394,720,100]}
+{"kind":"shape","id":"sh/7qp4be9c","slide":1,"name":"Rectangle 3","bbox":[860,86,338,500]}
+{"kind":"textbox","id":"sh/65g3298r","slide":1,"name":"Rectangle 4","text":"Airtable reference","textPreview":"Airtable reference","textChars":18,"textLines":1,"bbox":[900,142,260,36]}
+{"kind":"textbox","id":"sh/ts7md4r2","slide":1,"name":"Rectangle 5","text":"Tables\nInterfaces\nAutomations\nDashboards","textPreview":"Tables | Interfaces | Automations | Dashboards","textChars":40,"textLines":4,"bbox":[900,210,260,220]}
+{"kind":"shape","id":"sh/ipovexwn","slide":1,"name":"Straight Arrow Connector 15","bbox":[900,462,238,0]}
+{"kind":"textbox","id":"sh/fu94fe98","slide":1,"name":"Rectangle 7","text":"AnalyticalRx product direction","textPreview":"AnalyticalRx product direction","textChars":30,"textLines":1,"bbox":[900,486,260,56]}
+{"kind":"textbox","id":"sh/utg3698n","slide":1,"name":"Rectangle 8","text":"July 2026","textPreview":"July 2026","textChars":9,"textLines":1,"bbox":[42,636,300,28]}
+{"kind":"notes","id":"nt/y90nupkv","slide":1,"text":""}
+{"kind":"slide","id":"sl/hwbqtkby","slide":2,"title":"AIRTABLE READOUT","textShapes":11}
+{"kind":"textbox","id":"sh/ozy1ofad","slide":2,"name":"Rectangle 2","text":"AIRTABLE READOUT","textPreview":"AIRTABLE READOUT","textChars":16,"textLines":1,"bbox":[42,30,740,28]}
+{"kind":"textbox","id":"sh/9072xkry","slide":2,"name":"Rectangle 1","text":"Airtable shows product intent, not a database to copy","textPreview":"Airtable shows product intent, not a database to copy","textChars":53,"textLines":1,"bbox":[42,62,1120,82]}
+{"kind":"shape","id":"sh/cnupgny5","slide":2,"name":"Straight Arrow Connector 17","bbox":[42,150,1196,0]}
+{"kind":"textbox","id":"sh/b29kza94","slide":2,"name":"Rectangle 3","text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1184,664,54,22]}
+{"kind":"textbox","id":"sh/a10jqpsj","slide":2,"name":"Rectangle 4","text":"The current Airtable setup is useful because it reveals workflows, roles, and business questions. It should guide product design, but the custom platform should use a stronger model for security, integrations, and reporting.","textPreview":"The current Airtable setup is useful because it reveals workflows, roles, and business questions. It should guide product design, but the...","textChars":224,"textLines":1,"bbox":[42,174,780,86]}
+{"kind":"shape","id":"sh/x4r21kru","slide":2,"name":"Rectangle 5","bbox":[42,312,360,210]}
+{"kind":"textbox","id":"sh/w3i1sfa9","slide":2,"name":"Rectangle 6","text":"19","textPreview":"19","textChars":2,"textLines":1,"bbox":[64,340,316,72]}
+{"kind":"textbox","id":"sh/r65knqtk","slide":2,"name":"Rectangle 7","text":"Airtable tables covering stores, staff, finance, tasks, compliance, SOPs, documents, vendors, and doctor outreach.","textPreview":"Airtable tables covering stores, staff, finance, tasks, compliance, SOPs, documents, vendors, and doctor outreach.","textChars":114,"textLines":1,"bbox":[64,418,316,90]}
+{"kind":"shape","id":"sh/q5wjelsz","slide":2,"name":"Rectangle 8","bbox":[460,312,360,210]}
+{"kind":"textbox","id":"sh/ove9o7yd","slide":2,"name":"Rectangle 9","text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[482,340,316,72]}
+{"kind":"textbox","id":"sh/9wnqhczy","slide":2,"name":"Rectangle 10","text":"Dashboard pages across owner, bookkeeper, technician, daily sales, and KPI views.","textPreview":"Dashboard pages across owner, bookkeeper, technician, daily sales, and KPI views.","textChars":81,"textLines":1,"bbox":[482,418,316,90]}
+{"kind":"shape","id":"sh/mtwrmxg7","slide":2,"name":"Rectangle 11","bbox":[878,312,360,210]}
+{"kind":"textbox","id":"sh/nu58f2hs","slide":2,"name":"Rectangle 12","text":"14","textPreview":"14","textChars":2,"textLines":1,"bbox":[900,340,316,72]}
+{"kind":"textbox","id":"sh/wjy9sry9","slide":2,"name":"Rectangle 13","text":"Observed automations. They appear OFF, so we treat them as workflow intent to rebuild carefully.","textPreview":"Observed automations. They appear OFF, so we treat them as workflow intent to rebuild carefully.","textChars":96,"textLines":1,"bbox":[900,418,316,90]}
+{"kind":"textbox","id":"sh/xk7qlczu","slide":2,"name":"Rectangle 14","text":"Source: Airtable metadata and screenshots. No record values were used.","textPreview":"Source: Airtable metadata and screenshots. No record values were used.","textChars":70,"textLines":1,"bbox":[42,606,790,26]}
+{"kind":"notes","id":"nt/hwbqtkby","slide":2,"text":""}
+{"kind":"slide","id":"sl/ofy9wn61","slide":3,"title":"PRODUCT MAPPING","textShapes":16}
+{"kind":"textbox","id":"sh/d0jax03i","slide":3,"name":"Rectangle 2","text":"PRODUCT MAPPING","textPreview":"PRODUCT MAPPING","textChars":15,"textLines":1,"bbox":[42,30,740,28]}
+{"kind":"textbox","id":"sh/cza94vmx","slide":3,"name":"Rectangle 1","text":"The Airtable setup maps cleanly into six product areas","textPreview":"The Airtable setup maps cleanly into six product areas","textChars":54,"textLines":1,"bbox":[42,62,1120,82]}
+{"kind":"shape","id":"sh/sfix03y9","slide":3,"name":"Straight Arrow Connector 25","bbox":[42,150,1196,0]}
+{"kind":"textbox","id":"sh/298ryl4v","slide":3,"name":"Rectangle 3","text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1184,664,54,22]}
+{"kind":"shape","id":"sh/3ah8rqlg","slide":3,"name":"Rectangle 4","bbox":[42,190,362,144]}
+{"kind":"textbox","id":"sh/obq90bml","slide":3,"name":"Rectangle 5","text":"Store operations","textPreview":"Store operations","textChars":16,"textLines":1,"bbox":[64,210,318,34]}
+{"kind":"textbox","id":"sh/pcjqtg36","slide":3,"name":"Rectangle 6","text":"Pharmacies, People, Tasks, Onboarding Steps","textPreview":"Pharmacies, People, Tasks, Onboarding Steps","textChars":43,"textLines":1,"bbox":[64,254,318,62]}
+{"kind":"shape","id":"sh/m5cra54z","slide":3,"name":"Rectangle 7","bbox":[452,190,362,144]}
+{"kind":"textbox","id":"sh/n6ls3alk","slide":3,"name":"Rectangle 8","text":"Compliance control","textPreview":"Compliance control","textChars":18,"textLines":1,"bbox":[474,210,318,34]}
+{"kind":"textbox","id":"sh/n2l4fq98","slide":3,"name":"Rectangle 9","text":"Compliance Items, Logs, Employee Licenses, SOPs, Documents","textPreview":"Compliance Items, Logs, Employee Licenses, SOPs, Documents","textChars":58,"textLines":1,"bbox":[474,254,318,62]}
+{"kind":"shape","id":"sh/m1c3mlsn","slide":3,"name":"Rectangle 10","bbox":[862,190,362,144]}
+{"kind":"textbox","id":"sh/943mhgre","slide":3,"name":"Rectangle 11","text":"Financial visibility","textPreview":"Financial visibility","textChars":20,"textLines":1,"bbox":[884,210,318,34]}
+{"kind":"textbox","id":"sh/83ulovat","slide":3,"name":"Rectangle 12","text":"Financial Periods, AR Aging, KPI Scorecard, Daily Sales","textPreview":"Financial Periods, AR Aging, KPI Scorecard, Daily Sales","textChars":55,"textLines":1,"bbox":[884,254,318,62]}
+{"kind":"shape","id":"sh/v6l4jq94","slide":3,"name":"Rectangle 13","bbox":[42,380,362,144]}
+{"kind":"textbox","id":"sh/a5c3ql8z","slide":3,"name":"Rectangle 14","text":"Rx performance","textPreview":"Rx performance","textChars":14,"textLines":1,"bbox":[64,400,318,34]}
+{"kind":"textbox","id":"sh/x8nml0ra","slide":3,"name":"Rectangle 15","text":"Rx Metrics, Daily Sales, payer and prescription metrics from PrimeRx","textPreview":"Rx Metrics, Daily Sales, payer and prescription metrics from PrimeRx","textChars":68,"textLines":1,"bbox":[64,444,318,62]}
+{"kind":"shape","id":"sh/w7ulsvqp","slide":3,"name":"Rectangle 16","bbox":[452,380,362,144]}
+{"kind":"textbox","id":"sh/ja54na9g","slide":3,"name":"Rectangle 17","text":"Growth workflows","textPreview":"Growth workflows","textChars":16,"textLines":1,"bbox":[474,400,318,34]}
+{"kind":"textbox","id":"sh/i9w3u58v","slide":3,"name":"Rectangle 18","text":"Doctor Offices, Doctor Visits, referral and follow-up tracking","textPreview":"Doctor Offices, Doctor Visits, referral and follow-up tracking","textChars":62,"textLines":1,"bbox":[474,444,318,62]}
+{"kind":"shape","id":"sh/e10f2twf","slide":3,"name":"Rectangle 19","bbox":[862,380,362,144]}
+{"kind":"textbox","id":"sh/f29gbyx0","slide":3,"name":"Rectangle 20","text":"Vendor management","textPreview":"Vendor management","textChars":17,"textLines":1,"bbox":[884,400,318,34]}
+{"kind":"textbox","id":"sh/03ix43e5","slide":3,"name":"Rectangle 21","text":"Vendors, contracts, renewals, spend, and performance","textPreview":"Vendors, contracts, renewals, spend, and performance","textChars":52,"textLines":1,"bbox":[884,444,318,62]}
+{"kind":"textbox","id":"sh/14ryd8fq","slide":3,"name":"Rectangle 22","text":"This gives us a practical product map: keep the business modules, rebuild the implementation around tenant-aware services and reliable source data.","textPreview":"This gives us a practical product map: keep the business modules, rebuild the implementation around tenant-aware services and reliable so...","textChars":147,"textLines":1,"bbox":[42,592,1120,44]}
+{"kind":"notes","id":"nt/ofy9wn61","slide":3,"text":""}
+{"kind":"slide","id":"sl/jyx0ra1s","slide":4,"title":"COMPONENT MAPPING","textShapes":24}
+{"kind":"textbox","id":"sh/0ba143al","slide":4,"name":"Rectangle 2","text":"COMPONENT MAPPING","textPreview":"COMPONENT MAPPING","textChars":17,"textLines":1,"bbox":[42,30,740,28]}
+{"kind":"textbox","id":"sh/1cj2d8b6","slide":4,"name":"Rectangle 1","text":"Airtable modules translate into AnalyticalRx components","textPreview":"Airtable modules translate into AnalyticalRx components","textChars":55,"textLines":1,"bbox":[42,62,1120,82]}
+{"kind":"shape","id":"sh/idcb2lob","slide":4,"name":"Straight Arrow Connector 48","bbox":[42,150,1196,0]}
+{"kind":"textbox","id":"sh/rm1k7yt4","slide":4,"name":"Rectangle 3","text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1184,664,54,22]}
+{"kind":"shape","id":"sh/ql8jytsj","slide":4,"name":"Rectangle 4","bbox":[42,176,1120,55]}
+{"kind":"textbox","id":"sh/doj29oba","slide":4,"name":"Rectangle 5","text":"Airtable area","textPreview":"Airtable area","textChars":13,"textLines":1,"bbox":[52,185,250,43]}
+{"kind":"textbox","id":"sh/sna103ap","slide":4,"name":"Rectangle 6","text":"Product component","textPreview":"Product component","textChars":17,"textLines":1,"bbox":[342,188.25,310,43]}
+{"kind":"shape","id":"sh/gna9gr25","slide":4,"name":"Straight Arrow Connector 53","bbox":[312,176,55,0]}
+{"kind":"textbox","id":"sh/ih8ju9sn","slide":4,"name":"Rectangle 8","text":"How we improve it","textPreview":"How we improve it","textChars":17,"textLines":1,"bbox":[672,187.38,500,43]}
+{"kind":"shape","id":"sh/ulsrehkz","slide":4,"name":"Straight Arrow Connector 55","bbox":[642,176,55,0]}
+{"kind":"shape","id":"sh/5cva1cfq","slide":4,"name":"Rectangle 10","bbox":[42,231,1120,55]}
+{"kind":"textbox","id":"sh/i94r6xgz","slide":4,"name":"Rectangle 11","text":"Pharmacies + People","textPreview":"Pharmacies + People","textChars":19,"textLines":1,"bbox":[52,239,250,45]}
+{"kind":"textbox","id":"sh/jadsz2xk","slide":4,"name":"Rectangle 12","text":"Tenant, store, and user admin","textPreview":"Tenant, store, and user admin","textChars":29,"textLines":1,"bbox":[342,242.58,310,45]}
+{"kind":"shape","id":"sh/do761ova","slide":4,"name":"Straight Arrow Connector 59","bbox":[312,231,55,0]}
+{"kind":"textbox","id":"sh/x8vaxsfe","slide":4,"name":"Rectangle 14","text":"Role-based access, store assignments, audit trail, stronger data ownership.","textPreview":"Role-based access, store assignments, audit trail, stronger data ownership.","textChars":75,"textLines":1,"bbox":[687,242.23,500,45]}
+{"kind":"shape","id":"sh/bmpozed4","slide":4,"name":"Straight Arrow Connector 61","bbox":[642,231,55,0]}
+{"kind":"shape","id":"sh/v6tsv2xo","slide":4,"name":"Rectangle 16","bbox":[42,286,1120,55]}
+{"kind":"textbox","id":"sh/g36tgryd","slide":4,"name":"Rectangle 17","text":"Daily Sales + Rx Metrics","textPreview":"Daily Sales + Rx Metrics","textChars":24,"textLines":1,"bbox":[52,294,250,45]}
+{"kind":"textbox","id":"sh/h4fa9wfy","slide":4,"name":"Rectangle 18","text":"Operations and Rx dashboard","textPreview":"Operations and Rx dashboard","textChars":27,"textLines":1,"bbox":[340.75,295,310,45]}
+{"kind":"shape","id":"sh/zq9o3ydg","slide":4,"name":"Straight Arrow Connector 65","bbox":[312,286,55,0]}
+{"kind":"textbox","id":"sh/oz29krqh","slide":4,"name":"Rectangle 20","text":"PrimeRx/API/SFTP-backed metrics instead of manual dashboard inputs.","textPreview":"PrimeRx/API/SFTP-backed metrics instead of manual dashboard inputs.","textChars":67,"textLines":1,"bbox":[679.5,296.5,500,45]}
+{"kind":"shape","id":"sh/9grq98vi","slide":4,"name":"Straight Arrow Connector 67","bbox":[642,286,55,0]}
+{"kind":"shape","id":"sh/2xkrih8b","slide":4,"name":"Rectangle 22","bbox":[42,341,1120,55]}
+{"kind":"textbox","id":"sh/1wbapc7q","slide":4,"name":"Rectangle 23","text":"Financial + KPI tables","textPreview":"Financial + KPI tables","textChars":22,"textLines":1,"bbox":[52,349,250,45]}
+{"kind":"textbox","id":"sh/gv29g7q5","slide":4,"name":"Rectangle 24","text":"Finance and KPI workspace","textPreview":"Finance and KPI workspace","textChars":25,"textLines":1,"bbox":[339.5,351,310,45]}
+{"kind":"shape","id":"sh/8badgbq9","slide":4,"name":"Straight Arrow Connector 71","bbox":[312,341,55,0]}
+{"kind":"textbox","id":"sh/et0reh8f","slide":4,"name":"Rectangle 26","text":"Standard formulas, variance logic, period close status, drilldowns.","textPreview":"Standard formulas, variance logic, period close status, drilldowns.","textChars":67,"textLines":1,"bbox":[679.5,350.22,500,45]}
+{"kind":"shape","id":"sh/udcvil8z","slide":4,"name":"Straight Arrow Connector 73","bbox":[642,341,55,0]}
+{"kind":"shape","id":"sh/sri9s7q9","slide":4,"name":"Rectangle 28","bbox":[42,396,1120,55]}
+{"kind":"textbox","id":"sh/ilwf69kv","slide":4,"name":"Rectangle 29","text":"Tasks + Templates","textPreview":"Tasks + Templates","textChars":17,"textLines":1,"bbox":[52,404,250,45]}
+{"kind":"textbox","id":"sh/jm5gze1g","slide":4,"name":"Rectangle 30","text":"Work management","textPreview":"Work management","textChars":15,"textLines":1,"bbox":[342,407,310,45]}
+{"kind":"shape","id":"sh/ihcvml8b","slide":4,"name":"Straight Arrow Connector 77","bbox":[312,396,55,0]}
+{"kind":"textbox","id":"sh/5ony1oj6","slide":4,"name":"Rectangle 32","text":"Recurring task engine, due/overdue reminders, duplicate prevention.","textPreview":"Recurring task engine, due/overdue reminders, duplicate prevention.","textChars":67,"textLines":1,"bbox":[679.5,405,500,45]}
+{"kind":"shape","id":"sh/na18b2tc","slide":4,"name":"Straight Arrow Connector 79","bbox":[642,396,55,0]}
+{"kind":"shape","id":"sh/vy5gbe14","slide":4,"name":"Rectangle 34","bbox":[42,451,1120,55]}
+{"kind":"textbox","id":"sh/wzex4z2p","slide":4,"name":"Rectangle 35","text":"Compliance + Docs + SOPs","textPreview":"Compliance + Docs + SOPs","textChars":24,"textLines":1,"bbox":[52,459,250,45]}
+{"kind":"textbox","id":"sh/xknyx4ja","slide":4,"name":"Rectangle 36","text":"Compliance and document control","textPreview":"Compliance and document control","textChars":31,"textLines":1,"bbox":[339.5,459,310,45]}
+{"kind":"shape","id":"sh/bylsf2t8","slide":4,"name":"Straight Arrow Connector 83","bbox":[312,451,55,0]}
+{"kind":"textbox","id":"sh/nulw7u18","slide":4,"name":"Rectangle 38","text":"Secure files, renewal reminders, acknowledgments, permission-aware links.","textPreview":"Secure files, renewal reminders, acknowledgments, permission-aware links.","textChars":73,"textLines":1,"bbox":[679.5,460,500,45]}
+{"kind":"shape","id":"sh/x03ahcbe","slide":4,"name":"Straight Arrow Connector 85","bbox":[642,451,55,0]}
+{"kind":"shape","id":"sh/elwba54j","slide":4,"name":"Rectangle 40","bbox":[42,507,1120,55]}
+{"kind":"textbox","id":"sh/18nu50nu","slide":4,"name":"Rectangle 41","text":"Doctor Offices + Visits","textPreview":"Doctor Offices + Visits","textChars":23,"textLines":1,"bbox":[52,514,250,45]}
+{"kind":"textbox","id":"sh/0netcvm9","slide":4,"name":"Rectangle 42","text":"Growth and referral CRM","textPreview":"Growth and referral CRM","textChars":23,"textLines":1,"bbox":[339.5,515.28,310,45]}
+{"kind":"shape","id":"sh/w7e9grqx","slide":4,"name":"Straight Arrow Connector 89","bbox":[339.5,478.5,0,84.5]}
+{"kind":"textbox","id":"sh/qhcb6l47","slide":4,"name":"Rectangle 44","text":"Follow-ups, lapse risk, referral pipeline, store-level accountability.","textPreview":"Follow-ups, lapse risk, referral pipeline, store-level accountability.","textChars":70,"textLines":1,"bbox":[679.5,516,500,45]}
+{"kind":"shape","id":"sh/u5wreh8r","slide":4,"name":"Straight Arrow Connector 91","bbox":[669.5,478.5,2.5,84.5]}
+{"kind":"notes","id":"nt/jyx0ra1s","slide":4,"text":""}
+{"kind":"slide","id":"sl/i107q5of","slide":5,"title":"INTERFACE ALIGNMENT","textShapes":22}
+{"kind":"textbox","id":"sh/cf2tcr61","slide":5,"name":"Rectangle 2","text":"INTERFACE ALIGNMENT","textPreview":"INTERFACE ALIGNMENT","textChars":19,"textLines":1,"bbox":[42,30,740,28]}
+{"kind":"textbox","id":"sh/dgbulwnm","slide":5,"name":"Rectangle 1","text":"Role dashboards remain, but the data foundation changes","textPreview":"Role dashboards remain, but the data foundation changes","textChars":55,"textLines":1,"bbox":[42,62,1120,82]}
+{"kind":"shape","id":"sh/3md0bu94","slide":5,"name":"Straight Arrow Connector 43","bbox":[42,150,1196,0]}
+{"kind":"textbox","id":"sh/z2tcnm5s","slide":5,"name":"Rectangle 3","text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1184,664,54,22]}
+{"kind":"shape","id":"sh/yhkbe1o7","slide":5,"name":"Rectangle 4","bbox":[42,178,1120,66]}
+{"kind":"textbox","id":"sh/l4bupwny","slide":5,"name":"Rectangle 5","text":"Airtable dashboard","textPreview":"Airtable dashboard","textChars":18,"textLines":1,"bbox":[52,187,225,54]}
+{"kind":"textbox","id":"sh/032tgr6d","slide":5,"name":"Rectangle 6","text":"AnalyticalRx surface","textPreview":"AnalyticalRx surface","textChars":20,"textLines":1,"bbox":[334.25,187,280,54]}
+{"kind":"shape","id":"sh/qp4jm98v","slide":5,"name":"Straight Arrow Connector 48","bbox":[287,178,66,0]}
+{"kind":"textbox","id":"sh/m5kbi1oj","slide":5,"name":"Rectangle 8","text":"Main content to preserve","textPreview":"Main content to preserve","textChars":24,"textLines":1,"bbox":[636.75,187,555,54]}
+{"kind":"shape","id":"sh/9gfy5o7e","slide":5,"name":"Straight Arrow Connector 50","bbox":[587,178,66,0]}
+{"kind":"shape","id":"sh/x4vedgvm","slide":5,"name":"Rectangle 10","bbox":[42,244,1120,66]}
+{"kind":"textbox","id":"sh/ahkvi1cb","slide":5,"name":"Rectangle 11","text":"Owner Dashboard","textPreview":"Owner Dashboard","textChars":15,"textLines":1,"bbox":[52,252,225,56]}
+{"kind":"textbox","id":"sh/v2twb6dw","slide":5,"name":"Rectangle 12","text":"Owner command center","textPreview":"Owner command center","textChars":20,"textLines":1,"bbox":[328.5,255,280,56]}
+{"kind":"shape","id":"sh/lcfy147i","slide":5,"name":"Straight Arrow Connector 54","bbox":[287,244,66,0]}
+{"kind":"textbox","id":"sh/58vehgvy","slide":5,"name":"Rectangle 14","text":"Revenue, Rx volume, KPI status, tasks, financial risk, doctor relationships.","textPreview":"Revenue, Rx volume, KPI status, tasks, financial risk, doctor relationships.","textChars":76,"textLines":1,"bbox":[620,256.6,555,56]}
+{"kind":"shape","id":"sh/zqxgzupc","slide":5,"name":"Straight Arrow Connector 56","bbox":[587,244,66,0]}
+{"kind":"shape","id":"sh/j6dwfqds","slide":5,"name":"Rectangle 16","bbox":[42,310,1120,66]}
+{"kind":"textbox","id":"sh/sb6xsvu9","slide":5,"name":"Rectangle 17","text":"Bookkeeper Financials","textPreview":"Bookkeeper Financials","textChars":21,"textLines":1,"bbox":[52,318,225,56]}
+{"kind":"textbox","id":"sh/tcfel0vu","slide":5,"name":"Rectangle 18","text":"Finance dashboard","textPreview":"Finance dashboard","textChars":17,"textLines":1,"bbox":[328.5,321,280,56]}
+{"kind":"shape","id":"sh/s7u5crud","slide":5,"name":"Straight Arrow Connector 60","bbox":[287,310,66,0]}
+{"kind":"textbox","id":"sh/gfi5grih","slide":5,"name":"Rectangle 20","text":"Revenue, gross profit, EBITDA, margin, period status, AR and KPI trends.","textPreview":"Revenue, gross profit, EBITDA, margin, period status, AR and KPI trends.","textChars":72,"textLines":1,"bbox":[625,320.36,555,56]}
+{"kind":"shape","id":"sh/65cnahc7","slide":5,"name":"Straight Arrow Connector 62","bbox":[587,310,66,0]}
+{"kind":"shape","id":"sh/ud0ne10b","slide":5,"name":"Rectangle 22","bbox":[42,376,1120,66]}
+{"kind":"textbox","id":"sh/pkr6tgjy","slide":5,"name":"Rectangle 23","text":"Technician Dashboard","textPreview":"Technician Dashboard","textChars":20,"textLines":1,"bbox":[52,384,225,56]}
+{"kind":"textbox","id":"sh/4ji5kbid","slide":5,"name":"Rectangle 24","text":"Store workbench","textPreview":"Store workbench","textChars":15,"textLines":1,"bbox":[322,387,280,56]}
+{"kind":"shape","id":"sh/i1cn6hcb","slide":5,"name":"Straight Arrow Connector 66","bbox":[287,376,66,0]}
+{"kind":"textbox","id":"sh/2h0ni107","slide":5,"name":"Rectangle 26","text":"Assigned tasks, high-priority work, overdue work, compliance logs, proof of completion.","textPreview":"Assigned tasks, high-priority work, overdue work, compliance logs, proof of completion.","textChars":87,"textLines":1,"bbox":[620,386.35,555,56]}
+{"kind":"shape","id":"sh/ozepkbul","slide":5,"name":"Straight Arrow Connector 68","bbox":[587,376,66,0]}
+{"kind":"shape","id":"sh/kny587i9","slide":5,"name":"Rectangle 28","bbox":[42,442,1120,66]}
+{"kind":"textbox","id":"sh/atcjidg7","slide":5,"name":"Rectangle 29","text":"Daily Sales Dashboard","textPreview":"Daily Sales Dashboard","textChars":21,"textLines":1,"bbox":[52,450,225,56]}
+{"kind":"textbox","id":"sh/vu5kbihc","slide":5,"name":"Rectangle 30","text":"Daily performance view","textPreview":"Daily performance view","textChars":22,"textLines":1,"bbox":[322,452.02,280,56]}
+{"kind":"shape","id":"sh/98z298bu","slide":5,"name":"Straight Arrow Connector 72","bbox":[287,442,66,0]}
+{"kind":"textbox","id":"sh/xwn2dszi","slide":5,"name":"Rectangle 32","text":"Sales, prescription volume, vaccines, OTC/front-end sales, trends and leaderboard.","textPreview":"Sales, prescription volume, vaccines, OTC/front-end sales, trends and leaderboard.","textChars":82,"textLines":1,"bbox":[620,452.35,555,56]}
+{"kind":"shape","id":"sh/zihk3ytc","slide":5,"name":"Straight Arrow Connector 74","bbox":[587,442,66,0]}
+{"kind":"shape","id":"sh/ji5kf2ho","slide":5,"name":"Rectangle 34","bbox":[42,508,1120,66]}
+{"kind":"textbox","id":"sh/kjelony9","slide":5,"name":"Rectangle 35","text":"KPI Dashboard","textPreview":"KPI Dashboard","textChars":13,"textLines":1,"bbox":[52,516,225,56]}
+{"kind":"textbox","id":"sh/5kn2hszu","slide":5,"name":"Rectangle 36","text":"KPI scorecard","textPreview":"KPI scorecard","textChars":13,"textLines":1,"bbox":[322,517.16,280,56]}
+{"kind":"shape","id":"sh/je14f2tw","slide":5,"name":"Straight Arrow Connector 78","bbox":[287,508,66,0]}
+{"kind":"textbox","id":"sh/zmlk3yhk","slide":5,"name":"Rectangle 38","text":"Target vs actual, variance, status, store comparison, and drilldown to source facts.","textPreview":"Target vs actual, variance, status, store comparison, and drilldown to source facts.","textChars":84,"textLines":1,"bbox":[628.5,517.16,555,56]}
+{"kind":"shape","id":"sh/qto36xkf","slide":5,"name":"Straight Arrow Connector 80","bbox":[620,475,0,99]}
+{"kind":"textbox","id":"sh/ehkzepsn","slide":5,"name":"Rectangle 40","text":"Additional product rule: dashboards should be filtered by tenant, store, and role from day one.","textPreview":"Additional product rule: dashboards should be filtered by tenant, store, and role from day one.","textChars":95,"textLines":1,"bbox":[42,622,960,26]}
+{"kind":"notes","id":"nt/i107q5of","slide":5,"text":""}
+{"kind":"slide","id":"sl/x8f69ofe","slide":6,"title":"WORKFLOW ALIGNMENT","textShapes":21}
+{"kind":"textbox","id":"sh/zi98nu94","slide":6,"name":"Rectangle 2","text":"WORKFLOW ALIGNMENT","textPreview":"WORKFLOW ALIGNMENT","textChars":18,"textLines":1,"bbox":[42,30,740,28]}
+{"kind":"textbox","id":"sh/yhg7epsj","slide":6,"name":"Rectangle 1","text":"Airtable automations become managed workflow services","textPreview":"Airtable automations become managed workflow services","textChars":53,"textLines":1,"bbox":[42,62,1120,82]}
+{"kind":"shape","id":"sh/fq9cfqxc","slide":6,"name":"Straight Arrow Connector 44","bbox":[42,150,1196,0]}
+{"kind":"textbox","id":"sh/87ipkzal","slide":6,"name":"Rectangle 3","text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1184,664,54,22]}
+{"kind":"shape","id":"sh/98rqt4r6","slide":6,"name":"Rectangle 4","bbox":[42,222,194,146]}
+{"kind":"textbox","id":"sh/ml07i9sv","slide":6,"name":"Rectangle 5","text":"Trigger","textPreview":"Trigger","textChars":7,"textLines":1,"bbox":[64,242,150,34]}
+{"kind":"textbox","id":"sh/7m98ru9g","slide":6,"name":"Rectangle 6","text":"New record\nStatus change\nDaily schedule\nWeekly schedule","textPreview":"New record | Status change | Daily schedule | Weekly schedule","textChars":55,"textLines":4,"bbox":[64,286,150,64]}
+{"kind":"shape","id":"sh/oryp8fah","slide":6,"name":"Rectangle 7","bbox":[376,222,194,146]}
+{"kind":"textbox","id":"sh/pc76hkr2","slide":6,"name":"Rectangle 8","text":"Rule engine","textPreview":"Rule engine","textChars":11,"textLines":1,"bbox":[398,242,150,34]}
+{"kind":"textbox","id":"sh/h4bupgn6","slide":6,"name":"Rectangle 9","text":"Tenant-scoped rules\nDuplicate prevention\nDry-run mode\nEnabled/disabled","textPreview":"Tenant-scoped rules | Duplicate prevention | Dry-run mode | Enabled/disabled","textChars":70,"textLines":4,"bbox":[398,286,150,64]}
+{"kind":"shape","id":"sh/w32twb6l","slide":6,"name":"Rectangle 10","bbox":[710,222,194,146]}
+{"kind":"textbox","id":"sh/v2tcn650","slide":6,"name":"Rectangle 11","text":"Action","textPreview":"Action","textChars":6,"textLines":1,"bbox":[732,242,150,34]}
+{"kind":"textbox","id":"sh/u1kbu1ov","slide":6,"name":"Rectangle 12","text":"Create task\nSend reminder\nUpdate KPI\nBuild digest","textPreview":"Create task | Send reminder | Update KPI | Build digest","textChars":49,"textLines":4,"bbox":[732,286,150,64]}
+{"kind":"shape","id":"sh/5svutgni","slide":6,"name":"Rectangle 13","bbox":[1044,222,194,146]}
+{"kind":"textbox","id":"sh/47mt0b6x","slide":6,"name":"Rectangle 14","text":"Audit","textPreview":"Audit","textChars":5,"textLines":1,"bbox":[1066,242,150,34]}
+{"kind":"textbox","id":"sh/j6dcr65c","slide":6,"name":"Rectangle 15","text":"Run log\nRecipients\nSkipped records\nErrors","textPreview":"Run log | Recipients | Skipped records | Errors","textChars":41,"textLines":4,"bbox":[1066,286,150,64]}
+{"kind":"shape","id":"sh/c7md0zi5","slide":6,"name":"Straight Arrow Connector 58","bbox":[236,295,140,0]}
+{"kind":"shape","id":"sh/twfux0ne","slide":6,"name":"Rectangle 17","bbox":[244,265,240,24]}
+{"kind":"shape","id":"sh/p4j6loby","slide":6,"name":"Straight Arrow Connector 60","bbox":[570,295,140,0]}
+{"kind":"shape","id":"sh/cbe5g3ih","slide":6,"name":"Rectangle 19","bbox":[578,265,240,24]}
+{"kind":"shape","id":"sh/n21ojets","slide":6,"name":"Straight Arrow Connector 62","bbox":[904,295,140,0]}
+{"kind":"shape","id":"sh/qpwnet0b","slide":6,"name":"Rectangle 21","bbox":[912,265,240,24]}
+{"kind":"shape","id":"sh/bq547yhw","slide":6,"name":"Rectangle 22","bbox":[42,438,1120,44]}
+{"kind":"textbox","id":"sh/0fy5k3id","slide":6,"name":"Rectangle 23","text":"Airtable intent","textPreview":"Airtable intent","textChars":15,"textLines":1,"bbox":[52,447,300,32]}
+{"kind":"textbox","id":"sh/lg76d8zy","slide":6,"name":"Rectangle 24","text":"Product equivalent","textPreview":"Product equivalent","textChars":18,"textLines":1,"bbox":[392,446,780,32]}
+{"kind":"shape","id":"sh/kvu5k3ul","slide":6,"name":"Straight Arrow Connector 67","bbox":[362,438,44,0]}
+{"kind":"shape","id":"sh/zep4byhs","slide":6,"name":"Rectangle 26","bbox":[42,482,1120,44]}
+{"kind":"textbox","id":"sh/gju58ji9","slide":6,"name":"Rectangle 27","text":"Task due/overdue emails","textPreview":"Task due/overdue emails","textChars":23,"textLines":1,"bbox":[52,490,300,34]}
+{"kind":"textbox","id":"sh/1k3mhozu","slide":6,"name":"Rectangle 28","text":"Notification service with batching, escalation, and delivery history.","textPreview":"Notification service with batching, escalation, and delivery history.","textChars":69,"textLines":1,"bbox":[372,490,780,34]}
+{"kind":"shape","id":"sh/hs7qlcve","slide":6,"name":"Straight Arrow Connector 71","bbox":[362,482,44,0]}
+{"kind":"shape","id":"sh/idk7ehkr","slide":6,"name":"Rectangle 30","bbox":[42,526,1120,44]}
+{"kind":"textbox","id":"sh/50bqpcj2","slide":6,"name":"Rectangle 31","text":"Compliance to task/calendar","textPreview":"Compliance to task/calendar","textChars":27,"textLines":1,"bbox":[52,534,300,34]}
+{"kind":"textbox","id":"sh/4f2pgr2h","slide":6,"name":"Rectangle 32","text":"Compliance rules that create linked tasks and renewal reminders.","textPreview":"Compliance rules that create linked tasks and renewal reminders.","textChars":64,"textLines":1,"bbox":[372,534,780,34]}
+{"kind":"shape","id":"sh/5w7qpwva","slide":6,"name":"Straight Arrow Connector 75","bbox":[362,526,44,0]}
+{"kind":"shape","id":"sh/u907axkf","slide":6,"name":"Rectangle 34","bbox":[42,570,1120,44]}
+{"kind":"textbox","id":"sh/hcrqlcj6","slide":6,"name":"Rectangle 35","text":"Scheduled task generation","textPreview":"Scheduled task generation","textChars":25,"textLines":1,"bbox":[52,578,300,34]}
+{"kind":"textbox","id":"sh/wbipc72l","slide":6,"name":"Rectangle 36","text":"Template and recurrence engine with idempotent task creation.","textPreview":"Template and recurrence engine with idempotent task creation.","textChars":61,"textLines":1,"bbox":[372,578,780,34]}
+{"kind":"shape","id":"sh/m9szm1kf","slide":6,"name":"Straight Arrow Connector 79","bbox":[362,570,44,0]}
+{"kind":"shape","id":"sh/m5076xkj","slide":6,"name":"Rectangle 38","bbox":[42,614,1120,44]}
+{"kind":"textbox","id":"sh/2dkbalg3","slide":6,"name":"Rectangle 39","text":"KPI alerts and owner digest","textPreview":"KPI alerts and owner digest","textChars":27,"textLines":1,"bbox":[52,622,300,34]}
+{"kind":"textbox","id":"sh/netcjqxo","slide":6,"name":"Rectangle 40","text":"Calculated KPI exceptions and role-aware digest notifications.","textPreview":"Calculated KPI exceptions and role-aware digest notifications.","textChars":62,"textLines":1,"bbox":[372,622,780,34]}
+{"kind":"shape","id":"sh/adszq10r","slide":6,"name":"Straight Arrow Connector 83","bbox":[362,614,44,0]}
+{"kind":"notes","id":"nt/x8f69ofe","slide":6,"text":""}
+{"kind":"slide","id":"sl/gnmp4jqx","slide":7,"title":"WHAT WE ADD","textShapes":16}
+{"kind":"textbox","id":"sh/dcbud0ra","slide":7,"name":"Rectangle 2","text":"WHAT WE ADD","textPreview":"WHAT WE ADD","textChars":11,"textLines":1,"bbox":[42,30,740,28]}
+{"kind":"textbox","id":"sh/cb2tkvap","slide":7,"name":"Rectangle 1","text":"AnalyticalRx adds capabilities Airtable cannot own","textPreview":"AnalyticalRx adds capabilities Airtable cannot own","textChars":50,"textLines":1,"bbox":[42,62,1120,82]}
+{"kind":"shape","id":"sh/s3ml0v61","slide":7,"name":"Straight Arrow Connector 25","bbox":[42,150,1196,0]}
+{"kind":"textbox","id":"sh/ydkbm5sv","slide":7,"name":"Rectangle 3","text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1184,664,54,22]}
+{"kind":"shape","id":"sh/zedcfa9g","slide":7,"name":"Rectangle 4","bbox":[42,185,362,148]}
+{"kind":"textbox","id":"sh/kzmdova1","slide":7,"name":"Rectangle 5","text":"PrimeRx data pipeline","textPreview":"PrimeRx data pipeline","textChars":21,"textLines":1,"bbox":[64,205,318,34]}
+{"kind":"textbox","id":"sh/l0vuh0rm","slide":7,"name":"Rectangle 6","text":"API, webhooks, and SFTP/batch sources can feed one product model.","textPreview":"API, webhooks, and SFTP/batch sources can feed one product model.","textChars":65,"textLines":1,"bbox":[64,249,318,66]}
+{"kind":"shape","id":"sh/eh0ba1sr","slide":7,"name":"Rectangle 7","bbox":[452,185,362,148]}
+{"kind":"textbox","id":"sh/fi9c369c","slide":7,"name":"Rectangle 8","text":"Canonical event model","textPreview":"Canonical event model","textChars":21,"textLines":1,"bbox":[474,205,318,34]}
+{"kind":"textbox","id":"sh/baxkjqlk","slide":7,"name":"Rectangle 9","text":"Prescription, claim, payer, drug, and payment facts become reliable reporting inputs.","textPreview":"Prescription, claim, payer, drug, and payment facts become reliable reporting inputs.","textChars":85,"textLines":1,"bbox":[474,249,318,66]}
+{"kind":"shape","id":"sh/a9ojq5kz","slide":7,"name":"Rectangle 10","bbox":[862,185,362,148]}
+{"kind":"textbox","id":"sh/xcz2l03q","slide":7,"name":"Rectangle 11","text":"PHI-minimized boundary","textPreview":"PHI-minimized boundary","textChars":22,"textLines":1,"bbox":[884,205,318,34]}
+{"kind":"textbox","id":"sh/cbq1sv25","slide":7,"name":"Rectangle 12","text":"Raw payloads and source IDs stay restricted; dashboards query safe tables.","textPreview":"Raw payloads and source IDs stay restricted; dashboards query safe tables.","textChars":74,"textLines":1,"bbox":[884,249,318,66]}
+{"kind":"shape","id":"sh/n6x0fqlo","slide":7,"name":"Rectangle 13","bbox":[42,380,362,148]}
+{"kind":"textbox","id":"sh/25ojml43","slide":7,"name":"Rectangle 14","text":"Role and tenant security","textPreview":"Role and tenant security","textChars":24,"textLines":1,"bbox":[64,400,318,34]}
+{"kind":"textbox","id":"sh/p8fih03e","slide":7,"name":"Rectangle 15","text":"Access follows pharmacy group, store, and role rather than shared base permissions.","textPreview":"Access follows pharmacy group, store, and role rather than shared base permissions.","textChars":83,"textLines":1,"bbox":[64,444,318,66]}
+{"kind":"shape","id":"sh/o761ov2t","slide":7,"name":"Rectangle 16","bbox":[452,380,362,148]}
+{"kind":"textbox","id":"sh/f2d0b6lc","slide":7,"name":"Rectangle 17","text":"Audit and reconciliation","textPreview":"Audit and reconciliation","textChars":24,"textLines":1,"bbox":[474,400,318,34]}
+{"kind":"textbox","id":"sh/eh4jil4r","slide":7,"name":"Rectangle 18","text":"Received events, enrichment, retries, and skipped records are traceable.","textPreview":"Received events, enrichment, retries, and skipped records are traceable.","textChars":72,"textLines":1,"bbox":[474,444,318,66]}
+{"kind":"shape","id":"sh/id4ju1oz","slide":7,"name":"Rectangle 19","bbox":[862,380,362,148]}
+{"kind":"textbox","id":"sh/jedkn654","slide":7,"name":"Rectangle 20","text":"Future analytics","textPreview":"Future analytics","textChars":16,"textLines":1,"bbox":[884,400,318,34]}
+{"kind":"textbox","id":"sh/4fm1wb6p","slide":7,"name":"Rectangle 21","text":"Forecasting, payer mix, drug profitability, anomaly detection, and recommendations can build on clean data.","textPreview":"Forecasting, payer mix, drug profitability, anomaly detection, and recommendations can build on clean data.","textChars":107,"textLines":1,"bbox":[884,444,318,66]}
+{"kind":"textbox","id":"sh/50v2pgna","slide":7,"name":"Rectangle 22","text":"Airtable is the reference for what users need to manage. AnalyticalRx becomes the system that can safely automate and scale it.","textPreview":"Airtable is the reference for what users need to manage. AnalyticalRx becomes the system that can safely automate and scale it.","textChars":127,"textLines":1,"bbox":[42,606,1080,28]}
+{"kind":"notes","id":"nt/gnmp4jqx","slide":7,"text":""}
+{"kind":"slide","id":"sl/fu1gfa1s","slide":8,"title":"DELIVERY PATH","textShapes":13}
+{"kind":"textbox","id":"sh/g72x4zyd","slide":8,"name":"Rectangle 2","text":"DELIVERY PATH","textPreview":"DELIVERY PATH","textChars":13,"textLines":1,"bbox":[42,30,740,28]}
+{"kind":"textbox","id":"sh/18byd4zy","slide":8,"name":"Rectangle 1","text":"A phased plan keeps the first release focused","textPreview":"A phased plan keeps the first release focused","textChars":45,"textLines":1,"bbox":[42,62,1120,82]}
+{"kind":"shape","id":"sh/5sne5wne","slide":8,"name":"Straight Arrow Connector 23","bbox":[42,150,1196,0]}
+{"kind":"textbox","id":"sh/ri9g7uhw","slide":8,"name":"Rectangle 3","text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1184,664,54,22]}
+{"kind":"shape","id":"sh/jq5w365o","slide":8,"name":"Straight Arrow Connector 25","bbox":[90,520,1080,0]}
+{"kind":"shape","id":"sh/tkby9kzm","slide":8,"name":"Rectangle 5","bbox":[90,215,300,235]}
+{"kind":"textbox","id":"sh/sjix0zy1","slide":8,"name":"Rectangle 6","text":"Data foundation","textPreview":"Data foundation","textChars":15,"textLines":1,"bbox":[114,250,252,42]}
+{"kind":"textbox","id":"sh/je9g3ahk","slide":8,"name":"Rectangle 7","text":"PrimeRx ingestion, canonical database, safe starter dashboards, audit visibility.","textPreview":"PrimeRx ingestion, canonical database, safe starter dashboards, audit visibility.","textChars":81,"textLines":1,"bbox":[114,306,252,106]}
+{"kind":"shape","id":"sh/id0fu50z","slide":8,"name":"Oval 8","bbox":[94,512,16,16]}
+{"kind":"textbox","id":"sh/o7ydoret","slide":8,"name":"Rectangle 9","text":"Phase 1","textPreview":"Phase 1","textChars":7,"textLines":1,"bbox":[90,548,220,34]}
+{"kind":"shape","id":"sh/98rehwve","slide":8,"name":"Rectangle 10","bbox":[455,215,300,235]}
+{"kind":"textbox","id":"sh/m5gvmhwn","slide":8,"name":"Rectangle 11","text":"Operating workflows","textPreview":"Operating workflows","textChars":19,"textLines":1,"bbox":[479,250,252,42]}
+{"kind":"textbox","id":"sh/n6pwfmd8","slide":8,"name":"Rectangle 12","text":"Tasks, compliance, documents, reminders, role dashboards, workflow logs.","textPreview":"Tasks, compliance, documents, reminders, role dashboards, workflow logs.","textChars":72,"textLines":1,"bbox":[479,306,252,106]}
+{"kind":"shape","id":"sh/0jydkreh","slide":8,"name":"Oval 13","bbox":[459,512,16,16]}
+{"kind":"textbox","id":"sh/1k7edwv2","slide":8,"name":"Rectangle 14","text":"Phase 2","textPreview":"Phase 2","textChars":7,"textLines":1,"bbox":[455,548,220,34]}
+{"kind":"shape","id":"sh/ehgvihwr","slide":8,"name":"Rectangle 15","bbox":[820,215,300,235]}
+{"kind":"textbox","id":"sh/zipwbmdc","slide":8,"name":"Rectangle 16","text":"Advanced insights","textPreview":"Advanced insights","textChars":17,"textLines":1,"bbox":[844,250,252,42]}
+{"kind":"textbox","id":"sh/kfixwbe1","slide":8,"name":"Rectangle 17","text":"Forecasting, payer/drug analysis, referral intelligence, configurable automation rules.","textPreview":"Forecasting, payer/drug analysis, referral intelligence, configurable automation rules.","textChars":87,"textLines":1,"bbox":[844,306,252,106]}
+{"kind":"shape","id":"sh/lgbepgvm","slide":8,"name":"Oval 18","bbox":[824,512,16,16]}
+{"kind":"textbox","id":"sh/tw7e9gnq","slide":8,"name":"Rectangle 19","text":"Phase 3","textPreview":"Phase 3","textChars":7,"textLines":1,"bbox":[820,548,220,34]}
+{"kind":"textbox","id":"sh/svydgb65","slide":8,"name":"Rectangle 20","text":"The first commitment should be data ingestion plus starter dashboards. Airtable-style workflows should follow after the source data and roles are stable.","textPreview":"The first commitment should be data ingestion plus starter dashboards. Airtable-style workflows should follow after the source data and r...","textChars":153,"textLines":1,"bbox":[42,618,1080,40]}
+{"kind":"notes","id":"nt/fu1gfa1s","slide":8,"text":""}
+{"kind":"slide","id":"sl/udsvah03","slide":9,"title":"FUTURE REQUIREMENTS","textShapes":9}
+{"kind":"textbox","id":"sh/0b65obm9","slide":9,"name":"Rectangle 2","text":"FUTURE REQUIREMENTS","textPreview":"FUTURE REQUIREMENTS","textChars":19,"textLines":1,"bbox":[42,30,740,28]}
+{"kind":"textbox","id":"sh/1cfmhgne","slide":9,"name":"Rectangle 1","text":"Two production dependencies should start early","textPreview":"Two production dependencies should start early","textChars":46,"textLines":1,"bbox":[42,62,1120,82]}
+{"kind":"shape","id":"sh/do3id4fy","slide":9,"name":"Straight Arrow Connector 14","bbox":[42,150,1196,0]}
+{"kind":"textbox","id":"sh/nex4jq5k","slide":9,"name":"Rectangle 3","text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[1184,664,54,22]}
+{"kind":"textbox","id":"sh/mdonql4z","slide":9,"name":"Rectangle 4","text":"These are not blockers for design review, but they should be planned now so production rollout does not stall when real pharmacy data starts flowing.","textPreview":"These are not blockers for design review, but they should be planned now so production rollout does not stall when real pharmacy data sta...","textChars":149,"textLines":1,"bbox":[42,176,1030,58]}
+{"kind":"shape","id":"sh/9gzml0nq","slide":9,"name":"Rectangle 5","bbox":[42,286,560,260]}
+{"kind":"textbox","id":"sh/ofq5svm5","slide":9,"name":"Rectangle 6","text":"AWS BAA readiness before production PHI","textPreview":"AWS BAA readiness before production PHI","textChars":39,"textLines":1,"bbox":[64,306,516,34]}
+{"kind":"textbox","id":"sh/bih4na5w","slide":9,"name":"Rectangle 7","text":"- Needed before production PHI/ePHI is processed in AWS.\n- Accept/manage the BAA through AWS Artifact for the account or organization.\n- Use HIPAA-eligible AWS services with compliant security configuration.\n- AWS Artifact agreements are free; normal AWS service usage and legal/security review effort still apply.","textPreview":"- Needed before production PHI/ePHI is processed in AWS. | - Accept/manage the BAA through AWS Artifact for the account or organization. ...","textChars":314,"textLines":4,"bbox":[64,350,516,178]}
+{"kind":"shape","id":"sh/ah8nu54b","slide":9,"name":"Rectangle 8","bbox":[678,286,560,260]}
+{"kind":"textbox","id":"sh/oza1gfyh","slide":9,"name":"Rectangle 9","text":"PrimeRx API/backfill access for data completeness","textPreview":"PrimeRx API/backfill access for data completeness","textChars":49,"textLines":1,"bbox":[700,306,516,34]}
+{"kind":"textbox","id":"sh/p0ji9kf2","slide":9,"name":"Rectangle 10","text":"- Webhooks tell us what changed, but may not include all fields or history.\n- API/SFTP backfill gives starter history instead of empty day-one dashboards.\n- API enrichment fills missing details for webhook events and missed corrections.\n- Reconciliation improves trust in totals, payer/drug views, reversals, and rejections.","textPreview":"- Webhooks tell us what changed, but may not include all fields or history. | - API/SFTP backfill gives starter history instead of empty ...","textChars":324,"textLines":4,"bbox":[700,350,516,178]}
+{"kind":"textbox","id":"sh/2xsjepgb","slide":9,"name":"Rectangle 11","text":"Practical rule: webhooks tell us what changed; API/backfill tells us what we missed, what happened before integration, and what details need enrichment.","textPreview":"Practical rule: webhooks tell us what changed; API/backfill tells us what we missed, what happened before integration, and what details n...","textChars":152,"textLines":1,"bbox":[42,620,1080,34]}
+{"kind":"notes","id":"nt/udsvah03","slide":9,"text":""}
+{"kind":"slide","id":"sl/m90b6t0r","slide":10,"title":"ALIGNMENT SUMMARY","textShapes":11}
+{"kind":"textbox","id":"sh/cbu58j2h","slide":10,"name":"Rectangle 2","text":"ALIGNMENT SUMMARY","textPreview":"ALIGNMENT SUMMARY","textChars":17,"textLines":1,"bbox":[42,30,740,28]}
+{"kind":"textbox","id":"sh/xc3mho32","slide":10,"name":"Rectangle 1","text":"Airtable review confirms the planned product direction","textPreview":"Airtable review confirms the planned product direction","textChars":54,"textLines":1,"bbox":[42,62,1120,82]}
+{"kind":"shape","id":"sh/ozitcv29","slide":10,"name":"Straight Arrow Connector 17","bbox":[42,150,1196,0]}
+{"kind":"textbox","id":"sh/zelojyl8","slide":10,"name":"Rectangle 3","text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1184,664,54,22]}
+{"kind":"textbox","id":"sh/ydcnatkn","slide":10,"name":"Rectangle 4","text":"We are not using the Airtable review to choose a new direction. The review confirms that the product we planned already aligns with the client’s operating model.","textPreview":"We are not using the Airtable review to choose a new direction. The review confirms that the product we planned already aligns with the c...","textChars":161,"textLines":1,"bbox":[42,178,980,70]}
+{"kind":"shape","id":"sh/l036l83y","slide":10,"name":"Rectangle 5","bbox":[42,300,360,178]}
+{"kind":"textbox","id":"sh/kzu5c32t","slide":10,"name":"Rectangle 6","text":"Phase 1 remains starter dashboards","textPreview":"Phase 1 remains starter dashboards","textChars":34,"textLines":1,"bbox":[64,320,316,34]}
+{"kind":"textbox","id":"sh/725onyl4","slide":10,"name":"Rectangle 7","text":"Build PrimeRx ingestion, canonical event storage, audit visibility, and initial owner/store/KPI/daily performance dashboards.","textPreview":"Build PrimeRx ingestion, canonical event storage, audit visibility, and initial owner/store/KPI/daily performance dashboards.","textChars":125,"textLines":1,"bbox":[64,364,316,96]}
+{"kind":"shape","id":"sh/m1cnetkj","slide":10,"name":"Rectangle 8","bbox":[460,300,360,178]}
+{"kind":"textbox","id":"sh/s7yt4b21","slide":10,"name":"Rectangle 9","text":"Airtable validates the scope","textPreview":"Airtable validates the scope","textChars":28,"textLines":1,"bbox":[482,320,316,34]}
+{"kind":"textbox","id":"sh/d87uxg3m","slide":10,"name":"Rectangle 10","text":"The current tables and interfaces line up with planned modules: owner, finance, technician, compliance, daily sales, and growth workflows.","textPreview":"The current tables and interfaces line up with planned modules: owner, finance, technician, compliance, daily sales, and growth workflows.","textChars":138,"textLines":1,"bbox":[482,364,316,96]}
+{"kind":"shape","id":"sh/q5gb21kb","slide":10,"name":"Rectangle 11","bbox":[878,300,360,178]}
+{"kind":"textbox","id":"sh/r6pcv6lw","slide":10,"name":"Rectangle 12","text":"Phase 2 expands workflows","textPreview":"Phase 2 expands workflows","textChars":25,"textLines":1,"bbox":[900,320,316,34]}
+{"kind":"textbox","id":"sh/0bit8b2d","slide":10,"name":"Rectangle 13","text":"Tasks, compliance reminders, documents, SOP acknowledgments, doctor outreach, and recurring automations build on the Phase 1 data foundation.","textPreview":"Tasks, compliance reminders, documents, SOP acknowledgments, doctor outreach, and recurring automations build on the Phase 1 data foundat...","textChars":141,"textLines":1,"bbox":[900,364,316,96]}
+{"kind":"textbox","id":"sh/1cru1g3y","slide":10,"name":"Rectangle 14","text":"Review purpose: validate that our understanding is accurate and aligned with the planned AnalyticalRx product, not reopen the Phase 1 dashboard decision.","textPreview":"Review purpose: validate that our understanding is accurate and aligned with the planned AnalyticalRx product, not reopen the Phase 1 das...","textChars":153,"textLines":1,"bbox":[42,594,1080,42]}
+{"kind":"notes","id":"nt/m90b6t0r","slide":10,"text":""}
+{"kind":"slide","id":"sl/9x7wgq","slide":11,"title":"NEXT DELIVERABLE","textShapes":9}
+{"kind":"textbox","id":"sh/ve18z6lw","slide":11,"text":"NEXT DELIVERABLE","textPreview":"NEXT DELIVERABLE","textChars":16,"textLines":1,"bbox":[42,30,740,28]}
+{"kind":"textbox","id":"sh/wfu9sbmh","slide":11,"text":"A full PRD will follow; Phase 1 is already moving","textPreview":"A full PRD will follow; Phase 1 is already moving","textChars":49,"textLines":1,"bbox":[42,62,1120,82]}
+{"kind":"shape","id":"sh/xg3q1g3m","slide":11,"bbox":[42,150,1196,0]}
+{"kind":"textbox","id":"sh/mps7m14z","slide":11,"text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[1184,664,54,22]}
+{"kind":"textbox","id":"sh/nq18vmlk","slide":11,"text":"This deck validates our understanding from Airtable and confirms it aligns with the product already planned. The PRD will provide the deeper non-technical delivery plan.","textPreview":"This deck validates our understanding from Airtable and confirms it aligns with the product already planned. The PRD will provide the dee...","textChars":169,"textLines":1,"bbox":[42,184,1050,62]}
+{"kind":"shape","id":"sh/8raporm5","slide":11,"bbox":[42,300,560,214]}
+{"kind":"textbox","id":"sh/9sjqxw3q","slide":11,"text":"Non-technical PRD in two weeks","textPreview":"Non-technical PRD in two weeks","textChars":30,"textLines":1,"bbox":[74,330,496,44]}
+{"kind":"textbox","id":"sh/6lcrylkj","slide":11,"text":"We will provide a Product Requirements Document that explains the product in business terms, not engineering implementation details.\n\nIt will include the phase-by-phase delivery plan, planned dashboards, workflow modules, data dependencies, assumptions, open questions, and acceptance criteria for each phase.","textPreview":"We will provide a Product Requirements Document that explains the product in business terms, not engineering implementation details. |  |...","textChars":309,"textLines":3,"bbox":[74,396,496,88]}
+{"kind":"shape","id":"sh/7ml87ql4","slide":11,"bbox":[678,300,560,214]}
+{"kind":"textbox","id":"sh/vixoj29k","slide":11,"text":"Phase 1 is not waiting on the PRD","textPreview":"Phase 1 is not waiting on the PRD","textChars":33,"textLines":1,"bbox":[710,330,496,44]}
+{"kind":"textbox","id":"sh/aho7axsz","slide":11,"text":"Phase 1 has already been stated and work is in progress: PrimeRx integration, event ingestion, canonical storage, audit visibility, and starter dashboards.\n\nThe PRD will clarify the broader roadmap and sequencing, while Phase 1 delivery continues.","textPreview":"Phase 1 has already been stated and work is in progress: PrimeRx integration, event ingestion, canonical storage, audit visibility, and s...","textChars":247,"textLines":3,"bbox":[710,396,496,88]}
+{"kind":"textbox","id":"sh/xkf6lcra","slide":11,"text":"Positioning: the PRD is the detailed product roadmap; it does not reopen the Phase 1 commitment.","textPreview":"Positioning: the PRD is the detailed product roadmap; it does not reopen the Phase 1 commitment.","textChars":96,"textLines":1,"bbox":[42,594,1080,36]}
+{"kind":"notes","id":"nt/9x7wgq","slide":11,"text":""}

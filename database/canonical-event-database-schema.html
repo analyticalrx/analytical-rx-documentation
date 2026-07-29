@@ -189,7 +189,7 @@
 </head>
 <body>
   <main>
-    <nav><a href="index.html">Back to design index</a></nav>
+    <nav><a href="../index.html">Back to design index</a></nav>
 
     <header>
       <h1>Canonical Event Database Schema</h1>
@@ -202,7 +202,7 @@
       <div class="callout">
         <p>The core rule: store real <code>RxNo</code> and <code>RefillNo</code> only in restricted operational tables. Dashboards and analytics use <code>prescription_reference_token</code> and <code>fill_reference_token</code>.</p>
       </div>
-      <p>Current scope stops at saving webhook data into canonical format and letting the API enrichment worker update safe missing fields. This is not the full reporting warehouse or ML feature model.</p>
+      <p>Current scope stops at saving webhook data into canonical format, upserting safe drug/payer lookup rows, storing event payment components, and letting the API enrichment worker update safe missing fields. This is not the full reporting warehouse or ML feature model.</p>
     </section>
 
     <section>
@@ -238,8 +238,13 @@
           </tr>
           <tr>
             <td>Canonical model</td>
-            <td>Start with one <code>analytics.canonical_pharmacy_event</code> table</td>
-            <td>Good enough for receiving webhooks, saving canonical events, and letting API enrichment fill missing safe fields.</td>
+            <td>Use one event table plus normalized <code>core.drug</code>, <code>core.payer</code>, and event payment rows</td>
+            <td>Keeps one source of truth for safe drug and payer attributes. Exact original webhook/API values remain available only through restricted raw archive when retention is enabled.</td>
+          </tr>
+          <tr>
+            <td>Cash payments</td>
+            <td>Store as <code>payment_type = 'cash'</code> with <code>payer_id = null</code></td>
+            <td>Cash is not an insurance payer, so it should not create a payer dimension record.</td>
           </tr>
         </tbody>
       </table>
@@ -248,10 +253,10 @@
     <section>
       <h2>Schema Boundary Diagram</h2>
       <div class="diagram">
-        <img src="diagrams/canonical-event-schema.svg" alt="Canonical event database schema boundary">
+        <img src="../diagrams/canonical-event-schema.svg" alt="Canonical event database schema boundary">
       </div>
-      <p class="meta">Editable source: <a href="diagrams/canonical-event-schema.d2">diagrams/canonical-event-schema.d2</a></p>
-      <p class="meta">Full PostgreSQL ERD with every column and relationship: <a href="diagrams/canonical-event-postgres-erd.svg"><code>diagrams/canonical-event-postgres-erd.svg</code></a>.</p>
+      <p class="meta">Editable source: <a href="../diagrams/canonical-event-schema.d2">diagrams/canonical-event-schema.d2</a></p>
+      <p class="meta">Full PostgreSQL ERD with every column and relationship: <a href="../diagrams/canonical-event-postgres-erd.svg"><code>diagrams/canonical-event-postgres-erd.svg</code></a>.</p>
     </section>
 
     <section>
@@ -264,6 +269,14 @@
         <div class="card">
           <h3><code>core.pharmacy</code></h3>
           <p>One row per store/pharmacy location. Stores source pharmacy IDs, NPI/NCPDP when available, and tenant ownership.</p>
+        </div>
+        <div class="card">
+          <h3><code>core.drug</code></h3>
+          <p>Normalized drug lookup rows upserted from webhook/API fields such as NDC, product ID, drug name, strength, form, and manufacturer.</p>
+        </div>
+        <div class="card">
+          <h3><code>core.payer</code></h3>
+          <p>Normalized insurance payer lookup rows upserted from payer name, BIN, PCN, and source insurance code when available.</p>
         </div>
         <div class="card">
           <h3><code>ops.raw_payload_archive</code></h3>
@@ -280,6 +293,10 @@
         <div class="card">
           <h3><code>analytics.canonical_pharmacy_event</code></h3>
           <p>PHI-minimized event facts used by dashboards, reconciliation, and API enrichment updates.</p>
+        </div>
+        <div class="card">
+          <h3><code>analytics.canonical_event_payer_payment</code></h3>
+          <p>Bridge table between canonical events and payers. One row per event payment component: primary insurance, secondary insurance, tertiary insurance, patient pay, cash, or other payment type.</p>
         </div>
       </div>
     </section>
@@ -322,13 +339,23 @@
           </tr>
           <tr>
             <td>Drug/payer/prescriber</td>
-            <td><code>drug_ndc</code>, <code>drug_name</code>, <code>payer_name</code>, <code>payer_bin</code>, <code>payer_pcn</code>, <code>prescriber_npi</code></td>
-            <td>Allowed for analytics if available and PHI policy permits. These may be enriched from API later.</td>
+            <td><code>drug_id</code>, <code>prescriber_npi</code></td>
+            <td>Drug details are read from <code>core.drug</code>. Payer details are reached through <code>analytics.canonical_event_payer_payment</code> to <code>core.payer</code>.</td>
+          </tr>
+          <tr>
+            <td>Prescription/fill details</td>
+            <td><code>days_supply</code>, <code>quantity_ordered</code>, <code>quantity_dispensed</code>, <code>quantity_remaining</code>, <code>date_filled</code>, <code>date_picked_up</code></td>
+            <td>Safe fill-level facts from webhook/API. Direct patient identifiers remain excluded.</td>
           </tr>
           <tr>
             <td>Financial</td>
-            <td><code>total_amount</code>, <code>insurance_paid_amount</code>, <code>patient_pay_amount</code>, <code>copay_paid_amount</code></td>
-            <td>Nullable until we confirm whether webhooks include reliable financials or API enrichment is required.</td>
+            <td><code>total_amount</code>, <code>ingredient_cost_amount</code>, <code>dispensing_fee_amount</code>, <code>amount_due</code></td>
+            <td>Event-level Rx/cost facts live on the canonical event. Payer and patient payment amounts live in <code>analytics.canonical_event_payer_payment</code>.</td>
+          </tr>
+          <tr>
+            <td>Payment breakdown</td>
+            <td><code>payment_type</code>, <code>payer_id</code>, <code>payer_sequence</code>, <code>paid_amount</code></td>
+            <td>Payer is linked through <code>analytics.canonical_event_payer_payment</code>: canonical event ID to payment row, then payment <code>payer_id</code> to <code>core.payer</code>. Cash rows use <code>payment_type = 'cash'</code> and <code>payer_id = null</code>.</td>
           </tr>
           <tr>
             <td>Quality</td>
@@ -378,17 +405,17 @@ fill_reference_token         = HMAC_SHA256(secret, tenant_id + pharmacy_id + rx_
         <tbody>
           <tr>
             <td>Webhook processor</td>
-            <td>Write <code>ops.webhook_event_audit</code>, <code>ops.source_prescription_reference_restricted</code>, and <code>analytics.canonical_pharmacy_event</code></td>
+            <td>Write <code>ops.webhook_event_audit</code>, <code>ops.source_prescription_reference_restricted</code>, <code>core.drug</code>, <code>core.payer</code>, <code>analytics.canonical_pharmacy_event</code>, and <code>analytics.canonical_event_payer_payment</code></td>
             <td>Logging raw payloads or exposing source identifiers to dashboards</td>
           </tr>
           <tr>
             <td>API enrichment worker</td>
-            <td>Read restricted source references, call PrimeRx API, write safe enriched fields back to canonical records</td>
+            <td>Read restricted source references, call PrimeRx API, write safe enriched fields back to lookup, canonical, and payment records</td>
             <td>Writing direct patient identifiers to analytics tables</td>
           </tr>
           <tr>
             <td>Dashboard/API application</td>
-            <td>Read <code>analytics</code> schema records for authorized tenant/pharmacy only</td>
+            <td>Read <code>analytics</code> records and safe <code>core</code> labels for authorized tenant/pharmacy only</td>
             <td>Reading <code>ops.source_prescription_reference_restricted</code> or raw payload archive</td>
           </tr>
           <tr>
@@ -407,16 +434,26 @@ fill_reference_token         = HMAC_SHA256(secret, tenant_id + pharmacy_id + rx_
         <li>Receiver writes a metadata audit row with status <code>received</code> and optionally stores raw payload in restricted archive.</li>
         <li>Processor validates payload and creates/updates <code>ops.source_prescription_reference_restricted</code> with real <code>RxNo</code>, <code>RefillNo</code>, and tokens.</li>
         <li>Processor updates audit status to <code>processing</code>.</li>
-        <li>Processor suppresses PHI and maps safe fields into <code>analytics.canonical_pharmacy_event</code>.</li>
+        <li>Processor suppresses PHI, upserts safe drug/payer lookup rows, and maps safe fields into <code>analytics.canonical_pharmacy_event</code>.</li>
+        <li>Processor writes event payment rows for insurance, patient pay, cash, or other payment components.</li>
         <li>Processor updates audit status to <code>processed</code>, <code>failed</code>, <code>duplicate</code>, or <code>needs_enrichment</code>.</li>
       </ol>
     </section>
 
     <section>
       <h2>SQL Draft</h2>
-      <p>The executable first-pass DDL lives here: <a href="schemas/mvp_canonical_event_schema.sql"><code>schemas/mvp_canonical_event_schema.sql</code></a>.</p>
-      <p>Detailed field definitions and table access rules are here: <a href="Canonical_Event_Table_Dictionary.html"><code>Canonical_Event_Table_Dictionary.html</code></a>.</p>
+      <p>The executable first-pass DDL lives here: <a href="../schemas/mvp_canonical_event_schema.sql"><code>schemas/mvp_canonical_event_schema.sql</code></a>.</p>
+      <p>The incremental migration for an already-created local design database lives here: <a href="../schemas/migrations/2026-07-24-drug-payer-event-fields.sql"><code>schemas/migrations/2026-07-24-drug-payer-event-fields.sql</code></a>.</p>
+      <p>The cleanup migration that removes duplicate canonical drug/payer snapshot columns lives here: <a href="../schemas/migrations/2026-07-24-remove-canonical-drug-payer-snapshots.sql"><code>schemas/migrations/2026-07-24-remove-canonical-drug-payer-snapshots.sql</code></a>.</p>
+      <p>The migration that applies the MVP raw payload archive retention default lives here: <a href="../schemas/migrations/2026-07-29-raw-payload-retention-default.sql"><code>schemas/migrations/2026-07-29-raw-payload-retention-default.sql</code></a>.</p>
+      <p>Detailed field definitions and table access rules are here: <a href="canonical-event-table-dictionary.html"><code>database/canonical-event-table-dictionary.html</code></a>.</p>
       <p>This SQL is a starting point for engineering review. Before production use, the team should add migrations, database roles, row-level security policy, backups, and environment-specific retention settings.</p>
+    </section>
+
+    <section>
+      <h2>Raw Payload Retention Decision</h2>
+      <p>For MVP, restricted raw payload archive records should default to a 30-day retention window. This gives the team a short replay/debug window without turning raw webhook/API payloads into a long-term product data store.</p>
+      <p>This is an engineering default for MVP review only. Before production, legal/security should confirm whether 30 days is acceptable, whether any customer agreement changes it, and whether production deletion should be enforced by S3 lifecycle policy, database cleanup job, or both.</p>
     </section>
 
     <section>
@@ -425,7 +462,7 @@ fill_reference_token         = HMAC_SHA256(secret, tenant_id + pharmacy_id + rx_
         <li>Does PrimeRx provide a stable webhook event ID?</li>
         <li>Does every prescription-level event include store/pharmacy identity, <code>RxNo</code>, and <code>RefillNo</code>?</li>
         <li>Are financial fields reliable in webhooks, or should they be treated as API-enriched fields?</li>
-        <li>Should we retain raw payloads in restricted S3 for MVP, and for how long?</li>
+        <li>Should production enforce the 30-day raw payload retention policy through S3 lifecycle rules, a database cleanup job, or both?</li>
         <li>When will security approve or reject patient-level pseudonymous continuity for refill/adherence analytics?</li>
       </ul>
     </section>

@@ -164,7 +164,7 @@
 </head>
 <body>
   <main>
-    <nav><a href="index.html">Back to design index</a></nav>
+    <nav><a href="../index.html">Back to design index</a></nav>
 
     <header>
       <h1>Canonical Event Table Dictionary</h1>
@@ -173,9 +173,27 @@
 
     <section>
       <h2>Current Scope</h2>
-      <p>This schema stops at the current implementation goal: receive webhook events, store processing/audit records, save a PHI-minimized canonical event, and allow the API enrichment worker to update missing safe fields later.</p>
+      <p>This schema stops at the current implementation goal: receive webhook events, store processing/audit records, save PHI-minimized canonical events, upsert safe drug/payer lookup rows, store payment components, and allow the API enrichment worker to update missing safe fields later.</p>
       <div class="callout">
         <p>This is not the full analytics warehouse design. It does not define forecasting tables, feature marts, dashboard-specific aggregates, or long-term patient analytics.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Source Of Truth</h2>
+      <table>
+        <thead><tr><th>Data category</th><th>Primary location</th><th>Rule</th></tr></thead>
+        <tbody>
+          <tr><td>Exact original webhook/API payload values</td><td>Restricted raw archive, if retention is enabled</td><td>Not copied into analytics tables for convenience.</td></tr>
+          <tr><td>Drug attributes</td><td><code>core.drug</code></td><td><code>analytics.canonical_pharmacy_event</code> stores only <code>drug_id</code>. Do not copy per-event drug snapshots into the canonical event row.</td></tr>
+          <tr><td>Insurance payer attributes</td><td><code>core.payer</code></td><td>Payment rows reference <code>payer_id</code>. Cash rows keep <code>payer_id</code> null. Do not copy per-event payer snapshots into the canonical event row.</td></tr>
+          <tr><td>Payer/payment amounts</td><td><code>analytics.canonical_event_payer_payment</code></td><td>Primary, secondary, tertiary, patient pay, cash, and other payments are stored as rows.</td></tr>
+          <tr><td>Prescription/fill event facts</td><td><code>analytics.canonical_pharmacy_event</code></td><td>Stores PHI-minimized event facts, statuses, dates, quantities, cost facts, and tokens.</td></tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <p><strong>Important:</strong> If fields like <code>ndc</code>, <code>drug_name</code>, <code>payer_bin</code>, or <code>payer_pcn</code> appear below, they belong only to normalized lookup tables such as <code>core.drug</code> and <code>core.payer</code>. They are not part of <code>analytics.canonical_pharmacy_event</code>. The restricted raw payload remains the source for the exact original vendor event snapshot.</p>
+        <p><strong>Payer link path:</strong> <code>analytics.canonical_pharmacy_event.id</code> links to <code>analytics.canonical_event_payer_payment.canonical_event_id</code>, then <code>analytics.canonical_event_payer_payment.payer_id</code> links to <code>core.payer.id</code>. Cash rows stop at the payment table with <code>payer_id = null</code>.</p>
       </div>
     </section>
 
@@ -183,16 +201,16 @@
       <h2>ER Diagram</h2>
       <p>The PostgreSQL-derived ERD is the exact database view. It includes all tables, all columns, key markers, and foreign key connections from the live local schema.</p>
       <div class="diagram full">
-        <img src="diagrams/canonical-event-postgres-erd.svg" alt="Full PostgreSQL canonical event ER diagram with all columns and relationships">
+        <img src="../diagrams/canonical-event-postgres-erd.svg" alt="Full PostgreSQL canonical event ER diagram with all columns and relationships">
       </div>
-      <p class="meta">Open directly for zooming: <a href="diagrams/canonical-event-postgres-erd.svg">SVG</a> | <a href="diagrams/canonical-event-postgres-erd.png">PNG</a> | <a href="diagrams/canonical-event-postgres-erd.dot">Graphviz source</a>. Generator: <a href="scripts/generate_postgres_erd.rb"><code>scripts/generate_postgres_erd.rb</code></a>.</p>
+      <p class="meta">Open directly for zooming: <a href="../diagrams/canonical-event-postgres-erd.svg">SVG</a> | <a href="../diagrams/canonical-event-postgres-erd.png">PNG</a> | <a href="../diagrams/canonical-event-postgres-erd.dot">Graphviz source</a>. Generator: <a href="../scripts/generate_postgres_erd.rb"><code>scripts/generate_postgres_erd.rb</code></a>.</p>
 
       <h3>Simplified Design View</h3>
       <p>The simplified diagram is easier for design review because it hides some column-level detail and emphasizes table responsibility.</p>
       <div class="diagram">
-        <img src="diagrams/canonical-event-er.svg" alt="Canonical event database ER diagram">
+        <img src="../diagrams/canonical-event-er.svg" alt="Canonical event database ER diagram">
       </div>
-      <p class="meta">Editable source: <a href="diagrams/canonical-event-er.d2">diagrams/canonical-event-er.d2</a></p>
+      <p class="meta">Editable source: <a href="../diagrams/canonical-event-er.d2">diagrams/canonical-event-er.d2</a></p>
     </section>
 
     <section>
@@ -201,8 +219,9 @@
         <li>Webhook receiver receives the PrimeRx event and creates an audit record.</li>
         <li>Receiver optionally stores the raw payload in restricted storage and saves only the storage pointer in the database.</li>
         <li>Processor reads the queued event, validates it, de-duplicates it, and stores restricted source identifiers if present.</li>
-        <li>Processor creates one canonical PHI-minimized event row.</li>
-        <li>API enrichment worker uses restricted <code>RxNo</code>, <code>RefillNo</code>, and pharmacy reference to fetch missing details and update only safe canonical columns.</li>
+        <li>Processor upserts safe drug and insurance payer lookup rows when the event contains usable NDC, product, BIN, PCN, or payer name values.</li>
+        <li>Processor creates one canonical PHI-minimized event row and zero or more event payment rows.</li>
+        <li>API enrichment worker uses restricted <code>RxNo</code>, <code>RefillNo</code>, and pharmacy reference to fetch missing details and update only safe lookup, canonical, and payment columns.</li>
       </ol>
     </section>
 
@@ -224,17 +243,17 @@
           </tr>
           <tr>
             <td>Webhook processor Lambda</td>
-            <td>Read/update audit rows, upsert restricted source reference rows, insert canonical event rows.</td>
+            <td>Read/update audit rows, upsert restricted source reference rows, upsert safe drug/payer lookup rows, insert canonical event and payment rows.</td>
             <td>May handle raw payload during processing, but must not copy direct patient identifiers into canonical tables or logs.</td>
           </tr>
           <tr>
             <td>API enrichment worker</td>
-            <td>Read <code>ops.source_prescription_reference_restricted</code>. Update safe missing fields on <code>analytics.canonical_pharmacy_event</code>. Update audit/enrichment status.</td>
+            <td>Read <code>ops.source_prescription_reference_restricted</code>. Update safe missing fields on <code>core.drug</code>, <code>core.payer</code>, <code>analytics.canonical_pharmacy_event</code>, and <code>analytics.canonical_event_payer_payment</code>. Update audit/enrichment status.</td>
             <td>Should not expose real <code>RxNo</code>, <code>RefillNo</code>, or raw API responses outside the restricted service boundary.</td>
           </tr>
           <tr>
             <td>Dashboard/API application</td>
-            <td>Read <code>analytics.canonical_pharmacy_event</code> and safe <code>core</code> pharmacy/tenant labels for authorized tenant/pharmacy only.</td>
+            <td>Read <code>analytics.canonical_pharmacy_event</code>, <code>analytics.canonical_event_payer_payment</code>, and safe <code>core</code> tenant/pharmacy/drug/payer labels for authorized tenant/pharmacy only.</td>
             <td>No direct access to <code>ops</code> schema or raw payload archive.</td>
           </tr>
           <tr>
@@ -288,6 +307,11 @@
             <td>This is the safe table used by product dashboards and basic reporting.</td>
           </tr>
           <tr>
+            <td><code>analytics.canonical_event_payer_payment</code></td>
+            <td>Insurance payments may reference <code>core.payer</code>. Cash payments must use <code>payment_type = 'cash'</code> and <code>payer_id = null</code>.</td>
+            <td>Cash is a payment method, not an insurance payer.</td>
+          </tr>
+          <tr>
             <td>Database access</td>
             <td>Use separate roles for receiver, processor, API enrichment, dashboard app, and admin. Apply tenant filtering for app reads.</td>
             <td>Limits blast radius and prevents dashboard users from reaching restricted source identifiers.</td>
@@ -335,8 +359,60 @@
     </section>
 
     <section>
+      <h2><code>core.drug</code></h2>
+      <p>Stores normalized drug lookup rows only. These fields are not copied into <code>analytics.canonical_pharmacy_event</code>; canonical events link to this table through <code>drug_id</code> when drug-level reporting or matching is needed.</p>
+      <table>
+        <thead><tr><th>Field</th><th>Meaning</th><th>Access / restriction</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>Internal unique drug row ID.</td><td>Safe internal identifier.</td></tr>
+          <tr><td><code>tenant_id</code></td><td>Tenant where this drug row was observed.</td><td>Required for tenant isolation and tenant-specific source mappings.</td></tr>
+          <tr><td><code>source_system</code></td><td>Source system name, for example <code>primerx</code>.</td><td>Safe lineage field.</td></tr>
+          <tr><td><code>source_drug_id</code></td><td>PrimeRx-specific product identifier, such as <code>SpecificProductID</code>, when provided.</td><td>Safe product identifier for backend joins and enrichment.</td></tr>
+          <tr><td><code>ndc</code></td><td>National Drug Code from webhook/API.</td><td>Safe drug identifier. Prefer this for matching when present.</td></tr>
+          <tr><td><code>drug_name</code></td><td>Drug product display name from the source.</td><td>Safe descriptor for dashboard filters and labels.</td></tr>
+          <tr><td><code>generic_name</code></td><td>Generic drug name if provided by API enrichment.</td><td>Safe descriptor.</td></tr>
+          <tr><td><code>brand_name</code></td><td>Brand name if provided by API enrichment.</td><td>Safe descriptor.</td></tr>
+          <tr><td><code>is_brand</code></td><td>Whether the source indicates the product is branded.</td><td>Safe reporting flag.</td></tr>
+          <tr><td><code>strength</code></td><td>Drug strength, such as <code>200MG</code>.</td><td>Safe descriptor.</td></tr>
+          <tr><td><code>strength_unit</code></td><td>Strength unit of measure when separately provided.</td><td>Safe descriptor.</td></tr>
+          <tr><td><code>form</code></td><td>Drug dosage form, such as tablet, capsule, liquid, or cream.</td><td>Safe descriptor.</td></tr>
+          <tr><td><code>manufacturer_name</code></td><td>Manufacturer name from webhook/API.</td><td>Safe descriptor.</td></tr>
+          <tr><td><code>drug_class</code></td><td>Source drug class value when provided.</td><td>Safe descriptor, but should be normalized later if used for analytics.</td></tr>
+          <tr><td><code>unit_of_measure</code></td><td>Drug unit of measure from API enrichment.</td><td>Safe descriptor.</td></tr>
+          <tr><td><code>quantity_per_pack</code></td><td>Quantity per package when the API provides it.</td><td>Safe product attribute.</td></tr>
+          <tr><td><code>first_seen_at</code></td><td>First time this drug identity was observed.</td><td>Operational metadata.</td></tr>
+          <tr><td><code>last_seen_at</code></td><td>Most recent time this drug identity was observed.</td><td>Operational metadata.</td></tr>
+          <tr><td><code>created_at</code></td><td>When this row was created.</td><td>Operational metadata.</td></tr>
+          <tr><td><code>updated_at</code></td><td>When this row was last updated.</td><td>Operational metadata.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2><code>core.payer</code></h2>
+      <p>Stores normalized insurance payer rows. Payers are linked to canonical events only through <code>analytics.canonical_event_payer_payment</code>. Cash payments do not create payer rows; cash is represented in the payment table with <code>payment_type = 'cash'</code> and <code>payer_id = null</code>.</p>
+      <table>
+        <thead><tr><th>Field</th><th>Meaning</th><th>Access / restriction</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>Internal unique payer row ID.</td><td>Safe internal identifier.</td></tr>
+          <tr><td><code>tenant_id</code></td><td>Tenant where this payer was observed.</td><td>Required for tenant isolation and tenant-specific source mappings.</td></tr>
+          <tr><td><code>source_system</code></td><td>Source system name, for example <code>primerx</code>.</td><td>Safe lineage field.</td></tr>
+          <tr><td><code>source_payer_id</code></td><td>PrimeRx insurance code or another source payer identifier, if available.</td><td>Safe operational identifier. Do not use patient insurance member ID here.</td></tr>
+          <tr><td><code>payer_type</code></td><td>Payer classification: insurance, discount card, government, other, or unknown.</td><td>Safe grouping value. Cash is intentionally not included as a payer type.</td></tr>
+          <tr><td><code>payer_name</code></td><td>Payer, plan, or insurance name from webhook/API.</td><td>Visible only inside authorized tenant context.</td></tr>
+          <tr><td><code>payer_bin</code></td><td>BIN value used for payer routing when available.</td><td>Use for operations/analytics. Do not expose outside authorized tenant context.</td></tr>
+          <tr><td><code>payer_pcn</code></td><td>PCN value used for payer routing when available.</td><td>Use for operations/analytics. Do not expose outside authorized tenant context.</td></tr>
+          <tr><td><code>first_seen_at</code></td><td>First time this payer identity was observed.</td><td>Operational metadata.</td></tr>
+          <tr><td><code>last_seen_at</code></td><td>Most recent time this payer identity was observed.</td><td>Operational metadata.</td></tr>
+          <tr><td><code>created_at</code></td><td>When this row was created.</td><td>Operational metadata.</td></tr>
+          <tr><td><code>updated_at</code></td><td>When this row was last updated.</td><td>Operational metadata.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
       <h2><code>ops.raw_payload_archive</code></h2>
-      <p>Stores metadata about a raw webhook payload if raw archive is enabled. The table should not store the raw JSON payload itself.</p>
+      <p>Stores metadata about a raw webhook payload if raw archive is enabled. The table should not store the raw JSON payload itself. MVP retention defaults to 30 days so the team has a short replay/debug window; legal/security should revisit this before production.</p>
       <table>
         <thead><tr><th>Field</th><th>Meaning</th><th>Access / restriction</th></tr></thead>
         <tbody>
@@ -349,7 +425,7 @@
           <tr><td><code>raw_payload_sha256</code></td><td>Hash of the raw payload used for integrity checks and duplicate fallback.</td><td>Operational metadata. Does not replace idempotency key.</td></tr>
           <tr><td><code>payload_size_bytes</code></td><td>Size of the raw payload.</td><td>Operational metadata for troubleshooting.</td></tr>
           <tr><td><code>received_at</code></td><td>When the payload was received.</td><td>Operational metadata.</td></tr>
-          <tr><td><code>retention_until</code></td><td>Date after which the raw archive can be deleted.</td><td>Must be set by retention policy when raw archive is enabled.</td></tr>
+          <tr><td><code>retention_until</code></td><td>Date after which the raw archive can be deleted. MVP default is <code>current_date + 30</code>.</td><td>Must be enforced by retention policy when raw archive is enabled. Production value requires legal/security confirmation.</td></tr>
           <tr><td><code>created_at</code></td><td>When this metadata row was created.</td><td>Operational metadata.</td></tr>
         </tbody>
       </table>
@@ -420,6 +496,7 @@
           <tr><td><code>tenant_id</code></td><td>Tenant associated with the event.</td><td>Required for tenant isolation and dashboard filtering.</td></tr>
           <tr><td><code>pharmacy_id</code></td><td>Store associated with the event.</td><td>Required for store-level dashboards.</td></tr>
           <tr><td><code>audit_event_id</code></td><td>One-to-one link to the processing audit record.</td><td>Lineage field. Dashboard app does not need to expose it.</td></tr>
+          <tr><td><code>drug_id</code></td><td>Optional link to normalized <code>core.drug</code>.</td><td>Safe FK. Nullable when drug could not be matched or is not relevant to the event.</td></tr>
           <tr><td><code>source_system</code></td><td>Source system name, for example <code>primerx</code>.</td><td>Safe lineage field.</td></tr>
           <tr><td><code>source_event_type</code></td><td>Original vendor event type.</td><td>Safe for internal reporting.</td></tr>
           <tr><td><code>canonical_event_type</code></td><td>Internal normalized event type.</td><td>Dashboard-friendly event grouping.</td></tr>
@@ -427,28 +504,71 @@
           <tr><td><code>business_date</code></td><td>Date used for daily reporting, usually derived from fill, billing, pickup, or event timestamp.</td><td>Used for date filters and daily metrics.</td></tr>
           <tr><td><code>prescription_reference_token</code></td><td>Tokenized prescription identity.</td><td>Safe replacement for raw <code>RxNo</code>.</td></tr>
           <tr><td><code>fill_reference_token</code></td><td>Tokenized fill/refill identity.</td><td>Safe replacement for raw <code>RxNo</code> + <code>RefillNo</code>.</td></tr>
+          <tr><td><code>date_ordered</code></td><td>Prescription ordered date from webhook/API.</td><td>Safe event date. Does not include patient identity.</td></tr>
+          <tr><td><code>date_filled</code></td><td>Prescription filled date from webhook/API.</td><td>Safe event date used for reporting and reconciliation.</td></tr>
+          <tr><td><code>date_dispensed</code></td><td>Dispense date from API enrichment when separate from fill date.</td><td>Safe event date.</td></tr>
+          <tr><td><code>date_picked_up</code></td><td>Pickup date/time when available.</td><td>Safe fulfillment date. Do not pair with patient identity in analytics tables.</td></tr>
+          <tr><td><code>picked_up_flag</code></td><td>Whether the source indicates the prescription was picked up.</td><td>Safe fulfillment flag.</td></tr>
+          <tr><td><code>days_supply</code></td><td>Days supply for the prescription fill.</td><td>Safe fill-level fact used later for refill/adherence calculations.</td></tr>
+          <tr><td><code>auth_refills</code></td><td>Authorized refill count from webhook when available.</td><td>Safe prescription fact.</td></tr>
+          <tr><td><code>total_refills</code></td><td>Total authorized refills from API when available.</td><td>Safe prescription fact.</td></tr>
+          <tr><td><code>quantity_ordered</code></td><td>Quantity ordered on the prescription.</td><td>Safe prescription quantity.</td></tr>
+          <tr><td><code>quantity_dispensed</code></td><td>Quantity dispensed for the fill.</td><td>Safe prescription quantity.</td></tr>
+          <tr><td><code>quantity_remaining</code></td><td>Quantity remaining after the fill.</td><td>Safe prescription quantity.</td></tr>
           <tr><td><code>rx_status</code></td><td>Normalized prescription status when available.</td><td>Nullable. Can be updated by API enrichment.</td></tr>
           <tr><td><code>claim_status</code></td><td>Normalized claim status such as paid, rejected, or reversed.</td><td>Nullable. Can be updated by API enrichment.</td></tr>
           <tr><td><code>fulfillment_status</code></td><td>Fulfillment status such as shipped, delivered, or picked up if available.</td><td>Nullable. Can be updated by API enrichment.</td></tr>
           <tr><td><code>queue_status</code></td><td>Workflow queue/status from PrimeRx if available.</td><td>Nullable and used for operations views.</td></tr>
-          <tr><td><code>drug_ndc</code></td><td>National Drug Code from webhook or API.</td><td>Safe drug identifier. Can be updated by API enrichment.</td></tr>
-          <tr><td><code>drug_name</code></td><td>Drug product name.</td><td>Safe drug descriptor. Can be updated by API enrichment.</td></tr>
-          <tr><td><code>drug_generic_name</code></td><td>Generic drug name if available.</td><td>Safe drug descriptor.</td></tr>
-          <tr><td><code>payer_name</code></td><td>Payer or plan name when available.</td><td>Safe for authorized tenant reporting. Can be updated by API enrichment.</td></tr>
-          <tr><td><code>payer_bin</code></td><td>BIN value for payer routing if available.</td><td>Use only for analytics/operations. Do not expose outside authorized tenant context.</td></tr>
-          <tr><td><code>payer_pcn</code></td><td>PCN value for payer routing if available.</td><td>Use only for analytics/operations. Do not expose outside authorized tenant context.</td></tr>
+          <tr><td><code>order_status</code></td><td>Order status from PrimeRx when available.</td><td>Safe operational status.</td></tr>
+          <tr><td><code>refill_queue_status</code></td><td>Refill queue status from PrimeRx when available.</td><td>Safe operational status.</td></tr>
+          <tr><td><code>verification_status</code></td><td>Pharmacist/RPH or drug pick verification status when available.</td><td>Safe workflow status.</td></tr>
+          <tr><td><code>label_printed_flag</code></td><td>Whether the source indicates a label was printed.</td><td>Safe workflow flag.</td></tr>
+          <tr><td><code>copay_collected_flag</code></td><td>Whether the source indicates copay was collected.</td><td>Safe payment workflow flag.</td></tr>
+          <tr><td><code>delivery_method</code></td><td>Pickup, delivery, shipping, or source delivery method value.</td><td>Safe fulfillment descriptor.</td></tr>
+          <tr><td><code>bill_type</code></td><td>Billing type such as insurance or cash.</td><td>Safe billing descriptor. Cash payments still use <code>payer_id = null</code> in the payment table.</td></tr>
+          <tr><td><code>rx_origin_code</code></td><td>Source origin code for the prescription.</td><td>Safe source descriptor.</td></tr>
+          <tr><td><code>rx_origin_description</code></td><td>Human-readable origin description from the source.</td><td>Safe source descriptor.</td></tr>
           <tr><td><code>prescriber_npi</code></td><td>Prescriber NPI if available.</td><td>Safe provider identifier for authorized tenant reporting.</td></tr>
           <tr><td><code>total_amount</code></td><td>Total prescription or claim amount from webhook/API.</td><td>Nullable. API enrichment may update if webhook is incomplete.</td></tr>
-          <tr><td><code>insurance_paid_amount</code></td><td>Amount paid by insurance/payer.</td><td>Nullable. API enrichment may update if webhook is incomplete.</td></tr>
-          <tr><td><code>patient_pay_amount</code></td><td>Patient responsibility/copay amount.</td><td>Financial amount only. Do not store patient identity with it.</td></tr>
-          <tr><td><code>copay_paid_amount</code></td><td>Amount of copay actually paid, if available.</td><td>Nullable. API enrichment may update if webhook is incomplete.</td></tr>
+          <tr><td><code>ingredient_cost_amount</code></td><td>Ingredient cost from API enrichment when available.</td><td>Safe financial fact used for margin analysis.</td></tr>
+          <tr><td><code>dispensing_fee_amount</code></td><td>Dispensing/professional fee amount from API enrichment when available.</td><td>Safe financial fact.</td></tr>
+          <tr><td><code>other_fee_amount</code></td><td>Other fee amount from API enrichment when available.</td><td>Safe financial fact.</td></tr>
+          <tr><td><code>other_amount</code></td><td>Other amount from API enrichment when available.</td><td>Safe financial fact.</td></tr>
+          <tr><td><code>tax_amount</code></td><td>Tax amount from webhook/API when available.</td><td>Safe financial fact.</td></tr>
+          <tr><td><code>discount_amount</code></td><td>Discount amount from webhook/API when available.</td><td>Safe financial fact.</td></tr>
+          <tr><td><code>amount_due</code></td><td>Remaining amount due from webhook/API when available.</td><td>Safe financial fact.</td></tr>
           <tr><td><code>reversal_flag</code></td><td>Whether the event represents a reversal.</td><td>Safe reporting flag.</td></tr>
           <tr><td><code>rejection_code</code></td><td>Claim rejection code if available.</td><td>Safe operational code. Do not store free-text PHI in this field.</td></tr>
           <tr><td><code>rejection_reason_category</code></td><td>Normalized rejection category.</td><td>Safe dashboard grouping.</td></tr>
           <tr><td><code>enrichment_status</code></td><td>Whether API enrichment is not required, pending, complete, or failed.</td><td>Controls follow-up processing and data completeness display.</td></tr>
           <tr><td><code>data_quality_status</code></td><td>Whether canonical row is valid, partial, invalid, or needs review.</td><td>Used to avoid treating incomplete records as fully reliable.</td></tr>
+          <tr><td><code>enriched_at</code></td><td>When API enrichment last completed for this event.</td><td>Operational metadata for freshness checks.</td></tr>
           <tr><td><code>created_at</code></td><td>When the canonical event row was created.</td><td>Operational metadata.</td></tr>
           <tr><td><code>updated_at</code></td><td>When the canonical event row was last updated.</td><td>Updated by processor or API enrichment worker.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2><code>analytics.canonical_event_payer_payment</code></h2>
+      <p>Stores event-level payment components and acts as the bridge between <code>analytics.canonical_pharmacy_event</code> and <code>core.payer</code>. This avoids forcing primary, secondary, tertiary, patient pay, and cash amounts into one flat event row.</p>
+      <table>
+        <thead><tr><th>Field</th><th>Meaning</th><th>Access / restriction</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>Internal unique payment row ID.</td><td>Safe internal identifier.</td></tr>
+          <tr><td><code>tenant_id</code></td><td>Tenant associated with the payment component.</td><td>Required for tenant isolation.</td></tr>
+          <tr><td><code>pharmacy_id</code></td><td>Store associated with the payment component.</td><td>Required for store-level filtering.</td></tr>
+          <tr><td><code>canonical_event_id</code></td><td>Parent canonical event row.</td><td>Safe FK. Deleting the event deletes its payment rows.</td></tr>
+          <tr><td><code>payer_id</code></td><td>Optional normalized payer reference.</td><td>Required for known insurance rows when available. Must be null for cash rows.</td></tr>
+          <tr><td><code>payment_type</code></td><td>Payment category: insurance, cash, patient pay, other, or unknown.</td><td>Safe grouping value. Cash rows use <code>payer_id = null</code>.</td></tr>
+          <tr><td><code>payer_sequence</code></td><td>Primary, secondary, tertiary, patient, cash, or other.</td><td>Safe grouping value for payer waterfall reporting.</td></tr>
+          <tr><td><code>billed_amount</code></td><td>Amount billed to this payer/payment component when available.</td><td>Safe financial fact.</td></tr>
+          <tr><td><code>paid_amount</code></td><td>Amount paid by this payer/payment component.</td><td>Safe financial fact.</td></tr>
+          <tr><td><code>patient_responsibility_amount</code></td><td>Patient responsibility amount associated with this payment row when available.</td><td>Financial amount only. Do not store patient identity with it.</td></tr>
+          <tr><td><code>copay_paid_amount</code></td><td>Copay collected amount associated with this row when available.</td><td>Safe financial fact.</td></tr>
+          <tr><td><code>payment_status</code></td><td>Payment/adjudication status for this component when available.</td><td>Safe operational status.</td></tr>
+          <tr><td><code>created_at</code></td><td>When this payment row was created.</td><td>Operational metadata.</td></tr>
+          <tr><td><code>updated_at</code></td><td>When this payment row was last updated.</td><td>Updated by processor or API enrichment worker.</td></tr>
         </tbody>
       </table>
     </section>
@@ -457,7 +577,7 @@
       <h2>API Enrichment Update Rules</h2>
       <ul>
         <li>API enrichment should use restricted source references only from <code>ops.source_prescription_reference_restricted</code>.</li>
-        <li>API enrichment may update missing safe fields in <code>analytics.canonical_pharmacy_event</code>, such as drug, payer, status, and payment amounts.</li>
+        <li>API enrichment may update missing safe fields in <code>core.drug</code>, <code>core.payer</code>, <code>analytics.canonical_pharmacy_event</code>, and <code>analytics.canonical_event_payer_payment</code>.</li>
         <li>API enrichment must not write patient names, DOB, address, phone, email, insurance member ID, notes, images, raw <code>RxNo</code>, or raw <code>RefillNo</code> into canonical tables.</li>
         <li>If enrichment fails, update <code>enrichment_status</code> and the audit failure fields without logging raw API response payloads.</li>
       </ul>

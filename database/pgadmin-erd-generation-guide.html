@@ -143,7 +143,7 @@
 </head>
 <body>
   <main>
-    <nav><a href="index.html">Back to design index</a></nav>
+    <nav><a href="../index.html">Back to design index</a></nav>
 
     <header>
       <h1>pgAdmin ERD Generation Guide</h1>
@@ -169,19 +169,19 @@
         </thead>
         <tbody>
           <tr>
-            <td><a href="schemas/mvp_canonical_event_schema.sql"><code>schemas/mvp_canonical_event_schema.sql</code></a></td>
+            <td><a href="../schemas/mvp_canonical_event_schema.sql"><code>schemas/mvp_canonical_event_schema.sql</code></a></td>
             <td>SQL DDL used to create the tables and foreign key relationships in PostgreSQL.</td>
           </tr>
           <tr>
-            <td><a href="Canonical_Event_Table_Dictionary.html"><code>Canonical_Event_Table_Dictionary.html</code></a></td>
+            <td><a href="canonical-event-table-dictionary.html"><code>database/canonical-event-table-dictionary.html</code></a></td>
             <td>Field definitions and access restrictions to review alongside the pgAdmin ERD.</td>
           </tr>
           <tr>
-            <td><a href="pgadmin/analytical-rx-local-server.json"><code>pgadmin/analytical-rx-local-server.json</code></a></td>
+            <td><a href="../pgadmin/analytical-rx-local-server.json"><code>pgadmin/analytical-rx-local-server.json</code></a></td>
             <td>pgAdmin server registration file for this local design database.</td>
           </tr>
           <tr>
-            <td><a href="scripts/generate_postgres_erd.rb"><code>scripts/generate_postgres_erd.rb</code></a></td>
+            <td><a href="../scripts/generate_postgres_erd.rb"><code>scripts/generate_postgres_erd.rb</code></a></td>
             <td>Optional CLI generator that reads the live PostgreSQL schema and creates a full-column ERD with Graphviz.</td>
           </tr>
         </tbody>
@@ -301,15 +301,15 @@ analytics</code></pre>
         </thead>
         <tbody>
           <tr>
-            <td><a href="diagrams/canonical-event-postgres-erd.svg"><code>diagrams/canonical-event-postgres-erd.svg</code></a></td>
+            <td><a href="../diagrams/canonical-event-postgres-erd.svg"><code>diagrams/canonical-event-postgres-erd.svg</code></a></td>
             <td>Zoomable full-column ERD with all tables, columns, key markers, and foreign key connections.</td>
           </tr>
           <tr>
-            <td><a href="diagrams/canonical-event-postgres-erd.png"><code>diagrams/canonical-event-postgres-erd.png</code></a></td>
+            <td><a href="../diagrams/canonical-event-postgres-erd.png"><code>diagrams/canonical-event-postgres-erd.png</code></a></td>
             <td>PNG export for quick review or attaching to documents.</td>
           </tr>
           <tr>
-            <td><a href="diagrams/canonical-event-postgres-erd.dot"><code>diagrams/canonical-event-postgres-erd.dot</code></a></td>
+            <td><a href="../diagrams/canonical-event-postgres-erd.dot"><code>diagrams/canonical-event-postgres-erd.dot</code></a></td>
             <td>Graphviz source generated from PostgreSQL metadata.</td>
           </tr>
         </tbody>
@@ -331,6 +331,10 @@ analytics</code></pre>
           <tr>
             <td><code>core.tenant</code> to <code>core.pharmacy</code></td>
             <td>One tenant can have many pharmacies.</td>
+          </tr>
+          <tr>
+            <td><code>core.tenant</code> to <code>core.drug</code> and <code>core.payer</code></td>
+            <td>Drug and payer lookup rows are tenant-scoped for source matching and isolation.</td>
           </tr>
           <tr>
             <td><code>core.tenant</code> to <code>ops.raw_payload_archive</code></td>
@@ -355,6 +359,18 @@ analytics</code></pre>
           <tr>
             <td><code>ops.webhook_event_audit</code> to <code>analytics.canonical_pharmacy_event</code></td>
             <td>One processed audit event should create at most one canonical event row.</td>
+          </tr>
+          <tr>
+            <td><code>core.drug</code> to <code>analytics.canonical_pharmacy_event</code></td>
+            <td>A canonical event can link to a normalized drug when available.</td>
+          </tr>
+          <tr>
+            <td><code>analytics.canonical_pharmacy_event</code> to <code>analytics.canonical_event_payer_payment</code></td>
+            <td>A canonical event can have multiple payment rows for primary, secondary, tertiary, patient pay, cash, or other components.</td>
+          </tr>
+          <tr>
+            <td><code>core.payer</code> to <code>analytics.canonical_event_payer_payment</code></td>
+            <td>Insurance payment rows can link to a payer. Cash payment rows intentionally keep <code>payer_id</code> null.</td>
           </tr>
         </tbody>
       </table>

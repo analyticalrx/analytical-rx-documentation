@@ -1,0 +1,895 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Airtable Tables</title>
+  <style>
+:root {
+  --ink: #1f2933;
+  --muted: #5f6c7b;
+  --line: #d9e2ec;
+  --panel: #f8fafc;
+  --code: #eef2f7;
+  --accent: #0f766e;
+  --accent-soft: #ccfbf1;
+  --warn: #9a3412;
+  --warn-soft: #ffedd5;
+  --risk: #b91c1c;
+  --risk-soft: #fee2e2;
+}
+
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  color: var(--ink);
+  background: #ffffff;
+  line-height: 1.56;
+}
+
+main {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 44px 24px 72px;
+}
+
+nav {
+  margin-bottom: 28px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+nav a,
+a {
+  color: var(--accent);
+}
+
+nav a {
+  text-decoration: none;
+  font-weight: 700;
+}
+
+header {
+  max-width: 980px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+h1 {
+  margin: 0 0 10px;
+  font-size: 34px;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+h2 {
+  margin: 34px 0 12px;
+  font-size: 23px;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+h3 {
+  margin: 24px 0 10px;
+  font-size: 18px;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+p {
+  margin: 0 0 13px;
+}
+
+ul,
+ol {
+  margin: 0 0 18px;
+  padding-left: 24px;
+}
+
+li {
+  margin: 5px 0;
+}
+
+code {
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: var(--code);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.92em;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 18px 0;
+  font-size: 13px;
+}
+
+th,
+td {
+  border: 1px solid var(--line);
+  padding: 8px 10px;
+  vertical-align: top;
+}
+
+th {
+  background: var(--panel);
+  text-align: left;
+}
+
+.lead {
+  color: var(--muted);
+  font-size: 18px;
+}
+
+.meta {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.callout {
+  margin: 16px 0;
+  padding: 14px 18px;
+  border-left: 4px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent-soft);
+}
+
+.warn {
+  border-left-color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.risk {
+  border-left-color: var(--risk);
+  background: var(--risk-soft);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.link-card {
+  display: block;
+  min-height: 112px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.link-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(15, 118, 110, 0.12);
+}
+
+.link-card strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 17px;
+}
+
+.link-card span {
+  display: block;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.badge,
+.tag {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.tag {
+  margin: 0 0 0 6px;
+}
+
+.badge.secondary,
+.tag.warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+  border-left: 0;
+}
+
+.tag.risk {
+  background: var(--risk-soft);
+  color: var(--risk);
+  border-left: 0;
+}
+
+.diagram {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.diagram img,
+.screenshot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.screenshot {
+  margin: 18px 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.screenshot figcaption {
+  padding: 10px 12px;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.toc {
+  columns: 2;
+  column-gap: 36px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+@media (max-width: 760px) {
+  .toc {
+    columns: 1;
+  }
+
+  table {
+    font-size: 12px;
+  }
+}
+
+
+  </style>
+</head>
+<body>
+  <main>
+    <nav><a href="../index.html">Back to design index</a> | <a href="index.html">Airtable docs</a></nav>
+    <header>
+      <h1>Airtable Tables</h1>
+      <p class="lead">Schema-level review of Airtable tables, fields, linked relationships, and software implications.</p>
+    </header>
+<section>
+  <h2>Source And Scope</h2>
+  <p>This document uses Airtable base metadata only: table names, field names, field types, select options, linked-record relationships, and view names. It does not include record values.</p>
+  <p>Airtable is a temporary reference prototype. These tables capture product intent and future module ideas; they are not a migration source and should not be copied one-to-one into the AnalyticalRx database.</p>
+  <div class="callout warn">
+    <p>Fields and relationships here describe the current Airtable setup. They should guide our product model, but we should not build a generic Airtable clone.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Table Inventory</h2>
+  <table>
+    <thead><tr><th>Table</th><th>Fields</th><th>Views</th><th>Product purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>AR Aging</code></td><td>12</td><td>1</td><td>Accounts receivable aging by payer and month.</td></tr>
+        <tr><td><code>Compliance Items</code></td><td>17</td><td>1</td><td>Compliance requirement tracker with due dates, owners, documents, and renewal behavior.</td></tr>
+        <tr><td><code>Compliance Logs</code></td><td>15</td><td>1</td><td>Operational compliance log entries such as counts, temperatures, exceptions, and supporting documents.</td></tr>
+        <tr><td><code>Daily Sales</code></td><td>12</td><td>1</td><td>Daily store sales, prescription volume, vaccine count, and front-end sales snapshot.</td></tr>
+        <tr><td><code>Doctor Offices</code></td><td>18</td><td>1</td><td>Prescriber office CRM for outreach stage, assigned rep, follow-up, referral status, and lapse risk.</td></tr>
+        <tr><td><code>Doctor Visits</code></td><td>7</td><td>1</td><td>Visit history and next-action tracking for doctor office outreach.</td></tr>
+        <tr><td><code>Documents</code></td><td>11</td><td>1</td><td>Document metadata, attachments, permission levels, expiration dates, and compliance links.</td></tr>
+        <tr><td><code>Employee Licenses</code></td><td>7</td><td>1</td><td>Employee credential and license expiration tracking.</td></tr>
+        <tr><td><code>Financial Periods</code></td><td>17</td><td>9</td><td>Monthly financial performance facts and calculated margins by store.</td></tr>
+        <tr><td><code>KPI Scorecard</code></td><td>16</td><td>1</td><td>Target versus actual KPI tracking and dashboard source data.</td></tr>
+        <tr><td><code>Onboarding Steps</code></td><td>9</td><td>1</td><td>New store onboarding checklist records.</td></tr>
+        <tr><td><code>People</code></td><td>21</td><td>1</td><td>Staff directory, user-role source, assignee lookup, and notification recipient source.</td></tr>
+        <tr><td><code>Pharmacies</code></td><td>32</td><td>1</td><td>Store master record and central hub for most operational, compliance, financial, and dashboard data.</td></tr>
+        <tr><td><code>Rx Metrics</code></td><td>15</td><td>9</td><td>Monthly pharmacy operations metrics by store.</td></tr>
+        <tr><td><code>SOP Acknowledgments</code></td><td>8</td><td>1</td><td>Employee acknowledgment tracking for SOP versions and due dates.</td></tr>
+        <tr><td><code>SOPs</code></td><td>12</td><td>1</td><td>Standard operating procedure library with versioning, owner, status, scope, and attachments.</td></tr>
+        <tr><td><code>Task Templates</code></td><td>12</td><td>1</td><td>Reusable task definitions for scheduled task generation.</td></tr>
+        <tr><td><code>Tasks</code></td><td>17</td><td>11</td><td>Operational task tracking across stores, compliance, onboarding, reporting, and recurring work.</td></tr>
+        <tr><td><code>Vendors</code></td><td>13</td><td>1</td><td>Vendor contacts, contracts, renewal dates, spend, and performance tracking.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>Product Module Mapping</h2>
+  <table>
+    <thead><tr><th>Module</th><th>Airtable tables</th><th>Software implication</th></tr></thead>
+    <tbody>
+      <tr><td>Store and staff master data</td><td><code>Pharmacies</code>,<code>People</code></td><td>Tenant, pharmacy/store, and staff/user models. Most records hang off a pharmacy and often a person.</td></tr>
+        <tr><td>Task management</td><td><code>Tasks</code>,<code>Task Templates</code>,<code>Onboarding Steps</code></td><td>Assigned tasks, due dates, priority, status, recurrence/templates, proof documents, and store-specific views.</td></tr>
+        <tr><td>Compliance operations</td><td><code>Compliance Items</code>,<code>Compliance Logs</code>,<code>Employee Licenses</code></td><td>Due dates, owners, renewal tracking, license data, cost, logs, exceptions, and reminders.</td></tr>
+        <tr><td>SOP and document control</td><td><code>SOPs</code>,<code>SOP Acknowledgments</code>,<code>Documents</code></td><td>Secure file metadata, SOP versioning, acknowledgment tracking, and document expiration reminders.</td></tr>
+        <tr><td>Doctor outreach / local growth</td><td><code>Doctor Offices</code>,<code>Doctor Visits</code></td><td>CRM-style workflow for prescriber offices, visits, follow-ups, referral status, and assigned reps.</td></tr>
+        <tr><td>Vendor and contract tracking</td><td><code>Vendors</code></td><td>Vendor contracts, contacts, renewal dates, annual value, auto-renew flags, and ratings.</td></tr>
+        <tr><td>Financial and KPI reporting</td><td><code>Financial Periods</code>,<code>Rx Metrics</code>,<code>AR Aging</code>,<code>KPI Scorecard</code>,<code>Daily Sales</code></td><td>Starter dashboard inputs that can later be replaced or enriched from PrimeRx API, webhooks, SFTP, POS, or accounting feeds.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>Linked Relationships</h2>
+  <p>These linked-record fields are the clearest relationship hints in the Airtable model.</p>
+  <table>
+    <thead><tr><th>Source table</th><th>Field</th><th>Links to</th></tr></thead>
+    <tbody>
+      <tr><td><code>AR Aging</code></td><td><code>Store</code></td><td><code>Pharmacies</code></td></tr>
+        <tr><td><code>Compliance Items</code></td><td><code>Store</code></td><td><code>Pharmacies</code></td></tr>
+        <tr><td><code>Compliance Items</code></td><td><code>Owner</code></td><td><code>People</code></td></tr>
+        <tr><td><code>Compliance Items</code></td><td><code>Compliance Logs</code></td><td><code>Compliance Logs</code></td></tr>
+        <tr><td><code>Compliance Items</code></td><td><code>SOPs</code></td><td><code>SOPs</code></td></tr>
+        <tr><td><code>Compliance Items</code></td><td><code>Documents</code></td><td><code>Documents</code></td></tr>
+        <tr><td><code>Compliance Logs</code></td><td><code>Store</code></td><td><code>Pharmacies</code></td></tr>
+        <tr><td><code>Compliance Logs</code></td><td><code>Logged By</code></td><td><code>People</code></td></tr>
+        <tr><td><code>Compliance Logs</code></td><td><code>Related Compliance Item</code></td><td><code>Compliance Items</code></td></tr>
+        <tr><td><code>Daily Sales</code></td><td><code>Store</code></td><td><code>Pharmacies</code></td></tr>
+        <tr><td><code>Daily Sales</code></td><td><code>Created By</code></td><td><code>People</code></td></tr>
+        <tr><td><code>Doctor Offices</code></td><td><code>Store</code></td><td><code>Pharmacies</code></td></tr>
+        <tr><td><code>Doctor Offices</code></td><td><code>Assigned Rep</code></td><td><code>People</code></td></tr>
+        <tr><td><code>Doctor Offices</code></td><td><code>Doctor Visits</code></td><td><code>Doctor Visits</code></td></tr>
+        <tr><td><code>Doctor Visits</code></td><td><code>Office</code></td><td><code>Doctor Offices</code></td></tr>
+        <tr><td><code>Doctor Visits</code></td><td><code>Rep</code></td><td><code>People</code></td></tr>
+        <tr><td><code>Documents</code></td><td><code>Store</code></td><td><code>Pharmacies</code></td></tr>
+        <tr><td><code>Documents</code></td><td><code>Uploaded By</code></td><td><code>People</code></td></tr>
+        <tr><td><code>Documents</code></td><td><code>Related Compliance Item</code></td><td><code>Compliance Items</code></td></tr>
+        <tr><td><code>Employee Licenses</code></td><td><code>Employee</code></td><td><code>People</code></td></tr>
+        <tr><td><code>Financial Periods</code></td><td><code>Store</code></td><td><code>Pharmacies</code></td></tr>
+        <tr><td><code>KPI Scorecard</code></td><td><code>Store</code></td><td><code>Pharmacies</code></td></tr>
+        <tr><td><code>Onboarding Steps</code></td><td><code>New Store</code></td><td><code>Pharmacies</code></td></tr>
+        <tr><td><code>Onboarding Steps</code></td><td><code>Assignee</code></td><td><code>People</code></td></tr>
+        <tr><td><code>People</code></td><td><code>Home Store</code></td><td><code>Pharmacies</code></td></tr>
+        <tr><td><code>People</code></td><td><code>Also Works At</code></td><td><code>Pharmacies</code></td></tr>
+        <tr><td><code>People</code></td><td><code>Tasks</code></td><td><code>Tasks</code></td></tr>
+        <tr><td><code>People</code></td><td><code>Compliance Items</code></td><td><code>Compliance Items</code></td></tr>
+        <tr><td><code>People</code></td><td><code>Compliance Logs</code></td><td><code>Compliance Logs</code></td></tr>
+        <tr><td><code>People</code></td><td><code>SOPs</code></td><td><code>SOPs</code></td></tr>
+        <tr><td><code>People</code></td><td><code>SOP Acknowledgments</code></td><td><code>SOP Acknowledgments</code></td></tr>
+        <tr><td><code>People</code></td><td><code>Documents 2</code></td><td><code>Documents</code></td></tr>
+        <tr><td><code>People</code></td><td><code>Doctor Offices</code></td><td><code>Doctor Offices</code></td></tr>
+        <tr><td><code>People</code></td><td><code>Doctor Visits</code></td><td><code>Doctor Visits</code></td></tr>
+        <tr><td><code>People</code></td><td><code>Employee Licenses</code></td><td><code>Employee Licenses</code></td></tr>
+        <tr><td><code>People</code></td><td><code>Onboarding Steps</code></td><td><code>Onboarding Steps</code></td></tr>
+        <tr><td><code>People</code></td><td><code>Daily Sales</code></td><td><code>Daily Sales</code></td></tr>
+        <tr><td><code>Pharmacies</code></td><td><code>People (Home Store)</code></td><td><code>People</code></td></tr>
+        <tr><td><code>Pharmacies</code></td><td><code>People (Also Works At)</code></td><td><code>People</code></td></tr>
+        <tr><td><code>Pharmacies</code></td><td><code>Tasks</code></td><td><code>Tasks</code></td></tr>
+        <tr><td><code>Pharmacies</code></td><td><code>Compliance Items</code></td><td><code>Compliance Items</code></td></tr>
+        <tr><td><code>Pharmacies</code></td><td><code>Compliance Logs</code></td><td><code>Compliance Logs</code></td></tr>
+        <tr><td><code>Pharmacies</code></td><td><code>SOPs</code></td><td><code>SOPs</code></td></tr>
+        <tr><td><code>Pharmacies</code></td><td><code>SOP Acknowledgments</code></td><td><code>SOP Acknowledgments</code></td></tr>
+        <tr><td><code>Pharmacies</code></td><td><code>Documents 2</code></td><td><code>Documents</code></td></tr>
+        <tr><td><code>Pharmacies</code></td><td><code>Doctor Offices</code></td><td><code>Doctor Offices</code></td></tr>
+        <tr><td><code>Pharmacies</code></td><td><code>Vendors</code></td><td><code>Vendors</code></td></tr>
+        <tr><td><code>Pharmacies</code></td><td><code>Financial Periods</code></td><td><code>Financial Periods</code></td></tr>
+        <tr><td><code>Pharmacies</code></td><td><code>Rx Metrics</code></td><td><code>Rx Metrics</code></td></tr>
+        <tr><td><code>Pharmacies</code></td><td><code>AR Aging</code></td><td><code>AR Aging</code></td></tr>
+        <tr><td><code>Pharmacies</code></td><td><code>Onboarding Steps</code></td><td><code>Onboarding Steps</code></td></tr>
+        <tr><td><code>Pharmacies</code></td><td><code>KPI Scorecard</code></td><td><code>KPI Scorecard</code></td></tr>
+        <tr><td><code>Pharmacies</code></td><td><code>Daily Sales</code></td><td><code>Daily Sales</code></td></tr>
+        <tr><td><code>Rx Metrics</code></td><td><code>Store</code></td><td><code>Pharmacies</code></td></tr>
+        <tr><td><code>SOP Acknowledgments</code></td><td><code>Employee</code></td><td><code>People</code></td></tr>
+        <tr><td><code>SOP Acknowledgments</code></td><td><code>Store</code></td><td><code>Pharmacies</code></td></tr>
+        <tr><td><code>SOP Acknowledgments</code></td><td><code>SOP</code></td><td><code>SOPs</code></td></tr>
+        <tr><td><code>SOPs</code></td><td><code>Owner</code></td><td><code>People</code></td></tr>
+        <tr><td><code>SOPs</code></td><td><code>Applies To Stores</code></td><td><code>Pharmacies</code></td></tr>
+        <tr><td><code>SOPs</code></td><td><code>Related Compliance Items</code></td><td><code>Compliance Items</code></td></tr>
+        <tr><td><code>SOPs</code></td><td><code>SOP Acknowledgments</code></td><td><code>SOP Acknowledgments</code></td></tr>
+        <tr><td><code>Task Templates</code></td><td><code>Linked Tasks</code></td><td><code>Tasks</code></td></tr>
+        <tr><td><code>Tasks</code></td><td><code>Store</code></td><td><code>Pharmacies</code></td></tr>
+        <tr><td><code>Tasks</code></td><td><code>Assignee</code></td><td><code>People</code></td></tr>
+        <tr><td><code>Tasks</code></td><td><code>Related Tasks</code></td><td><code>Tasks</code></td></tr>
+        <tr><td><code>Tasks</code></td><td><code>From field: Related Tasks</code></td><td><code>Tasks</code></td></tr>
+        <tr><td><code>Tasks</code></td><td><code>Task Templates</code></td><td><code>Task Templates</code></td></tr>
+        <tr><td><code>Vendors</code></td><td><code>Store</code></td><td><code>Pharmacies</code></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>Data And Security Notes</h2>
+  <ul>
+        <li><code>People</code> has emails, phones, roles, employment status, and staff links. Access should be role-restricted.</li>
+        <li><code>Doctor Offices</code> has doctor, contact, outreach, and referral information. Treat it as sensitive business relationship data.</li>
+        <li><code>Documents</code>, <code>Compliance Items</code>, <code>SOPs</code>, <code>Tasks</code>, and related attachment fields should move to secure object storage with metadata in the database.</li>
+        <li><code>Compliance Logs</code> may include drug and controlled-substance operational information. Do not import records until the client confirms allowed scope.</li>
+        <li>Financial, AR, KPI, and sales tables should be visible only to owner/bookkeeper/admin roles unless the client explicitly allows broader access.</li>
+        <li>Free-text fields such as notes and comments can contain PHI or sensitive context even when the field name does not imply it.</li>
+      </ul>
+</section>
+
+<section id="ar-aging">
+  <h2>AR Aging</h2>
+  <p>Accounts receivable aging by payer and month.</p>
+  <p class="meta">Fields: 12. Views: <code>Grid view</code>.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type / options</th></tr></thead>
+    <tbody>
+      <tr><td><code>Id</code></td><td>autoNumber</td></tr>
+        <tr><td><code>Month</code></td><td>date</td></tr>
+        <tr><td><code>Payer</code></td><td>singleSelect: Medicare Part D, Medicaid/Managed Care, Commercial/Other</td></tr>
+        <tr><td><code>Current 0-30</code></td><td>currency</td></tr>
+        <tr><td><code>Days 31-60</code></td><td>currency</td></tr>
+        <tr><td><code>Days 61-90</code></td><td>currency</td></tr>
+        <tr><td><code>Days 91-120</code></td><td>currency</td></tr>
+        <tr><td><code>Over 120</code></td><td>currency</td></tr>
+        <tr><td><code>Disputed</code></td><td>currency</td></tr>
+        <tr><td><code>Clean Claim Rate</code></td><td>percent</td></tr>
+        <tr><td><code>Avg Days to Collect</code></td><td>number</td></tr>
+        <tr><td><code>Store</code></td><td>multipleRecordLinks: links to Pharmacies</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="compliance-items">
+  <h2>Compliance Items</h2>
+  <p>Compliance requirement tracker with due dates, owners, documents, and renewal behavior.</p>
+  <p class="meta">Fields: 17. Views: <code>Grid view</code>.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type / options</th></tr></thead>
+    <tbody>
+      <tr><td><code>Requirement</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Store</code></td><td>multipleRecordLinks: links to Pharmacies</td></tr>
+        <tr><td><code>Category</code></td><td>singleSelect: DEA, State Board, Medicaid, Medicare, PBM, HIPAA, Insurance, License, Permit, Fridge Log, Controlled Substance, Training</td></tr>
+        <tr><td><code>License Number</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Issuing Authority</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Issue Date</code></td><td>date</td></tr>
+        <tr><td><code>Due Date</code></td><td>date</td></tr>
+        <tr><td><code>Frequency</code></td><td>singleSelect: One-time, Monthly, Quarterly, Annual, Biennial</td></tr>
+        <tr><td><code>Renewal Lead Time Days</code></td><td>number</td></tr>
+        <tr><td><code>Owner</code></td><td>multipleRecordLinks: links to People</td></tr>
+        <tr><td><code>Cost</code></td><td>currency</td></tr>
+        <tr><td><code>Status</code></td><td>singleSelect: On Track, Due Soon, Overdue, Completed, N/A</td></tr>
+        <tr><td><code>Document</code></td><td>multipleAttachments</td></tr>
+        <tr><td><code>Notes</code></td><td>multilineText</td></tr>
+        <tr><td><code>Compliance Logs</code></td><td>multipleRecordLinks: links to Compliance Logs</td></tr>
+        <tr><td><code>SOPs</code></td><td>multipleRecordLinks: links to SOPs</td></tr>
+        <tr><td><code>Documents</code></td><td>multipleRecordLinks: links to Documents</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="compliance-logs">
+  <h2>Compliance Logs</h2>
+  <p>Operational compliance log entries such as counts, temperatures, exceptions, and supporting documents.</p>
+  <p class="meta">Fields: 15. Views: <code>Grid view</code>.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type / options</th></tr></thead>
+    <tbody>
+      <tr><td><code>Id</code></td><td>autoNumber</td></tr>
+        <tr><td><code>Store</code></td><td>multipleRecordLinks: links to Pharmacies</td></tr>
+        <tr><td><code>Logged At</code></td><td>date</td></tr>
+        <tr><td><code>Logged By</code></td><td>multipleRecordLinks: links to People</td></tr>
+        <tr><td><code>Drug Name</code></td><td>singleLineText</td></tr>
+        <tr><td><code>DEA Schedule</code></td><td>singleSelect: II, III, IV, V, N/A</td></tr>
+        <tr><td><code>Expected Count</code></td><td>number</td></tr>
+        <tr><td><code>Actual Count</code></td><td>number</td></tr>
+        <tr><td><code>Discrepancy</code></td><td>number</td></tr>
+        <tr><td><code>Temp</code></td><td>number</td></tr>
+        <tr><td><code>Exception Flag</code></td><td>checkbox</td></tr>
+        <tr><td><code>Notes</code></td><td>multilineText</td></tr>
+        <tr><td><code>Related Compliance Item</code></td><td>multipleRecordLinks: links to Compliance Items</td></tr>
+        <tr><td><code>Supporting Document</code></td><td>multipleAttachments</td></tr>
+        <tr><td><code>Log Type</code></td><td>singleSelect: Fridge Temp, Controlled Substance Count, DEA 222 Audit, Biennial Inventory, Training Completion</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="daily-sales">
+  <h2>Daily Sales</h2>
+  <p>Daily store sales, prescription volume, vaccine count, and front-end sales snapshot.</p>
+  <p class="meta">Fields: 12. Views: <code>Grid view</code>.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type / options</th></tr></thead>
+    <tbody>
+      <tr><td><code>Id</code></td><td>autoNumber</td></tr>
+        <tr><td><code>Store</code></td><td>multipleRecordLinks: links to Pharmacies</td></tr>
+        <tr><td><code>Total Daily Sales</code></td><td>currency</td></tr>
+        <tr><td><code>Prescription Volume</code></td><td>number</td></tr>
+        <tr><td><code>Vaccine Count</code></td><td>number</td></tr>
+        <tr><td><code>Front-End/OTC Sales</code></td><td>currency</td></tr>
+        <tr><td><code>Created By</code></td><td>multipleRecordLinks: links to People</td></tr>
+        <tr><td><code>Notes</code></td><td>multilineText</td></tr>
+        <tr><td><code>Day of Week</code></td><td>aiText</td></tr>
+        <tr><td><code>Sales Category Highlight</code></td><td>aiText</td></tr>
+        <tr><td><code>Sales Trend Insight</code></td><td>aiText</td></tr>
+        <tr><td><code>Date</code></td><td>date</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="doctor-offices">
+  <h2>Doctor Offices</h2>
+  <p>Prescriber office CRM for outreach stage, assigned rep, follow-up, referral status, and lapse risk.</p>
+  <p class="meta">Fields: 18. Views: <code>Grid view</code>.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type / options</th></tr></thead>
+    <tbody>
+      <tr><td><code>Office Name</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Doctor Name</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Specialty</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Contact Name</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Phone</code></td><td>phoneNumber</td></tr>
+        <tr><td><code>Email</code></td><td>email</td></tr>
+        <tr><td><code>Store</code></td><td>multipleRecordLinks: links to Pharmacies</td></tr>
+        <tr><td><code>Stage</code></td><td>singleSelect: Cold, Contacted, Interested, Active, Lapsed</td></tr>
+        <tr><td><code>Assigned Rep</code></td><td>multipleRecordLinks: links to People</td></tr>
+        <tr><td><code>Services Pitched</code></td><td>multipleSelects: Compounding, MTM, HRT, Specialty Rx, Topicals, Pediatric, 340B</td></tr>
+        <tr><td><code>Next Follow-up</code></td><td>date</td></tr>
+        <tr><td><code>Referral Status</code></td><td>singleSelect: None, Occasional, Regular, Top Referrer</td></tr>
+        <tr><td><code>Est Monthly Rx</code></td><td>number</td></tr>
+        <tr><td><code>Notes</code></td><td>multilineText</td></tr>
+        <tr><td><code>Doctor Visits</code></td><td>multipleRecordLinks: links to Doctor Visits</td></tr>
+        <tr><td><code>Last Visit Date</code></td><td>rollup</td></tr>
+        <tr><td><code>Days Since Last Visit</code></td><td>formula</td></tr>
+        <tr><td><code>Lapse Risk</code></td><td>formula</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="doctor-visits">
+  <h2>Doctor Visits</h2>
+  <p>Visit history and next-action tracking for doctor office outreach.</p>
+  <p class="meta">Fields: 7. Views: <code>Grid view</code>.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type / options</th></tr></thead>
+    <tbody>
+      <tr><td><code>Visit Date</code></td><td>date</td></tr>
+        <tr><td><code>Office</code></td><td>multipleRecordLinks: links to Doctor Offices</td></tr>
+        <tr><td><code>Rep</code></td><td>multipleRecordLinks: links to People</td></tr>
+        <tr><td><code>Notes</code></td><td>multilineText</td></tr>
+        <tr><td><code>Outcome</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Next Action</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Next Follow-up</code></td><td>date</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="documents">
+  <h2>Documents</h2>
+  <p>Document metadata, attachments, permission levels, expiration dates, and compliance links.</p>
+  <p class="meta">Fields: 11. Views: <code>Grid view</code>.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type / options</th></tr></thead>
+    <tbody>
+      <tr><td><code>Name</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Store</code></td><td>multipleRecordLinks: links to Pharmacies</td></tr>
+        <tr><td><code>Folder</code></td><td>singleSelect: Licenses, Insurance, Leases, Contracts, HR, Compliance, SOPs, Financial, Other</td></tr>
+        <tr><td><code>Tags</code></td><td>multipleSelects: Urgent, Renewal Required, Legal, Training, Vendor, Annual, Audit, Payroll, Other</td></tr>
+        <tr><td><code>File</code></td><td>multipleAttachments</td></tr>
+        <tr><td><code>Version</code></td><td>number</td></tr>
+        <tr><td><code>Expiration Date</code></td><td>date</td></tr>
+        <tr><td><code>Permission Level</code></td><td>singleSelect: Owner Only, Managers, All Staff</td></tr>
+        <tr><td><code>Uploaded By</code></td><td>multipleRecordLinks: links to People</td></tr>
+        <tr><td><code>Related Compliance Item</code></td><td>multipleRecordLinks: links to Compliance Items</td></tr>
+        <tr><td><code>Notes</code></td><td>multilineText</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="employee-licenses">
+  <h2>Employee Licenses</h2>
+  <p>Employee credential and license expiration tracking.</p>
+  <p class="meta">Fields: 7. Views: <code>Grid view</code>.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type / options</th></tr></thead>
+    <tbody>
+      <tr><td><code>Id</code></td><td>autoNumber</td></tr>
+        <tr><td><code>License Type</code></td><td>singleSelect: Pharmacist, Tech Cert, DEA Training, HIPAA, Flu Cert</td></tr>
+        <tr><td><code>License Number</code></td><td>singleLineText</td></tr>
+        <tr><td><code>State</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Expiration Date</code></td><td>date</td></tr>
+        <tr><td><code>Status</code></td><td>singleSelect: Current, Due Soon, Expired</td></tr>
+        <tr><td><code>Employee</code></td><td>multipleRecordLinks: links to People</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="financial-periods">
+  <h2>Financial Periods</h2>
+  <p>Monthly financial performance facts and calculated margins by store.</p>
+  <p class="meta">Fields: 17. Views: <code>Grid view</code>, <code>Ensure Pharmacy</code>, <code>Harry&#39;s Pharmacy</code>, <code>Valley Care Pharmacy</code>, <code>Barth&#39;s EM</code>, <code>Barth&#39;s RH</code>, <code>Barth&#39;s EQ</code>, <code>Bath&#39;s WH</code>, <code>Barth&#39;s JP</code>.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type / options</th></tr></thead>
+    <tbody>
+      <tr><td><code>Name</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Store</code></td><td>multipleRecordLinks: links to Pharmacies</td></tr>
+        <tr><td><code>Month</code></td><td>date</td></tr>
+        <tr><td><code>Rx Revenue</code></td><td>currency</td></tr>
+        <tr><td><code>Front-End Revenue</code></td><td>currency</td></tr>
+        <tr><td><code>Compounding Revenue</code></td><td>currency</td></tr>
+        <tr><td><code>MTM Revenue</code></td><td>currency</td></tr>
+        <tr><td><code>COGS</code></td><td>currency</td></tr>
+        <tr><td><code>DIR Fees</code></td><td>currency</td></tr>
+        <tr><td><code>Payroll</code></td><td>currency</td></tr>
+        <tr><td><code>Rent</code></td><td>currency</td></tr>
+        <tr><td><code>Other OpEx</code></td><td>currency</td></tr>
+        <tr><td><code>Status</code></td><td>singleSelect: Draft, Locked</td></tr>
+        <tr><td><code>Total Revenue</code></td><td>formula</td></tr>
+        <tr><td><code>Gross Profit</code></td><td>formula</td></tr>
+        <tr><td><code>Gross Margin %</code></td><td>formula</td></tr>
+        <tr><td><code>EBITDA</code></td><td>formula</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="kpi-scorecard">
+  <h2>KPI Scorecard</h2>
+  <p>Target versus actual KPI tracking and dashboard source data.</p>
+  <p class="meta">Fields: 16. Views: <code>Grid view</code>.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type / options</th></tr></thead>
+    <tbody>
+      <tr><td><code>Name</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Store</code></td><td>multipleRecordLinks: links to Pharmacies</td></tr>
+        <tr><td><code>Month</code></td><td>date</td></tr>
+        <tr><td><code>KPI</code></td><td>singleSelect: Monthly Revenue, Rx Volume, Gross Margin %, EBITDA Margin %, New Rx Patients, New Active Offices, Payroll % of Revenue, DIR Fees %</td></tr>
+        <tr><td><code>Actual</code></td><td>number</td></tr>
+        <tr><td><code>Target</code></td><td>number</td></tr>
+        <tr><td><code>Direction</code></td><td>singleSelect: Higher, Lower</td></tr>
+        <tr><td><code>Weight</code></td><td>percent</td></tr>
+        <tr><td><code>Notes</code></td><td>multilineText</td></tr>
+        <tr><td><code>Variance</code></td><td>number</td></tr>
+        <tr><td><code>Variance %</code></td><td>percent</td></tr>
+        <tr><td><code>Status</code></td><td>singleSelect: On Track, Needs Attention, Off Track</td></tr>
+        <tr><td><code>Comparison</code></td><td>formula</td></tr>
+        <tr><td><code>Comments</code></td><td>multilineText</td></tr>
+        <tr><td><code>Prior Period Actual</code></td><td>number</td></tr>
+        <tr><td><code>Growth %</code></td><td>formula</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="onboarding-steps">
+  <h2>Onboarding Steps</h2>
+  <p>New store onboarding checklist records.</p>
+  <p class="meta">Fields: 9. Views: <code>Master Grid view</code>.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type / options</th></tr></thead>
+    <tbody>
+      <tr><td><code>Step Title</code></td><td>singleLineText</td></tr>
+        <tr><td><code>New Store</code></td><td>multipleRecordLinks: links to Pharmacies</td></tr>
+        <tr><td><code>Category</code></td><td>singleSelect: Legal, License, PBM, Facility, Staffing, Systems</td></tr>
+        <tr><td><code>Assignee</code></td><td>multipleRecordLinks: links to People</td></tr>
+        <tr><td><code>Sequence</code></td><td>number</td></tr>
+        <tr><td><code>Due Date</code></td><td>date</td></tr>
+        <tr><td><code>Status</code></td><td>singleSelect: Not Started, In Progress, Done</td></tr>
+        <tr><td><code>Document</code></td><td>multipleAttachments</td></tr>
+        <tr><td><code>Notes</code></td><td>multilineText</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="people">
+  <h2>People</h2>
+  <p>Staff directory, user-role source, assignee lookup, and notification recipient source.</p>
+  <p class="meta">Fields: 21. Views: <code>Grid view</code>.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type / options</th></tr></thead>
+    <tbody>
+      <tr><td><code>Full Name</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Email</code></td><td>email</td></tr>
+        <tr><td><code>Phone</code></td><td>phoneNumber</td></tr>
+        <tr><td><code>Role</code></td><td>singleSelect: Owner/Admin, Operations Manager, Store Manager, Pharmacist, Technician, Driver, Bookkeeper, Marketing, Manager, Software Engineer, HR Specialist, Product Designer, Marketing Coordinator, QA Analyst, Customer Support, DevOps Engineer, Business Analyst, Intern, Office Manager, Data Scientist, Finance Assistant, Sales Lead, Content Writer</td></tr>
+        <tr><td><code>Home Store</code></td><td>multipleRecordLinks: links to Pharmacies</td></tr>
+        <tr><td><code>Also Works At</code></td><td>multipleRecordLinks: links to Pharmacies</td></tr>
+        <tr><td><code>Employment Status</code></td><td>singleSelect: Active, On Leave, Terminated, Full-time, Part-time, Contractor, Intern</td></tr>
+        <tr><td><code>Hire Date</code></td><td>date</td></tr>
+        <tr><td><code>Notes</code></td><td>multilineText</td></tr>
+        <tr><td><code>Documents</code></td><td>multipleAttachments</td></tr>
+        <tr><td><code>Tasks</code></td><td>multipleRecordLinks: links to Tasks</td></tr>
+        <tr><td><code>Compliance Items</code></td><td>multipleRecordLinks: links to Compliance Items</td></tr>
+        <tr><td><code>Compliance Logs</code></td><td>multipleRecordLinks: links to Compliance Logs</td></tr>
+        <tr><td><code>SOPs</code></td><td>multipleRecordLinks: links to SOPs</td></tr>
+        <tr><td><code>SOP Acknowledgments</code></td><td>multipleRecordLinks: links to SOP Acknowledgments</td></tr>
+        <tr><td><code>Documents 2</code></td><td>multipleRecordLinks: links to Documents</td></tr>
+        <tr><td><code>Doctor Offices</code></td><td>multipleRecordLinks: links to Doctor Offices</td></tr>
+        <tr><td><code>Doctor Visits</code></td><td>multipleRecordLinks: links to Doctor Visits</td></tr>
+        <tr><td><code>Employee Licenses</code></td><td>multipleRecordLinks: links to Employee Licenses</td></tr>
+        <tr><td><code>Onboarding Steps</code></td><td>multipleRecordLinks: links to Onboarding Steps</td></tr>
+        <tr><td><code>Daily Sales</code></td><td>multipleRecordLinks: links to Daily Sales</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="pharmacies">
+  <h2>Pharmacies</h2>
+  <p>Store master record and central hub for most operational, compliance, financial, and dashboard data.</p>
+  <p class="meta">Fields: 32. Views: <code>Grid view</code>.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type / options</th></tr></thead>
+    <tbody>
+      <tr><td><code>Name</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Code</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Display Label</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Address</code></td><td>singleLineText</td></tr>
+        <tr><td><code>City</code></td><td>singleLineText</td></tr>
+        <tr><td><code>State</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Zip</code></td><td>singleLineText</td></tr>
+        <tr><td><code>NPI</code></td><td>singleLineText</td></tr>
+        <tr><td><code>NCPDP</code></td><td>singleLineText</td></tr>
+        <tr><td><code>DEA Number</code></td><td>singleLineText</td></tr>
+        <tr><td><code>State License No</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Status</code></td><td>singleSelect: Prospect, Onboarding, Active, Paused, Closed, Inactive</td></tr>
+        <tr><td><code>Opened Date</code></td><td>date</td></tr>
+        <tr><td><code>Notes</code></td><td>multilineText</td></tr>
+        <tr><td><code>External Links</code></td><td>url</td></tr>
+        <tr><td><code>Documents</code></td><td>multipleAttachments</td></tr>
+        <tr><td><code>People (Home Store)</code></td><td>multipleRecordLinks: links to People</td></tr>
+        <tr><td><code>People (Also Works At)</code></td><td>multipleRecordLinks: links to People</td></tr>
+        <tr><td><code>Tasks</code></td><td>multipleRecordLinks: links to Tasks</td></tr>
+        <tr><td><code>Compliance Items</code></td><td>multipleRecordLinks: links to Compliance Items</td></tr>
+        <tr><td><code>Compliance Logs</code></td><td>multipleRecordLinks: links to Compliance Logs</td></tr>
+        <tr><td><code>SOPs</code></td><td>multipleRecordLinks: links to SOPs</td></tr>
+        <tr><td><code>SOP Acknowledgments</code></td><td>multipleRecordLinks: links to SOP Acknowledgments</td></tr>
+        <tr><td><code>Documents 2</code></td><td>multipleRecordLinks: links to Documents</td></tr>
+        <tr><td><code>Doctor Offices</code></td><td>multipleRecordLinks: links to Doctor Offices</td></tr>
+        <tr><td><code>Vendors</code></td><td>multipleRecordLinks: links to Vendors</td></tr>
+        <tr><td><code>Financial Periods</code></td><td>multipleRecordLinks: links to Financial Periods</td></tr>
+        <tr><td><code>Rx Metrics</code></td><td>multipleRecordLinks: links to Rx Metrics</td></tr>
+        <tr><td><code>AR Aging</code></td><td>multipleRecordLinks: links to AR Aging</td></tr>
+        <tr><td><code>Onboarding Steps</code></td><td>multipleRecordLinks: links to Onboarding Steps</td></tr>
+        <tr><td><code>KPI Scorecard</code></td><td>multipleRecordLinks: links to KPI Scorecard</td></tr>
+        <tr><td><code>Daily Sales</code></td><td>multipleRecordLinks: links to Daily Sales</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="rx-metrics">
+  <h2>Rx Metrics</h2>
+  <p>Monthly pharmacy operations metrics by store.</p>
+  <p class="meta">Fields: 15. Views: <code>Master</code>, <code>Harry&#39;s</code>, <code>Ensure</code>, <code>VCP</code>, <code>Barth&#39;s EM</code>, <code>Barth&#39;s RH</code>, <code>Barth&#39;s EQ</code>, <code>Barth&#39;s WH</code>, <code>Barth&#39;s JP</code>.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type / options</th></tr></thead>
+    <tbody>
+      <tr><td><code>Id</code></td><td>autoNumber</td></tr>
+        <tr><td><code>Month</code></td><td>date</td></tr>
+        <tr><td><code>New Rx</code></td><td>number</td></tr>
+        <tr><td><code>Refills</code></td><td>number</td></tr>
+        <tr><td><code>Generic Rx</code></td><td>number</td></tr>
+        <tr><td><code>Brand Rx</code></td><td>number</td></tr>
+        <tr><td><code>Compound Rx</code></td><td>number</td></tr>
+        <tr><td><code>MTM Interventions</code></td><td>number</td></tr>
+        <tr><td><code>Adherence Rate</code></td><td>percent</td></tr>
+        <tr><td><code>DIR Fees</code></td><td>currency</td></tr>
+        <tr><td><code>Returned Rx</code></td><td>number</td></tr>
+        <tr><td><code>Fill Rate</code></td><td>percent</td></tr>
+        <tr><td><code>Avg Wait Min</code></td><td>number</td></tr>
+        <tr><td><code>Complaints</code></td><td>number</td></tr>
+        <tr><td><code>Store</code></td><td>multipleRecordLinks: links to Pharmacies</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="sop-acknowledgments">
+  <h2>SOP Acknowledgments</h2>
+  <p>Employee acknowledgment tracking for SOP versions and due dates.</p>
+  <p class="meta">Fields: 8. Views: <code>Grid view</code>.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type / options</th></tr></thead>
+    <tbody>
+      <tr><td><code>Id</code></td><td>autoNumber</td></tr>
+        <tr><td><code>Employee</code></td><td>multipleRecordLinks: links to People</td></tr>
+        <tr><td><code>Store</code></td><td>multipleRecordLinks: links to Pharmacies</td></tr>
+        <tr><td><code>Version Acknowledged</code></td><td>number</td></tr>
+        <tr><td><code>Acknowledged Date</code></td><td>date</td></tr>
+        <tr><td><code>Status</code></td><td>singleSelect: Assigned, Completed, Overdue</td></tr>
+        <tr><td><code>Due Date</code></td><td>date</td></tr>
+        <tr><td><code>SOP</code></td><td>multipleRecordLinks: links to SOPs</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="sops">
+  <h2>SOPs</h2>
+  <p>Standard operating procedure library with versioning, owner, status, scope, and attachments.</p>
+  <p class="meta">Fields: 12. Views: <code>Grid view</code>.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type / options</th></tr></thead>
+    <tbody>
+      <tr><td><code>Title</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Category</code></td><td>singleSelect: Compliance, Workflow, Admin, Expansion, Safety</td></tr>
+        <tr><td><code>Owner</code></td><td>multipleRecordLinks: links to People</td></tr>
+        <tr><td><code>Status</code></td><td>singleSelect: Draft, Published, Archived</td></tr>
+        <tr><td><code>Scope</code></td><td>singleSelect: Org-wide, Store-specific</td></tr>
+        <tr><td><code>Applies To Stores</code></td><td>multipleRecordLinks: links to Pharmacies</td></tr>
+        <tr><td><code>Current Version</code></td><td>number</td></tr>
+        <tr><td><code>Document</code></td><td>multipleAttachments</td></tr>
+        <tr><td><code>Change Summary</code></td><td>multilineText</td></tr>
+        <tr><td><code>Published Date</code></td><td>date</td></tr>
+        <tr><td><code>Related Compliance Items</code></td><td>multipleRecordLinks: links to Compliance Items</td></tr>
+        <tr><td><code>SOP Acknowledgments</code></td><td>multipleRecordLinks: links to SOP Acknowledgments</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="task-templates">
+  <h2>Task Templates</h2>
+  <p>Reusable task definitions for scheduled task generation.</p>
+  <p class="meta">Fields: 12. Views: <code>Grid view</code>.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type / options</th></tr></thead>
+    <tbody>
+      <tr><td><code>Task Title</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Description</code></td><td>multilineText</td></tr>
+        <tr><td><code>Responsible Role</code></td><td>singleSelect: Pharmacist, Technician, Manager, Ops Manager</td></tr>
+        <tr><td><code>Store Scope</code></td><td>singleSelect: All Stores, Per Store</td></tr>
+        <tr><td><code>Frequency</code></td><td>singleSelect: Daily, Weekly, Monthly, Quarterly, Annual</td></tr>
+        <tr><td><code>Category</code></td><td>singleSelect: Operations, Compliance, Finance, HR, Marketing, Onboarding, Maintenance, Reporting, Web, Meeting, Feedback, Admin, IT, Development, Training, Project</td></tr>
+        <tr><td><code>Priority</code></td><td>singleSelect: Low, Medium, High, Urgent</td></tr>
+        <tr><td><code>Days Offset</code></td><td>number</td></tr>
+        <tr><td><code>Template Active</code></td><td>checkbox</td></tr>
+        <tr><td><code>Linked Tasks</code></td><td>multipleRecordLinks: links to Tasks</td></tr>
+        <tr><td><code>Suggested Instructions</code></td><td>aiText</td></tr>
+        <tr><td><code>Auto-Assign Logic</code></td><td>aiText</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="tasks">
+  <h2>Tasks</h2>
+  <p>Operational task tracking across stores, compliance, onboarding, reporting, and recurring work.</p>
+  <p class="meta">Fields: 17. Views: <code>Master Grid view</code>, <code>Harry&#39;s Grid View</code>, <code>Ensure Grid View </code>, <code>Master Calendar</code>, <code>Harry&#39;s Pharmacy </code>, <code>Ensure Pharmacy </code>, <code>Barth&#39;s Pharmacy EM</code>, <code>Barth&#39;s Pharmacy RH</code>, <code>Barth&#39;s Pharmacy EQ</code>, <code>Barth&#39;s Pharmacy WH</code>, <code>Barth&#39;s Pharmacy JP</code>.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type / options</th></tr></thead>
+    <tbody>
+      <tr><td><code>Title</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Description</code></td><td>multilineText</td></tr>
+        <tr><td><code>Store</code></td><td>multipleRecordLinks: links to Pharmacies</td></tr>
+        <tr><td><code>Category</code></td><td>singleSelect: Operations, Compliance, Finance, HR, Marketing, Onboarding, Maintenance, Reporting, Web, Meeting, Feedback, Admin, IT, Development, Training, Project</td></tr>
+        <tr><td><code>Priority</code></td><td>singleSelect: Low, Medium, High, Urgent</td></tr>
+        <tr><td><code>Status</code></td><td>singleSelect: Open, In Progress, Blocked, Done, Cancelled, To Do, Completed</td></tr>
+        <tr><td><code>Assignee</code></td><td>multipleRecordLinks: links to People</td></tr>
+        <tr><td><code>Due Date</code></td><td>date</td></tr>
+        <tr><td><code>Completed At</code></td><td>date</td></tr>
+        <tr><td><code>Recurrence</code></td><td>singleSelect: One-time, Daily, Weekly, Monthly, Quarterly, Annual, Biennial, None, Yearly</td></tr>
+        <tr><td><code>Proof of Completion</code></td><td>multipleAttachments</td></tr>
+        <tr><td><code>Comments</code></td><td>multilineText</td></tr>
+        <tr><td><code>Source</code></td><td>singleSelect: Manual, Compliance, SOP Training, Onboarding, Internal, Marketing, Client, External</td></tr>
+        <tr><td><code>Related Tasks</code></td><td>multipleRecordLinks: links to Tasks</td></tr>
+        <tr><td><code>Documents</code></td><td>multipleAttachments</td></tr>
+        <tr><td><code>From field: Related Tasks</code></td><td>multipleRecordLinks: links to Tasks</td></tr>
+        <tr><td><code>Task Templates</code></td><td>multipleRecordLinks: links to Task Templates</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="vendors">
+  <h2>Vendors</h2>
+  <p>Vendor contacts, contracts, renewal dates, spend, and performance tracking.</p>
+  <p class="meta">Fields: 13. Views: <code>Grid view</code>.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type / options</th></tr></thead>
+    <tbody>
+      <tr><td><code>Vendor Name</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Category</code></td><td>singleSelect: Drug Wholesaler, Specialty, PBM, Software, Waste Disposal, Security, Payroll, Insurance, CPA, Supplies, Primary Drug Wholesaler, Secondary Drug Wholesaler, Specialty Pharmaceuticals, Pharmacy Software, Medical Waste Disposal, Security / Alarms, Payroll Processing, Uniforms / Supplies, Accounting / Tax, Business Insurance</td></tr>
+        <tr><td><code>Store</code></td><td>multipleRecordLinks: links to Pharmacies</td></tr>
+        <tr><td><code>Contact Name</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Phone</code></td><td>phoneNumber</td></tr>
+        <tr><td><code>Email</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Contract Start</code></td><td>date</td></tr>
+        <tr><td><code>Contract End</code></td><td>date</td></tr>
+        <tr><td><code>Annual Value</code></td><td>currency</td></tr>
+        <tr><td><code>Payment Terms</code></td><td>singleLineText</td></tr>
+        <tr><td><code>Auto-Renew</code></td><td>checkbox</td></tr>
+        <tr><td><code>Performance Rating</code></td><td>rating</td></tr>
+        <tr><td><code>Notes</code></td><td>multilineText</td></tr>
+    </tbody>
+  </table>
+</section>
+
+
+  </main>
+</body>
+</html>

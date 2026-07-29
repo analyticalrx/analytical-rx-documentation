@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Canonical Event Schema Review Guide</title>
+  <style>
+    :root {
+      --ink: #1f2933;
+      --muted: #5f6c7b;
+      --line: #d9e2ec;
+      --panel: #f8fafc;
+      --code: #eef2f7;
+      --accent: #0f766e;
+      --accent-soft: #ccfbf1;
+      --warn: #9a3412;
+      --warn-soft: #ffedd5;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background: #ffffff;
+      line-height: 1.58;
+    }
+
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 44px 24px 72px;
+    }
+
+    nav {
+      margin-bottom: 28px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    nav a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    header {
+      max-width: 940px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 34px 0 12px;
+      font-size: 23px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 22px 0 8px;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    p {
+      margin: 0 0 13px;
+    }
+
+    ul, ol {
+      margin: 0 0 18px;
+      padding-left: 24px;
+    }
+
+    li {
+      margin: 5px 0;
+    }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: var(--code);
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 24px;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--panel);
+      text-align: left;
+    }
+
+    a {
+      color: var(--accent);
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .callout {
+      margin: 16px 0;
+      padding: 14px 18px;
+      border-left: 4px solid var(--accent);
+      border-radius: 6px;
+      background: var(--accent-soft);
+    }
+
+    .warn {
+      border-left-color: var(--warn);
+      background: var(--warn-soft);
+    }
+
+    .diagram {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      overflow-x: auto;
+    }
+
+    .diagram img {
+      display: block;
+      width: 100%;
+      min-width: 760px;
+      height: auto;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <nav><a href="../index.html">Back to design index</a></nav>
+
+    <header>
+      <h1>Canonical Event Schema Review Guide</h1>
+      <p class="lead">Step-by-step review guide for the MVP database schema that stores PrimeRx webhook/API events in a canonical, dashboard-ready format.</p>
+    </header>
+
+    <section>
+      <h2>How To Review This Document</h2>
+      <ol>
+        <li>Start with the scope and phase boundary so the review stays focused on Phase 1.</li>
+        <li>Review the source-of-truth rules to understand where each type of data belongs.</li>
+        <li>Review the main tables and relationships.</li>
+        <li>Review the access model and PHI restrictions.</li>
+        <li>Use the checklist at the end to leave comments or approval feedback.</li>
+      </ol>
+      <div class="callout">
+        <p>This is the main reviewer document. Use the linked field dictionary, SQL, and ERD only when you need column-level or implementation-level detail.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Review Goal</h2>
+      <p>The goal is to confirm that the Phase 1 schema can receive PrimeRx webhook events, store restricted operational references safely, transform events into a PHI-minimized canonical model, and support starter dashboards and API enrichment.</p>
+      <p>This review is not asking the team to finalize forecasting, long-term analytics marts, doctor CRM workflows, or production security policy. Those will be reviewed separately.</p>
+    </section>
+
+    <section>
+      <h2>Phase 1 Boundary</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Included now</th>
+            <th>Not included now</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Webhook/API event audit and idempotency tracking.</td>
+            <td>Forecasting models or machine learning feature marts.</td>
+          </tr>
+          <tr>
+            <td>Restricted storage of source prescription identifiers needed for API lookup.</td>
+            <td>Patient-facing CRM or patient outreach workflows.</td>
+          </tr>
+          <tr>
+            <td>Normalized drug and payer lookup tables.</td>
+            <td>Long-term analytics warehouse design.</td>
+          </tr>
+          <tr>
+            <td>Canonical pharmacy event rows and payment rows for starter dashboards.</td>
+            <td>Final production row-level security policy and legal retention policy.</td>
+          </tr>
+          <tr>
+            <td>API enrichment path for filling safe missing values later.</td>
+            <td>Full reporting cube or dashboard-specific aggregate tables.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Source Of Truth Rules</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Data category</th>
+            <th>Primary location</th>
+            <th>Rule</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Exact original webhook/API payload</td>
+            <td>Restricted encrypted object storage, if raw archive is enabled</td>
+            <td>Do not copy full raw JSON into dashboard-facing tables.</td>
+          </tr>
+          <tr>
+            <td>Raw payload archive metadata</td>
+            <td><code>ops.raw_payload_archive</code></td>
+            <td>Store pointer, hash, size, source, and retention metadata only.</td>
+          </tr>
+          <tr>
+            <td>Real <code>RxNo</code> and <code>RefillNo</code></td>
+            <td><code>ops.source_prescription_reference_restricted</code></td>
+            <td>Store only in restricted operational schema because API enrichment may need these values.</td>
+          </tr>
+          <tr>
+            <td>Drug attributes</td>
+            <td><code>core.drug</code></td>
+            <td>Canonical events store <code>drug_id</code> only, not repeated drug snapshots.</td>
+          </tr>
+          <tr>
+            <td>Payer attributes</td>
+            <td><code>core.payer</code></td>
+            <td>Insurance payers are linked through payment rows. Cash payments use <code>payer_id = null</code>.</td>
+          </tr>
+          <tr>
+            <td>Prescription/fill event facts</td>
+            <td><code>analytics.canonical_pharmacy_event</code></td>
+            <td>Store safe event facts, statuses, dates, quantities, costs, and tokens.</td>
+          </tr>
+          <tr>
+            <td>Payment components</td>
+            <td><code>analytics.canonical_event_payer_payment</code></td>
+            <td>Store insurance, patient pay, cash, and other payment components as rows.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Schema Overview</h2>
+      <div class="diagram">
+        <img src="../diagrams/canonical-event-er.svg" alt="Simplified canonical event database ER diagram">
+      </div>
+      <p class="meta">Full column-level ERD: <a href="../diagrams/canonical-event-postgres-erd.svg"><code>diagrams/canonical-event-postgres-erd.svg</code></a></p>
+
+      <h3>Core schema</h3>
+      <p><code>core</code> stores tenant-level and lookup data used by the application: tenants, pharmacies, drugs, and payers.</p>
+
+      <h3>Ops schema</h3>
+      <p><code>ops</code> stores restricted operational data: audit state, raw payload archive metadata, and real source prescription references used by backend services.</p>
+
+      <h3>Analytics schema</h3>
+      <p><code>analytics</code> stores PHI-minimized canonical events and event payment rows. This is the primary read area for dashboards and basic reporting.</p>
+    </section>
+
+    <section>
+      <h2>Main Relationships</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Relationship</th>
+            <th>Meaning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>core.tenant</code> to all major tables</td>
+            <td>Every important row is scoped by tenant for multi-pharmacy isolation.</td>
+          </tr>
+          <tr>
+            <td><code>core.pharmacy</code> to canonical events</td>
+            <td>Each canonical event belongs to a pharmacy when the source data provides or resolves the store.</td>
+          </tr>
+          <tr>
+            <td><code>ops.webhook_event_audit</code> to <code>analytics.canonical_pharmacy_event</code></td>
+            <td>Each canonical event links back to the audit record that explains source, status, duplicate handling, and processing result.</td>
+          </tr>
+          <tr>
+            <td><code>core.drug</code> to <code>analytics.canonical_pharmacy_event</code></td>
+            <td>Canonical events use <code>drug_id</code> when the drug is available or can be matched.</td>
+          </tr>
+          <tr>
+            <td><code>analytics.canonical_pharmacy_event</code> to <code>analytics.canonical_event_payer_payment</code></td>
+            <td>One event may have zero or more payment rows.</td>
+          </tr>
+          <tr>
+            <td><code>analytics.canonical_event_payer_payment</code> to <code>core.payer</code></td>
+            <td>Insurance payment rows can link to a payer. Cash payment rows intentionally keep <code>payer_id = null</code>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Processing Flow</h2>
+      <ol>
+        <li>Webhook receiver accepts the event and creates an audit record.</li>
+        <li>Receiver optionally stores raw payload in restricted encrypted storage and stores only archive metadata in the database.</li>
+        <li>Processor validates the queued event, applies idempotency checks, and updates audit status.</li>
+        <li>Processor stores real <code>RxNo</code> and <code>RefillNo</code> only in the restricted <code>ops</code> schema when present.</li>
+        <li>Processor upserts safe drug and payer lookup rows.</li>
+        <li>Processor writes one canonical event row and related payment rows.</li>
+        <li>API enrichment can later use restricted source references to fetch missing details and update only safe fields.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Access Model</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Actor or service</th>
+            <th>Allowed access</th>
+            <th>Restriction</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Webhook receiver</td>
+            <td>Insert audit rows and raw archive metadata.</td>
+            <td>Do not write canonical analytics rows directly. Do not log raw payloads.</td>
+          </tr>
+          <tr>
+            <td>Webhook processor</td>
+            <td>Update audit rows, write restricted references, upsert lookups, and write canonical/payment rows.</td>
+            <td>Do not copy direct patient identifiers into canonical tables or logs.</td>
+          </tr>
+          <tr>
+            <td>API enrichment worker</td>
+            <td>Read restricted source references and update safe missing fields in lookup, canonical, and payment tables.</td>
+            <td>Do not expose real <code>RxNo</code>, <code>RefillNo</code>, or raw API responses outside the restricted service boundary.</td>
+          </tr>
+          <tr>
+            <td>Dashboard/API application</td>
+            <td>Read safe <code>core</code> labels, <code>analytics.canonical_pharmacy_event</code>, and <code>analytics.canonical_event_payer_payment</code> for authorized tenant/pharmacy scope.</td>
+            <td>No direct access to restricted <code>ops</code> tables or raw payload archive.</td>
+          </tr>
+          <tr>
+            <td>Database administrator</td>
+            <td>Manage schema, migrations, indexes, roles, backups, and emergency support.</td>
+            <td>Production access should be limited, named, and audited.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Raw Payload Retention</h2>
+      <p>MVP default: retain restricted raw payload archive records for 30 days. The schema uses <code>retention_until = current_date + 30</code> for archive metadata rows.</p>
+      <div class="callout warn">
+        <p>This 30-day value is an MVP engineering default. Before production, legal/security should confirm the retention period and whether deletion should be enforced by S3 lifecycle policy, database cleanup job, or both.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Reviewer Checklist</h2>
+      <ul>
+        <li>Confirm that the Phase 1 webhook/API fields can map into the current canonical event, drug, payer, and payment tables.</li>
+        <li>Confirm that <code>RxNo</code> and <code>RefillNo</code> being restricted to <code>ops.source_prescription_reference_restricted</code> still supports API enrichment.</li>
+        <li>Confirm that drug details belong in <code>core.drug</code> and are linked by <code>drug_id</code>, not duplicated in the event row.</li>
+        <li>Confirm that payer details belong in <code>core.payer</code> and are linked through payment rows.</li>
+        <li>Confirm that cash payment handling is clear: <code>payment_type = 'cash'</code> and <code>payer_id = null</code>.</li>
+        <li>Confirm that dashboard/API users do not need direct access to restricted <code>ops</code> tables.</li>
+        <li>Identify any missing fields needed for Phase 1 starter dashboards.</li>
+        <li>Identify any fields that should move from dashboard-facing tables into restricted operational storage.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Detailed References</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Reference</th>
+            <th>Use when</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a href="canonical-event-database-schema.html">Canonical Event Database Schema</a></td>
+            <td>You need the design explanation, boundary decisions, and processing write example.</td>
+          </tr>
+          <tr>
+            <td><a href="canonical-event-table-dictionary.html">Canonical Event Table Dictionary</a></td>
+            <td>You need field-by-field meanings and table access restrictions.</td>
+          </tr>
+          <tr>
+            <td><a href="../schemas/mvp_canonical_event_schema.sql">MVP Canonical Event SQL</a></td>
+            <td>You need the executable PostgreSQL DDL draft.</td>
+          </tr>
+          <tr>
+            <td><a href="../diagrams/canonical-event-postgres-erd.svg">Full PostgreSQL ERD</a></td>
+            <td>You need all columns and foreign key relationships in one diagram.</td>
+          </tr>
+          <tr>
+            <td><a href="pgadmin-erd-generation-guide.html">pgAdmin ERD Generation Guide</a></td>
+            <td>You want to load the schema locally and inspect the ERD in pgAdmin.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>
