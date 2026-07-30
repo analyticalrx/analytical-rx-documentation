@@ -45,14 +45,14 @@ processing: {
   enrich: "Enrich from API if Needed"
 }
 
-analytics: {
-  label: "Analytics Update"
+canonical: {
+  label: "Canonical Persistence"
   class: core
-  model: "Canonical Event / Fill Records"
-  outputs: "KPIs, Alerts, Audit"
+  model: "Canonical Event + Payment Rows"
+  outputs: "Audit + Dashboard Readiness"
 }
 
-reconcile: "Periodic API / Bulk Reconciliation"
+reconcile: "Periodic API / SFTP Reconciliation"
 reconcile.class: support
 
 event -> receiver.receive
@@ -61,6 +61,6 @@ receiver.store -> receiver.ack
 receiver.store -> processing.normalize
 processing.normalize -> processing.privacy
 processing.privacy -> processing.enrich
-processing.enrich -> analytics.model
-analytics.model -> analytics.outputs
-reconcile -> analytics.model
+processing.enrich -> canonical.model
+canonical.model -> canonical.outputs
+reconcile -> canonical.model

@@ -157,14 +157,14 @@
 
     <header>
       <h1>PrimeRx Webhook Processing Pipeline</h1>
-      <p class="lead">Design for receiving PrimeRx webhook events safely, processing them asynchronously, suppressing PHI, and using them as near-real-time triggers for analytics updates.</p>
+      <p class="lead">Design for receiving PrimeRx webhook events safely, processing them asynchronously, suppressing PHI, and using them as near-real-time triggers for canonical data updates and starter dashboards.</p>
     </header>
 
     <section>
       <h2>Pipeline Position</h2>
       <div class="callout">
         <p>Webhooks are the primary near-real-time trigger. They are not sufficient by themselves for initial historical load, missed-event recovery, daily reconciliation, or KPI rebuilds.</p>
-        <p>The full integration strategy is: <code>webhooks</code> for event awareness, <code>API</code> for enrichment and reconciliation, and <code>bulk/export</code> for backfill if PrimeRx supports it.</p>
+        <p>The full integration strategy is: <code>webhooks</code> for event awareness, <code>API</code> for enrichment and reconciliation, and <code>SFTP/batch feeds</code> for historical load, daily feed transfer, and KPI rebuilds after PrimeRx field specification and setup approval.</p>
       </div>
     </section>
 
@@ -200,7 +200,7 @@
           <ul>
             <li>API enrichment for full details.</li>
             <li>Bulk or API reconciliation.</li>
-            <li>PHI suppression before analytics storage.</li>
+            <li>PHI suppression before canonical storage.</li>
           </ul>
         </div>
       </div>
@@ -208,7 +208,7 @@
 
     <section>
       <h2>Relevant Events</h2>
-      <p>The webhook guide lists several events. For analytics, group them into these business categories:</p>
+      <p>The webhook guide lists several events. For canonical storage and dashboard readiness, group them into these business categories:</p>
       <ul>
         <li>Prescription lifecycle: saved, filed, billed, reversed, deleted.</li>
         <li>Claim exceptions: transmission rejected.</li>
@@ -236,7 +236,7 @@
       <div class="callout risk">
         <p>Webhook payloads can include patient name, DOB, address, phone, email, driver license, original prescription number, prescription notes, and other direct identifiers. Raw webhook data must be treated as PHI until transformed.</p>
       </div>
-      <p>The analytics database should only receive HIPAA-minimized data. Direct patient identifiers should be excluded unless a later compliance decision explicitly allows a different model.</p>
+      <p>The canonical database should only receive HIPAA-minimized data. Direct patient identifiers should be excluded unless a later compliance decision explicitly allows a different model.</p>
     </section>
 
     <section>

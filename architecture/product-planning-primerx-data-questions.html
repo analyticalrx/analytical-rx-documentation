@@ -202,7 +202,7 @@
       <p>The Swagger UI loads an OpenAPI document from:</p>
       <p><a href="https://gatewayapi.micromerchantsystems.com/swagger/v2/swagger.json">https://gatewayapi.micromerchantsystems.com/swagger/v2/swagger.json</a></p>
       <p>The architecture should now treat API integration as the preferred path while keeping file-based exports as a fallback until production credentials, endpoint access, data coverage, rate limits, and privacy controls are confirmed.</p>
-      <p>Additional update: a local PDF named <code>PrimeRx Webhook Onboarding.pdf</code> was found in Downloads. It confirms that PrimeRx supports webhook notifications for selected events. Webhooks should be treated as a near real-time event notification channel, not as the only source for historical or complete analytics data.</p>
+      <p>Additional update: a local PDF named <code>PrimeRx Webhook Onboarding.pdf</code> was found in Downloads. It confirms that PrimeRx supports webhook notifications for selected events. Webhooks should be treated as a near real-time event notification channel, not as the only source for historical or complete dashboard data.</p>
       <p>The core planning principle is:</p>
       <blockquote>
       <p>Build the product around a canonical pharmacy analytics model first, then map PrimeRx / Micro Merchant / Airtable data into it once exports and source details become available.</p>
@@ -301,7 +301,7 @@
       <p>The visible API schemas include direct patient identifiers and PHI fields such as patient name, DOB, phone, mobile number, street address, prescription number, notes, patient insurance member ID, and prescription images. The analytics platform must not ingest these fields into the SaaS database. The API connector should explicitly suppress, hash, bucket, or aggregate sensitive fields before data leaves the ingestion boundary.</p>
       <p>Still unknown:</p>
       <ul>
-      <li>Whether API access covers all required analytics data</li>
+      <li>Whether API access covers all required dashboard and enrichment data</li>
       <li>Whether API access is available directly to the pharmacy or only through an approved partner</li>
       <li>Whether API use requires additional contracts, fees, BAAs, or vendor approvals</li>
       <li>Whether the public Swagger endpoints are all available to this customer</li>
@@ -326,7 +326,7 @@
       <li>Authenticate using the vendor-supported token flow.</li>
       <li>Store credentials securely.</li>
       <li>Pull only the minimum fields required for analytics.</li>
-      <li>Prevent direct patient identifiers from entering the analytics database.</li>
+      <li>Prevent direct patient identifiers from entering canonical dashboard-facing storage.</li>
       <li>Normalize pharmacy/store identity using NPI and any available stable store ID.</li>
       <li>Normalize prescription/fill data into the canonical model.</li>
       <li>Normalize payer fields: insurance name, BIN, PCN, group if available, paid amount.</li>
@@ -376,7 +376,7 @@
       <h1 id="primerx-webhook-support">PrimeRx Webhook Support</h1>
       <h2 id="confirmed-from-local-onboarding-pdf">Confirmed From Local Onboarding PDF</h2>
       <p>File reviewed:</p>
-      <p><code>/Users/bhanuprakasholeti/Downloads/PrimeRx Webhook Onboarding.pdf</code></p>
+      <p><code>PrimeRx Webhook Onboarding.pdf</code> from the local discovery materials. The PDF itself is not committed to this repository.</p>
       <p>Document metadata from extracted text:</p>
       <ul>
       <li>Title: <code>PrimeRx Webhook Integration Guide</code></li>
@@ -516,7 +516,7 @@
       <li>Prescriber contact details</li>
       </ul>
       <p>Design implication:</p>
-      <p>Webhook payloads must enter a restricted ingestion boundary first. The analytics database should only receive HIPAA-minimized transformed data. Direct patient identifiers should be dropped, bucketed, aggregated, or replaced with approved pseudonymous tokens before downstream processing.</p>
+      <p>Webhook payloads must enter a restricted ingestion boundary first. Canonical dashboard-facing storage should only receive HIPAA-minimized transformed data. Direct patient identifiers should be dropped, bucketed, aggregated, or replaced with approved pseudonymous tokens before downstream processing.</p>
       <h2 id="webhook-delivery-behavior">Webhook Delivery Behavior</h2>
       <p>The onboarding guide states:</p>
       <ul>
@@ -722,6 +722,7 @@
       <li>Vendor-recommended integration pattern for analytics platforms</li>
       </ol>
       <hr>
+      <p><strong>Current status:</strong> PrimeRx has confirmed historical and daily feed files through SFTP for batch transfer. The remaining active work is to provide our required field specification, confirm setup/development cost, agree on HIPAA-minimized fields, and configure the SFTP automation. The export questions below are retained as the original discovery checklist and should not be read as the current implementation plan.</p>
       <h2 id="1-export-availability">1. Export Availability</h2>
       <ol>
       <li>Does PrimeRx / Micro Merchant support periodic data exports for pharmacy operational, prescription, payer, drug, financial, and prescriber data?</li>

@@ -201,7 +201,7 @@
 
     <section>
       <h2>Current Local Setup</h2>
-      <p>This laptop has PostgreSQL, Graphviz, and pgAdmin installed. The design database has already been created and loaded from the schema SQL.</p>
+      <p>This guide assumes PostgreSQL, Graphviz, and pgAdmin are installed locally. Use a development database only; do not run this draft schema in production.</p>
       <table>
         <thead>
           <tr>
@@ -214,12 +214,12 @@
           <tr><td>Host</td><td><code>localhost</code></td></tr>
           <tr><td>Port</td><td><code>5432</code></td></tr>
           <tr><td>Database</td><td><code>analytical_rx_design</code></td></tr>
-          <tr><td>Username</td><td><code>bhanuprakasholeti</code></td></tr>
+          <tr><td>Username</td><td><code>your local PostgreSQL username</code></td></tr>
           <tr><td>Schemas</td><td><code>core</code>, <code>ops</code>, <code>analytics</code></td></tr>
         </tbody>
       </table>
       <div class="callout">
-        <p>If pgAdmin asks for a password on this local Homebrew PostgreSQL setup, try leaving it blank. If that does not work, create or reset the local database user password and update the pgAdmin server registration.</p>
+        <p>If pgAdmin asks for a password on a local Homebrew PostgreSQL setup, try leaving it blank. If that does not work, create or reset the local database user password and update the pgAdmin server registration.</p>
       </div>
     </section>
 
@@ -258,7 +258,7 @@ analytics</code></pre>
         <li>Select <code>AnalyticalRx Local Design</code>.</li>
         <li>Open <code>Databases</code>, then select <code>analytical_rx_design</code>.</li>
       </ol>
-      <p>If the server is not visible, import <code>pgadmin/analytical-rx-local-server.json</code> using pgAdmin's import server option or this desktop command:</p>
+      <p>If the server is not visible, copy <code>pgadmin/analytical-rx-local-server.json</code>, replace <code>CHANGE_ME_LOCAL_POSTGRES_USER</code> with your local PostgreSQL username, then import it using pgAdmin's import server option or this desktop command:</p>
       <pre><code>/Applications/pgAdmin\ 4.app/Contents/Frameworks/Python.framework/Versions/3.13/bin/python3.13 \
   /Applications/pgAdmin\ 4.app/Contents/Resources/web/setup.py \
   load-servers pgadmin/analytical-rx-local-server.json \

@@ -149,7 +149,7 @@ Recommended MVP pattern:
 Webhook event
   -> tells us what changed
   -> processor stores restricted source reference: tenant_id, pharmacy_id, RxNo, RefillNo
-  -> processor stores analytics-safe prescription/fill tokens
+  -> processor stores PHI-minimized prescription/fill tokens
   -> API enrichment fills in NDC, payer, BIN/PCN, paid amounts, copay, ingredient cost, pickup/refill details
 ```
 
@@ -178,7 +178,7 @@ Important identifier handling decision:
 
 ### Objective
 
-Create a complete inventory of analytics-relevant fields available from PrimeRx webhooks, PrimeRx/Micro Merchant API endpoints, and any future bulk/export files.
+Create a complete inventory of analytics-relevant fields available from PrimeRx webhooks, PrimeRx/Micro Merchant API endpoints, and PrimeRx SFTP/batch feed files.
 
 ### Background
 
@@ -191,7 +191,7 @@ Build a field inventory covering:
 - Webhook payload fields.
 - API response fields.
 - Fields that require API enrichment after webhook receipt.
-- Fields that require bulk/export or another source.
+- Fields that require SFTP/batch feeds or another source.
 - Fields that contain PHI.
 - Fields safe for analytics after transformation.
 - Fields needed for revenue, refill/adherence, and forecasting.
@@ -355,7 +355,7 @@ Define rules for:
 - Data quality rules document.
 - Exception categories and severity.
 - Proposed exception table or report shape.
-- Reconciliation approach between webhook events, API reads, and future bulk/export reports.
+- Reconciliation approach between webhook events, API reads, and SFTP/batch feed reports.
 - Sample SQL checks or pseudocode.
 
 ### Acceptance Criteria

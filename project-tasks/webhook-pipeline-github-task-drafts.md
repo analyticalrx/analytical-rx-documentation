@@ -790,7 +790,7 @@ The schema should support queries like:
 - Status lifecycle definition.
 - Idempotency key strategy.
 - Restricted source-reference strategy for `RxNo` and `RefillNo`.
-- Token strategy for analytics-safe prescription/fill references.
+- Token strategy for PHI-minimized prescription/fill references.
 - PHI exclusion list for audit records.
 - Example operational queries.
 
@@ -964,7 +964,7 @@ SQS message received
   -> compute idempotency key
   -> check duplicate status
   -> apply PHI minimization
-  -> generate analytics-safe prescription/fill tokens
+  -> generate PHI-minimized prescription/fill tokens
   -> map safe fields to canonical event
   -> write canonical event
   -> mark audit record processed

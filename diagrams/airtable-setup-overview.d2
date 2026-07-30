@@ -80,7 +80,7 @@ software: {
   workflow: "Tasks + Compliance Workflows"
   document_store: "Document Metadata + Secure Files"
   reporting: "Starter Dashboards"
-  automation_engine: "Notifications + Workflow Rules"
+  automation_engine: "Notifications + Predefined Workflows"
   canonical: "PrimeRx Canonical Events"
 }
 
@@ -109,4 +109,4 @@ growth -> software.reporting
 business -> software.reporting
 interfaces -> software.reporting
 automations -> software.automation_engine
-software.canonical -> software.reporting: "Phase 2 enrichment"
+software.canonical -> software.reporting: "Phase 1 dashboards + Phase 2 workflows"

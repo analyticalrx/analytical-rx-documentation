@@ -55,7 +55,7 @@ payments: "analytics.canonical_event_payer_payment\npayer-event bridge\ncanonica
   class: safe
 }
 
-dashboards: "Dashboards + Analytics\nquery canonical tables only" {
+dashboards: "Dashboards + Basic Reporting\nquery canonical tables only" {
   class: safe
 }
 
@@ -74,7 +74,7 @@ audit -> canonical: "one processed event"
 drug_lookup -> canonical: "drug_id FK"
 canonical -> payments: "canonical_event_id FK"
 payer_lookup -> payments: "payer_id FK when insurance"
-canonical -> dashboards: "safe reporting"
+canonical -> dashboards: "safe reads"
 payments -> dashboards: "safe payment breakdown"
 source_ref -> enrichment: "RxNo / RefillNo"
 enrichment -> primerx: "detail lookup"

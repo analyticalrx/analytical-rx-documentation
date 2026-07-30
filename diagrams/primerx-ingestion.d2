@@ -31,7 +31,7 @@ primerx: {
   class: source
   webhooks: "Webhooks\nreal-time triggers"
   api: "API\nlookup + sync"
-  bulk: "Bulk / Batch\nopen vendor question"
+  bulk: "SFTP / Batch\nhistory + daily feeds"
 }
 
 intake: {
@@ -43,18 +43,18 @@ intake: {
 }
 
 load: {
-  label: "Analytics Load"
+  label: "Canonical Load"
   class: core
   canonical: "Canonical Pharmacy Model"
   reconcile: "Reconciliation + Audit"
 }
 
-question: "Key PrimeRx Question\nCan they provide bulk/backfill data for initial load,\nmissed events, reconciliation, and KPI rebuilds?"
+question: "Key PrimeRx SFTP Task\nProvide required field spec,\nconfirm setup cost,\nconfigure feed automation"
 question.class: open
 
 primerx.webhooks -> intake.raw: "new events"
 primerx.api -> intake.raw: "details / sync"
-primerx.bulk -> intake.raw: "history if available"
+primerx.bulk -> intake.raw: "historical + daily files"
 intake.raw -> intake.privacy
 intake.privacy -> intake.quality
 intake.quality -> load.canonical

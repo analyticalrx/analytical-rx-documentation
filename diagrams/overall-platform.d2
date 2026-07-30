@@ -41,12 +41,12 @@ ingestion: {
   mapping: "Map to Canonical Model"
 }
 
-analytics: {
-  label: "Analytics Core"
+data_core: {
+  label: "Data + Workflow Core"
   class: core
   model: "Canonical Pharmacy Data"
-  kpis: "KPI + Root-Cause Engine"
-  decisions: "Alerts, Reports,\nRecommendations, Scenarios"
+  dashboards: "Starter Dashboard Read Models"
+  workflows: "Workflow + Alert Foundation"
 }
 
 product: {
@@ -66,10 +66,10 @@ platform: {
 sources -> ingestion
 ingestion.intake -> ingestion.privacy
 ingestion.privacy -> ingestion.mapping
-ingestion -> analytics
-analytics.model -> analytics.kpis
-analytics.kpis -> analytics.decisions
-analytics -> product
+ingestion -> data_core
+data_core.model -> data_core.dashboards
+data_core.model -> data_core.workflows
+data_core -> product
 platform -> ingestion
-platform -> analytics
+platform -> data_core
 platform -> product

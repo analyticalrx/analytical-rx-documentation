@@ -131,15 +131,15 @@
     <section>
       <h2>Start Here</h2>
       <div class="grid">
-        <a class="link-card" href="prd/product-requirements-document.html">
+        <a class="link-card" href="prd/product-requirements-document.md">
           <span class="badge">PRD</span>
           <strong>Product Requirements Document</strong>
-          <span>Reader-friendly PRD draft covering the problem statement, background, product goals, delivery phases, Phase 1 in-progress scope, Phase 2 plan, and appendices.</span>
+          <span>Implementation source of truth using the PRD skill structure, including Phase 1, Phase 2, user stories, acceptance criteria, technical specs, risks, and rollout plan.</span>
         </a>
-        <a class="link-card" href="prd/phase-2-product-design.html">
+        <a class="link-card" href="prd/prd-readiness-review.md">
           <span class="badge">PRD</span>
-          <strong>Phase 2 Product Design</strong>
-          <span>Separate Phase 2 draft for workflow automation, doctor CRM, refill queues, alerts, optional emails, role access, and dashboard improvements.</span>
+          <strong>PRD Readiness Review</strong>
+          <span>Review of whether the current PRD is professional, clear, and implementation-ready for the team.</span>
         </a>
         <a class="link-card" href="architecture/high-level-design.html">
           <span class="badge">Architecture</span>
@@ -165,7 +165,7 @@
         <a class="link-card" href="ingestion/ingestion-pipeline-design.html">
           <span class="badge">Ingestion</span>
           <strong>PrimeRx Ingestion Pipeline</strong>
-          <span>Webhook, API, bulk/backfill, PHI filtering, validation, canonical load, and reconciliation design.</span>
+          <span>Webhook, API, SFTP/backfill, PHI filtering, validation, canonical load, and reconciliation design.</span>
         </a>
         <a class="link-card" href="ingestion/webhook-processing-pipeline.html">
           <span class="badge">Ingestion</span>
@@ -244,6 +244,11 @@
           <strong>Airtable Automations</strong>
           <span>Workflow intent from screenshots, including triggers, actions, idempotency, notifications, and validation gaps.</span>
         </a>
+        <a class="link-card" href="presentations/airtable-product-alignment.pptx">
+          <span class="badge secondary">Deck</span>
+          <strong>Airtable Product Alignment Deck</strong>
+          <span>Presentation mapping Airtable tables, interfaces, and automations to AnalyticalRx product components.</span>
+        </a>
       </div>
     </section>
 
@@ -290,22 +295,22 @@
         <a class="link-card" href="diagrams/overall-platform.svg">
           <span class="badge">D2</span>
           <strong>Overall Platform Diagram</strong>
-          <span>End-to-end platform view from PrimeRx/Airtable sources through ingestion, analytics, and dashboards.</span>
+          <span>End-to-end platform view from PrimeRx/Airtable sources through ingestion, canonical data, workflows, and role dashboards.</span>
         </a>
         <a class="link-card" href="diagrams/primerx-ingestion.svg">
           <span class="badge">D2</span>
           <strong>PrimeRx Ingestion Diagram</strong>
-          <span>API, webhook, and bulk/batch paths into quarantine, PHI filtering, validation, and canonical load.</span>
+          <span>API, webhook, and SFTP/batch paths into restricted intake, PHI filtering, validation, and canonical load.</span>
         </a>
         <a class="link-card" href="diagrams/webhook-processing.svg">
           <span class="badge">D2</span>
           <strong>Webhook Processing Diagram</strong>
-          <span>Webhook receiver, queue, async worker, failure paths, enrichment, and analytics outputs.</span>
+          <span>Webhook receiver, queue, async worker, failure paths, enrichment, and canonical persistence.</span>
         </a>
         <a class="link-card" href="diagrams/canonical-event-schema.svg">
           <span class="badge">D2</span>
           <strong>Canonical Event Schema Diagram</strong>
-          <span>Database boundary between raw payload references, audit records, restricted source IDs, and analytics-safe events.</span>
+          <span>Database boundary between raw payload references, audit records, restricted source IDs, and PHI-minimized canonical events.</span>
         </a>
         <a class="link-card" href="diagrams/canonical-event-er.svg">
           <span class="badge">D2</span>

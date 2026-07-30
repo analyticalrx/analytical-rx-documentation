@@ -5,7 +5,7 @@ This repository tracks the current AnalyticalRx product architecture and PrimeRx
 Start here:
 
 - `index.html` - main review index for all docs, diagrams, drafts, and generated artifacts
-- `prd/` - non-technical product requirements document drafts and review artifacts
+- `prd/` - unified Markdown PRD source of truth and review artifacts
 - `architecture/` - high-level design and product planning / PrimeRx discovery notes
 - `ingestion/` - PrimeRx ingestion and webhook processing designs
 - `database/` and `schemas/` - canonical event schema docs, SQL DDL/migrations, ERD guide, and table dictionary

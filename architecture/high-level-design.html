@@ -197,7 +197,7 @@
       <li>Canonical model first, source adapters second.</li>
       <li>Webhooks are for near-real-time event triggers, not the only data source.</li>
       <li>API pulls are for enrichment, backfill, and reconciliation.</li>
-      <li>PHI must be suppressed or transformed before data enters the analytics database.</li>
+      <li>PHI must be suppressed or transformed before data enters canonical dashboard-facing storage.</li>
       <li>Everything must be tenant-safe from the beginning, even if the first deployment is internal only.</li>
       <li>Build the minimum useful slice first, then widen the surface area.</li>
       </ol>
@@ -291,7 +291,7 @@
       <div class="step-grid">
         <div><span>Webhooks</span>Near-real-time event trigger</div>
         <div><span>API</span>Detail lookup, backfill, reconciliation</div>
-        <div><span>Bulk / Batch</span>Historical load if PrimeRx supports it</div>
+        <div><span>SFTP / Batch</span>Historical and daily feed load after field spec and cost approval</div>
       </div>
       <p>Important operational rule:</p>
       <ul>
@@ -301,7 +301,7 @@
       <li>The system should be able to rebuild KPIs from source data.</li>
       </ul>
       <h2 id="phi-policy">PHI Policy</h2>
-      <p>The platform should not ingest direct patient identifiers into the analytics database unless compliance and legal explicitly approve a different policy later.</p>
+      <p>The platform should not ingest direct patient identifiers into canonical dashboard-facing storage unless compliance and legal explicitly approve a different policy later.</p>
       <p>Preferred handling:</p>
       <ul>
       <li>Remove patient name, address, DOB, phone, email, driver license, prescription image, and free-text identifier fields</li>
@@ -345,7 +345,7 @@
       <li>Build the restricted ingestion boundary.</li>
       <li>Implement API connector and webhook receiver.</li>
       <li>Implement PHI suppression and mapping.</li>
-      <li>Load the canonical analytics database.</li>
+      <li>Load the canonical database.</li>
       <li>Build owner and store dashboards.</li>
       <li>Add alerts, exceptions, and audit views.</li>
       <li>Extend to tasks, documents, doctor CRM, and finance workflows.</li>
