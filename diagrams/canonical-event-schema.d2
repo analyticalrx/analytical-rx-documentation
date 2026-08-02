@@ -27,31 +27,35 @@ receiver: "Webhook Receiver + SQS" {
   class: neutral
 }
 
+tenant_schema: "Tenant Schema Boundary\none schema per tenant\nall tables below live together" {
+  class: neutral
+}
+
 raw: "Restricted Raw Payload Archive\nS3 pointer + payload hash\nshort retention" {
   class: restricted
 }
 
-audit: "ops.webhook_event_audit\nstatus, idempotency, retry state\nno raw PHI payload" {
+audit: "webhook_event_audit\nstatus, idempotency, retry state\nno raw PHI payload" {
   class: restricted
 }
 
-source_ref: "ops.source_prescription_reference_restricted\nreal RxNo + RefillNo\nbackend-only API lookup" {
+source_ref: "source_prescription_reference_restricted\nreal RxNo + RefillNo\nbackend-only API lookup" {
   class: restricted
 }
 
-drug_lookup: "core.drug\nnormalized drug lookup\nlinked by drug_id" {
+drug_lookup: "drug\nnormalized drug lookup\nlinked by drug_id" {
   class: safe
 }
 
-payer_lookup: "core.payer\nnormalized payer lookup\nlinked through payment rows" {
+payer_lookup: "payer\nnormalized payer lookup\nlinked through payment rows" {
   class: safe
 }
 
-canonical: "analytics.canonical_pharmacy_event\nPHI-minimized event facts\ndrug_id + prescription/fill tokens" {
+canonical: "canonical_pharmacy_event\nPHI-minimized event facts\ndrug_id + prescription/fill tokens" {
   class: safe
 }
 
-payments: "analytics.canonical_event_payer_payment\npayer-event bridge\ncanonical_event_id + payer_id\ncash uses null payer_id" {
+payments: "canonical_event_payer_payment\npayer-event bridge\ncanonical_event_id + payer_id\ncash uses null payer_id" {
   class: safe
 }
 
@@ -64,6 +68,7 @@ enrichment: "API Enrichment Worker\nuses restricted source reference\nupdates ca
 }
 
 primerx -> receiver: "POST event"
+receiver -> tenant_schema: "select by authenticated tenant context"
 receiver -> raw: "optional archive"
 receiver -> audit: "receipt + processing audit"
 audit -> source_ref: "restricted source IDs"

@@ -189,7 +189,7 @@
       <li>The API uses <code>Bearer</code> authentication</li>
       <li>PrimeRx also supports webhooks for near-real-time event notifications</li>
       <li>The webhook guide states that webhook events are HTTPS POSTs with JSON payloads</li>
-      <li>Both the API and the webhook payloads include PHI-heavy fields, so the analytics layer must treat raw source data as restricted until transformed</li>
+      <li>Both the API and the webhook payloads include PHI-heavy fields, so the canonical/dashboard data layer must treat raw source data as restricted until transformed</li>
       <li>We do not yet know whether PrimeRx provides a bulk historical export, batch send, or other backfill mechanism, so that remains a key vendor question</li>
       </ul>
       <h2 id="design-principles">Design Principles</h2>
@@ -214,7 +214,7 @@
       <ul>
       <li>PrimeRx API</li>
       <li>PrimeRx webhooks</li>
-      <li>Bulk export or scheduled report send, if available</li>
+      <li>PrimeRx SFTP historical and daily feed files</li>
       <li>Current Airtable prototype</li>
       <li>Finance inputs</li>
       <li>Documents and licenses</li>
@@ -235,6 +235,7 @@
       </ul>
       <h3 id="3-canonical-data-model">3. Canonical Data Model</h3>
       <p>This is the stable internal model that every source maps into.</p>
+      <p>For SaaS isolation, tenant-owned canonical tables should live together inside one PostgreSQL schema per tenant. The application selects the active tenant schema from authenticated tenant context or trusted job configuration.</p>
       <p>Core entities:</p>
       <ul>
       <li>Store</li>
@@ -264,7 +265,7 @@
       <li>Scenario modeling</li>
       </ul>
       <h3 id="5-product-layer">5. Product Layer</h3>
-      <p>Role-specific interfaces should sit on top of the analytics layer.</p>
+      <p>Role-specific interfaces should sit on top of the canonical dashboard data layer.</p>
       <ul>
       <li>Owner / executive dashboard</li>
       <li>Store manager dashboard</li>
@@ -368,7 +369,7 @@
       <li>What is the best supported method for multi-store analytics?</li>
       </ul>
       <h2 id="architecture-summary">Architecture Summary</h2>
-      <p>The platform should be built as a pipeline that turns operational pharmacy data into explainable business decisions. The main system boundary is not the dashboard. The main boundary is the PHI-controlled ingestion layer that protects the analytics store and makes the rest of the platform safe to scale.</p>
+      <p>The platform should be built as a pipeline that turns operational pharmacy data into explainable business decisions. The main system boundary is not the dashboard. The main boundary is the PHI-controlled ingestion layer that protects the canonical dashboard store and makes the rest of the platform safe to scale.</p>
       
     </article>
   </main>

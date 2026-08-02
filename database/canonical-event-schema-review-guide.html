@@ -204,7 +204,7 @@
           </tr>
           <tr>
             <td>Canonical pharmacy event rows and payment rows for starter dashboards.</td>
-            <td>Final production row-level security policy and legal retention policy.</td>
+            <td>Final production tenant-schema routing, schema-level access policy, and legal retention policy.</td>
           </tr>
           <tr>
             <td>API enrichment path for filling safe missing values later.</td>
@@ -232,32 +232,32 @@
           </tr>
           <tr>
             <td>Raw payload archive metadata</td>
-            <td><code>ops.raw_payload_archive</code></td>
+            <td><code>raw_payload_archive</code></td>
             <td>Store pointer, hash, size, source, and retention metadata only.</td>
           </tr>
           <tr>
             <td>Real <code>RxNo</code> and <code>RefillNo</code></td>
-            <td><code>ops.source_prescription_reference_restricted</code></td>
-            <td>Store only in restricted operational schema because API enrichment may need these values.</td>
+            <td><code>source_prescription_reference_restricted</code></td>
+            <td>Store only in the restricted source-reference table because API enrichment may need these values.</td>
           </tr>
           <tr>
             <td>Drug attributes</td>
-            <td><code>core.drug</code></td>
+            <td><code>drug</code></td>
             <td>Canonical events store <code>drug_id</code> only, not repeated drug snapshots.</td>
           </tr>
           <tr>
             <td>Payer attributes</td>
-            <td><code>core.payer</code></td>
+            <td><code>payer</code></td>
             <td>Insurance payers are linked through payment rows. Cash payments use <code>payer_id = null</code>.</td>
           </tr>
           <tr>
             <td>Prescription/fill event facts</td>
-            <td><code>analytics.canonical_pharmacy_event</code></td>
+            <td><code>canonical_pharmacy_event</code></td>
             <td>Store safe event facts, statuses, dates, quantities, costs, and tokens.</td>
           </tr>
           <tr>
             <td>Payment components</td>
-            <td><code>analytics.canonical_event_payer_payment</code></td>
+            <td><code>canonical_event_payer_payment</code></td>
             <td>Store insurance, patient pay, cash, and other payment components as rows.</td>
           </tr>
         </tbody>
@@ -271,14 +271,11 @@
       </div>
       <p class="meta">Full column-level ERD: <a href="../diagrams/canonical-event-postgres-erd.svg"><code>diagrams/canonical-event-postgres-erd.svg</code></a></p>
 
-      <h3>Core schema</h3>
-      <p><code>core</code> stores tenant-level and lookup data used by the application: tenants, pharmacies, drugs, and payers.</p>
+      <h3>Tenant schema</h3>
+      <p>The current SaaS design uses one PostgreSQL schema per tenant. All tenant-owned tables live together inside that schema, for example <code>tenant_acme_pharmacy_group</code>. The checked-in SQL uses <code>tenant_template</code> as the local review schema.</p>
 
-      <h3>Ops schema</h3>
-      <p><code>ops</code> stores restricted operational data: audit state, raw payload archive metadata, and real source prescription references used by backend services.</p>
-
-      <h3>Analytics schema</h3>
-      <p><code>analytics</code> stores PHI-minimized canonical events and event payment rows. This is the primary read area for dashboards and basic reporting.</p>
+      <h3>Table responsibility groups</h3>
+      <p>Inside each tenant schema, tables are separated by responsibility: tenant/store lookup tables, restricted source-reference tables, audit tables, PHI-minimized canonical event tables, and payment rows. This keeps the model understandable without splitting one tenant's data across multiple logical database schemas.</p>
     </section>
 
     <section>
@@ -292,27 +289,27 @@
         </thead>
         <tbody>
           <tr>
-            <td><code>core.tenant</code> to all major tables</td>
+            <td><code>tenant</code> to all major tables</td>
             <td>Every important row is scoped by tenant for multi-pharmacy isolation.</td>
           </tr>
           <tr>
-            <td><code>core.pharmacy</code> to canonical events</td>
+            <td><code>pharmacy</code> to canonical events</td>
             <td>Each canonical event belongs to a pharmacy when the source data provides or resolves the store.</td>
           </tr>
           <tr>
-            <td><code>ops.webhook_event_audit</code> to <code>analytics.canonical_pharmacy_event</code></td>
+            <td><code>webhook_event_audit</code> to <code>canonical_pharmacy_event</code></td>
             <td>Each canonical event links back to the audit record that explains source, status, duplicate handling, and processing result.</td>
           </tr>
           <tr>
-            <td><code>core.drug</code> to <code>analytics.canonical_pharmacy_event</code></td>
+            <td><code>drug</code> to <code>canonical_pharmacy_event</code></td>
             <td>Canonical events use <code>drug_id</code> when the drug is available or can be matched.</td>
           </tr>
           <tr>
-            <td><code>analytics.canonical_pharmacy_event</code> to <code>analytics.canonical_event_payer_payment</code></td>
+            <td><code>canonical_pharmacy_event</code> to <code>canonical_event_payer_payment</code></td>
             <td>One event may have zero or more payment rows.</td>
           </tr>
           <tr>
-            <td><code>analytics.canonical_event_payer_payment</code> to <code>core.payer</code></td>
+            <td><code>canonical_event_payer_payment</code> to <code>payer</code></td>
             <td>Insurance payment rows can link to a payer. Cash payment rows intentionally keep <code>payer_id = null</code>.</td>
           </tr>
         </tbody>
@@ -325,7 +322,7 @@
         <li>Webhook receiver accepts the event and creates an audit record.</li>
         <li>Receiver optionally stores raw payload in restricted encrypted storage and stores only archive metadata in the database.</li>
         <li>Processor validates the queued event, applies idempotency checks, and updates audit status.</li>
-        <li>Processor stores real <code>RxNo</code> and <code>RefillNo</code> only in the restricted <code>ops</code> schema when present.</li>
+        <li>Processor stores real <code>RxNo</code> and <code>RefillNo</code> only in <code>source_prescription_reference_restricted</code> when present.</li>
         <li>Processor upserts safe drug and payer lookup rows.</li>
         <li>Processor writes one canonical event row and related payment rows.</li>
         <li>API enrichment can later use restricted source references to fetch missing details and update only safe fields.</li>
@@ -346,7 +343,7 @@
           <tr>
             <td>Webhook receiver</td>
             <td>Insert audit rows and raw archive metadata.</td>
-            <td>Do not write canonical analytics rows directly. Do not log raw payloads.</td>
+            <td>Do not write canonical rows directly. Do not log raw payloads.</td>
           </tr>
           <tr>
             <td>Webhook processor</td>
@@ -360,12 +357,12 @@
           </tr>
           <tr>
             <td>Dashboard/API application</td>
-            <td>Read safe <code>core</code> labels, <code>analytics.canonical_pharmacy_event</code>, and <code>analytics.canonical_event_payer_payment</code> for authorized tenant/pharmacy scope.</td>
-            <td>No direct access to restricted <code>ops</code> tables or raw payload archive.</td>
+            <td>Read safe lookup labels, <code>canonical_pharmacy_event</code>, and <code>canonical_event_payer_payment</code> from the authenticated user's tenant schema and authorized pharmacy scope.</td>
+            <td>No direct access to restricted source-reference tables or raw payload archive.</td>
           </tr>
           <tr>
             <td>Database administrator</td>
-            <td>Manage schema, migrations, indexes, roles, backups, and emergency support.</td>
+            <td>Manage tenant schemas, migrations, indexes, roles, backups, and emergency support.</td>
             <td>Production access should be limited, named, and audited.</td>
           </tr>
         </tbody>
@@ -384,11 +381,11 @@
       <h2>Reviewer Checklist</h2>
       <ul>
         <li>Confirm that the Phase 1 webhook/API fields can map into the current canonical event, drug, payer, and payment tables.</li>
-        <li>Confirm that <code>RxNo</code> and <code>RefillNo</code> being restricted to <code>ops.source_prescription_reference_restricted</code> still supports API enrichment.</li>
-        <li>Confirm that drug details belong in <code>core.drug</code> and are linked by <code>drug_id</code>, not duplicated in the event row.</li>
-        <li>Confirm that payer details belong in <code>core.payer</code> and are linked through payment rows.</li>
+        <li>Confirm that <code>RxNo</code> and <code>RefillNo</code> being restricted to <code>source_prescription_reference_restricted</code> still supports API enrichment.</li>
+        <li>Confirm that drug details belong in <code>drug</code> and are linked by <code>drug_id</code>, not duplicated in the event row.</li>
+        <li>Confirm that payer details belong in <code>payer</code> and are linked through payment rows.</li>
         <li>Confirm that cash payment handling is clear: <code>payment_type = 'cash'</code> and <code>payer_id = null</code>.</li>
-        <li>Confirm that dashboard/API users do not need direct access to restricted <code>ops</code> tables.</li>
+        <li>Confirm that dashboard/API users do not need direct access to restricted source-reference tables.</li>
         <li>Identify any missing fields needed for Phase 1 starter dashboards.</li>
         <li>Identify any fields that should move from dashboard-facing tables into restricted operational storage.</li>
       </ul>

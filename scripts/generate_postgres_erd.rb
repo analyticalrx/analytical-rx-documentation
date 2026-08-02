@@ -10,7 +10,7 @@ DATABASE = ENV.fetch("PGDATABASE", "analytical_rx_design")
 OUTPUT_DOT = ENV.fetch("OUTPUT_DOT", "diagrams/canonical-event-postgres-erd.dot")
 OUTPUT_SVG = ENV.fetch("OUTPUT_SVG", "diagrams/canonical-event-postgres-erd.svg")
 OUTPUT_PNG = ENV.fetch("OUTPUT_PNG", "diagrams/canonical-event-postgres-erd.png")
-SCHEMAS = %w[core ops analytics].freeze
+TARGET_SCHEMA = ENV.fetch("TENANT_SCHEMA", "tenant_template")
 
 def psql_json(sql)
   cmd = ["psql", "-d", DATABASE, "-X", "-A", "-t", "-v", "ON_ERROR_STOP=1", "-c", sql]
@@ -36,6 +36,10 @@ end
 
 def quote(value)
   value.to_s.dump
+end
+
+def sql_literal(value)
+  "'#{value.to_s.gsub("'", "''")}'"
 end
 
 columns = psql_json(<<~SQL)
@@ -66,7 +70,7 @@ columns = psql_json(<<~SQL)
     join pg_namespace n on n.oid = c.relnamespace
     join pg_attribute a on a.attrelid = c.oid
     where c.relkind = 'r'
-      and n.nspname in (#{SCHEMAS.map { |schema| "'#{schema}'" }.join(", ")})
+      and n.nspname = #{sql_literal(TARGET_SCHEMA)}
       and a.attnum > 0
       and not a.attisdropped
     order by n.nspname, c.relname, a.attnum
@@ -94,7 +98,7 @@ foreign_keys = psql_json(<<~SQL)
     join pg_attribute src_att on src_att.attrelid = src.oid and src_att.attnum = source_key.attnum
     join pg_attribute dst_att on dst_att.attrelid = dst.oid and dst_att.attnum = target_key.attnum
     where con.contype = 'f'
-      and src_ns.nspname in (#{SCHEMAS.map { |schema| "'#{schema}'" }.join(", ")})
+      and src_ns.nspname = #{sql_literal(TARGET_SCHEMA)}
     order by src_ns.nspname, src.relname, con.conname, source_key.ord
   ) fk_rows;
 SQL
@@ -102,9 +106,7 @@ SQL
 tables = columns.group_by { |column| [column.fetch("schema_name"), column.fetch("table_name")] }
 
 schema_colors = {
-  "core" => { header: "#dbeafe", border: "#2563eb" },
-  "ops" => { header: "#ffedd5", border: "#c2410c" },
-  "analytics" => { header: "#dcfce7", border: "#047857" }
+  TARGET_SCHEMA => { header: "#dbeafe", border: "#2563eb" }
 }
 
 dot = +"digraph canonical_event_erd {\n"
@@ -113,7 +115,7 @@ dot << "  node [shape=plain, fontname=\"Helvetica\"];\n"
 dot << "  edge [fontname=\"Helvetica\", fontsize=9, color=\"#475569\", arrowsize=0.7];\n\n"
 
 tables.each do |(schema_name, table_name), table_columns|
-  colors = schema_colors.fetch(schema_name)
+  colors = schema_colors.fetch(schema_name, { header: "#dbeafe", border: "#2563eb" })
   node_id = "#{schema_name}.#{table_name}"
   dot << "  #{quote(node_id)} [label=<\n"
   dot << "    <TABLE BORDER=\"1\" CELLBORDER=\"1\" CELLSPACING=\"0\" CELLPADDING=\"6\" COLOR=\"#{colors[:border]}\">\n"

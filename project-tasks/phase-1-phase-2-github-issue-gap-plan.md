@@ -14,13 +14,13 @@ The parent epic `#40: Epic: Pharmacy Data Platform And Role-Based Dashboards` wa
 | --- | --- | --- |
 | #40: Epic: Pharmacy Data Platform And Role-Based Dashboards | Todo | `epic`, `platform` |
 | #26: Define Phase 1 API/SFTP Backfill And Enrichment Plan | Todo | `mvp`, `platform` |
-| #27: Design Phase 1 Spring Backend Service For RBAC, Dashboard APIs, And PostgreSQL | Todo | `mvp`, `architecture` |
-| #28: Provision Phase 1 AWS PostgreSQL Database And Apply Canonical Schema | Todo | `mvp`, `database` |
-| #29: Implement Tenant, Pharmacy, User, And Role Access Foundation | Todo | `mvp`, `security` |
+| #27: Design Phase 1 Spring Backend Service For RBAC, Dashboard APIs, And PostgreSQL | Todo | `mvp`, `data-platform` |
+| #28: Provision Phase 1 AWS PostgreSQL Database And Tenant Schema Template | Todo | `mvp`, `data-platform` |
+| #29: Build Spring Boot Core Service Auth And Tenant/Pharmacy RBAC Foundation | Todo | `mvp`, `data-platform` |
 | #30: Build Import And Pipeline Audit View | Todo | `mvp`, `platform` |
-| #41: Build Phase 1 Frontend Application And Shared UI Components | Todo | `mvp`, `dashboard` |
+| #41: Build Phase 1 Frontend Application And Role-Based Dashboard Screens | Todo | `mvp`, `data-platform` |
 | #31: Build Phase 1 Role-Level Starter Dashboards | Todo | `mvp`, `dashboard` |
-| #32: Build Dashboard Read Models And APIs For Phase 1 Starter Metrics | Todo | `mvp`, `dashboard` |
+| #32: Build Dashboard Read Models And APIs For Phase 1 Starter Metrics | Todo | `mvp`, `data-platform` |
 | #33: Create Phase 1 Demo And Data Readiness Checklist | Todo | `mvp`, `testing` |
 | #34: Design Phase 2 Workflow Automation Architecture | Todo | `phase-2`, `workflow` |
 | #35: Build Doctor CRM Foundation | Todo | `phase-2`, `crm` |
@@ -73,7 +73,7 @@ These issues now exist in GitHub.
 
 **Phase:** Phase 1  
 **Type:** Integration planning  
-**Labels:** `mvp`, `platform`
+**Labels:** `mvp`, `data-platform`
 
 **Description:**  
 Define how API and SFTP data will support Phase 1 historical backfill, missing field enrichment, and reconciliation. This should translate confirmed PrimeRx/Micro Merchant capabilities into a concrete Phase 1 data plan.
@@ -96,7 +96,7 @@ Define how API and SFTP data will support Phase 1 historical backfill, missing f
 
 **Phase:** Phase 1  
 **Type:** Architecture / backend service design  
-**Labels:** `mvp`, `architecture`
+**Labels:** `mvp`, `data-platform`
 
 **Description:**  
 Design the Phase 1 application service that powers role-based access, starter dashboard APIs, business read models, and PostgreSQL access.
@@ -105,13 +105,15 @@ Design the Phase 1 application service that powers role-based access, starter da
 - Java Spring Boot service.
 - Container image deployed in AWS.
 - PostgreSQL/RDS as the application database.
-- Role-based access and tenant/pharmacy scoping handled in the service layer.
+- One PostgreSQL schema per tenant for tenant-owned data.
+- Role-based access, tenant schema routing, and pharmacy scoping handled in the service layer.
 
 **Scope:**
 - Define service boundaries and responsibilities.
 - Define module structure for authentication, authorization, tenants/pharmacies, dashboard APIs, audit views, and database access.
 - Define RBAC model for Phase 1 roles.
 - Define dashboard API groups for all Phase 1 starter dashboards.
+- Define how authenticated tenant context maps to the active tenant schema.
 - Define how the service reads canonical event data without exposing restricted raw/source payloads.
 - Define container build, runtime configuration, secrets, logging, health checks, and deployment approach.
 
@@ -119,53 +121,57 @@ Design the Phase 1 application service that powers role-based access, starter da
 - [ ] Service boundary is clearly documented.
 - [ ] Spring Boot is confirmed or a clearly justified alternative is documented.
 - [ ] RBAC model covers all Phase 1 roles.
+- [ ] Tenant schema routing model is documented.
 - [ ] Starter dashboard API groups are listed.
 - [ ] Restricted data access rules are documented.
 - [ ] PostgreSQL connection, migration, and credential strategy is documented.
 - [ ] AWS container deployment path is documented.
 
-### #28: Provision Phase 1 Database In AWS And Apply Canonical Schema
+### #28: Provision Phase 1 AWS PostgreSQL Database And Tenant Schema Template
 
 **Phase:** Phase 1  
 **Type:** Infrastructure/database  
-**Labels:** `mvp`, `database`
+**Labels:** `mvp`, `data-platform`
 
 **Description:**  
-Create the Phase 1 PostgreSQL/RDS database environment and apply the approved canonical event schema, including tenant, pharmacy, restricted source reference, audit, drug, payer, payment, and canonical event tables.
+Create the Phase 1 PostgreSQL/RDS database environment and apply the approved tenant-schema canonical event model, including tenant, pharmacy, restricted source reference, audit, drug, payer, payment, and canonical event tables.
 
 **Scope:**
 - Create or configure the Phase 1 AWS database environment.
-- Apply the current schema and migrations.
-- Verify foreign keys, indexes, and schemas.
+- Create the tenant schema template and document how new tenant schemas will be provisioned.
+- Apply the current schema and migrations inside the target tenant schema.
+- Verify foreign keys, indexes, and tenant schema ownership.
 - Confirm database credentials and access boundaries for receiver/processor services.
 - Confirm that restricted source tables are not exposed to dashboard queries.
 
 **Acceptance criteria:**
 - [ ] Database exists in the agreed AWS environment.
-- [ ] Current canonical schema applies successfully.
-- [ ] Migration scripts run cleanly.
+- [ ] Current canonical tenant schema applies successfully.
+- [ ] Migration scripts run cleanly inside the target tenant schema.
+- [ ] New tenant provisioning path is documented.
 - [ ] Processor Lambda can connect using least-necessary credentials.
 - [ ] Dashboard/query role cannot access restricted raw/source tables.
 
-### #29: Implement Tenant, Pharmacy, User, And Role Access Foundation
+### #29: Build Spring Boot Core Service Auth And Tenant/Pharmacy RBAC Foundation
 
 **Phase:** Phase 1  
 **Type:** Backend/security  
-**Labels:** `mvp`, `security`
+**Labels:** `mvp`, `data-platform`
 
 **Description:**  
-Implement the first access-control foundation so dashboards and workflow data are scoped by tenant, pharmacy, and role.
+Build the Phase 1 Spring Boot core service foundation and authentication module so dashboards and workflow data are scoped by tenant schema, pharmacy, and role.
 
 **Scope:**
 - Define Phase 1 roles: owner/executive, store manager, pharmacist, technician, bookkeeper/finance, compliance/admin, business development, internal admin.
 - Define tenant and pharmacy assignment rules.
-- Implement or document how APIs enforce tenant/pharmacy/role scope.
+- Implement or document how APIs choose the tenant schema from authenticated tenant context and enforce pharmacy/role scope.
 - Define restricted-source access rules for backend-only tables.
 - Provide seed/admin setup path for the first customer.
 
 **Acceptance criteria:**
 - [ ] Phase 1 roles are defined in code/config.
 - [ ] Users can be assigned to tenant and pharmacy scope.
+- [ ] Tenant schema is selected server-side from authenticated tenant context.
 - [ ] Dashboard APIs enforce scope.
 - [ ] Restricted raw/source data is not available to normal roles.
 - [ ] Basic admin setup path exists.
@@ -174,7 +180,7 @@ Implement the first access-control foundation so dashboards and workflow data ar
 
 **Phase:** Phase 1  
 **Type:** Backend/frontend  
-**Labels:** `mvp`, `platform`
+**Labels:** `mvp`, `data-platform`
 
 **Description:**  
 Build an internal/admin-facing view that shows whether webhook events and future files were received, accepted, rejected, retried, enriched, skipped, failed, or persisted.
@@ -193,11 +199,11 @@ Build an internal/admin-facing view that shows whether webhook events and future
 - [ ] Failed/retryable items are identifiable.
 - [ ] View supports Phase 1 operational debugging.
 
-### #41: Build Phase 1 Frontend Application And Shared UI Components
+### #41: Build Phase 1 Frontend Application And Role-Based Dashboard Screens
 
 **Phase:** Phase 1  
 **Type:** Frontend  
-**Labels:** `mvp`, `dashboard`
+**Labels:** `mvp`, `data-platform`
 
 **Description:**  
 Build the Phase 1 frontend application foundation that users will interact with for role-based dashboards, pipeline visibility, and later workflow features.
@@ -227,7 +233,7 @@ This issue is separate from the individual dashboard issue so the team has a cle
 
 **Phase:** Phase 1  
 **Type:** Frontend/product  
-**Labels:** `mvp`, `dashboard`
+**Labels:** `mvp`, `data-platform`
 
 **Description:**  
 Build simple starter dashboards for all roles. These are intentionally not final dashboards; they prove role-level visibility and become the base that Phase 2 improves with workflow execution.
@@ -252,7 +258,7 @@ Build simple starter dashboards for all roles. These are intentionally not final
 
 **Phase:** Phase 1  
 **Type:** Backend/API  
-**Labels:** `mvp`, `dashboard`
+**Labels:** `mvp`, `data-platform`
 
 **Description:**  
 Create backend query/read models that provide stable data for Phase 1 starter dashboards without making frontend components query raw PrimeRx data directly.
@@ -264,10 +270,12 @@ Create backend query/read models that provide stable data for Phase 1 starter da
 - Finance starter read model.
 - Compliance/document status read model.
 - Task/business-development starter read model where data exists.
+- Tenant schema selection based on authenticated tenant context.
 
 **Acceptance criteria:**
 - [ ] Dashboard APIs do not depend on raw PrimeRx payload shape.
 - [ ] Dashboard APIs enforce tenant/pharmacy/role access.
+- [ ] Dashboard APIs select tenant schema server-side and never trust a schema value from request input.
 - [ ] APIs handle missing source fields gracefully.
 - [ ] APIs are documented for frontend use.
 - [ ] APIs support initial demo data and real canonical records.
@@ -276,7 +284,7 @@ Create backend query/read models that provide stable data for Phase 1 starter da
 
 **Phase:** Phase 1  
 **Type:** QA/product  
-**Labels:** `mvp`, `testing`
+**Labels:** `mvp`, `data-platform`
 
 **Description:**  
 Create a checklist that defines what must be true before Phase 1 can be shown as a working product foundation.
@@ -401,6 +409,6 @@ Enhance Phase 1 dashboards with workflow status, queue completion, alerts, CRM a
 | Epic | Child issues |
 | --- | --- |
 | #40: Pharmacy Data Platform And Role-Based Dashboards | #26 through #39 and #41 |
-| Phase 1 - Data Foundation And Starter Dashboards | Existing #1 through #10, #23, #26 through #33, and #41 |
+| Phase 1 - Data Foundation And Starter Dashboards | Existing #1 through #10, #23, #26 through #33, and #41. Tenant-owned database tables use one schema per tenant. |
 | Phase 2 - Workflow Automation And Doctor CRM | #34 through #39 |
 | Backlog - Data Engineering And Analytics | #11 through #17 and #21 |

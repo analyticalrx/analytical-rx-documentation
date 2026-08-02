@@ -1,9 +1,13 @@
 -- AnalyticalRx MVP canonical event schema cleanup.
 -- Purpose: remove duplicate drug/payer snapshots from canonical tables after normalizing drug and payer data.
+-- Tenant schema model: run inside the target tenant schema. tenant_template is the local review schema.
+
+create schema if not exists tenant_template;
+set search_path to tenant_template, public;
 
 drop index if exists idx_canonical_primary_payer;
 
-alter table analytics.canonical_pharmacy_event
+alter table canonical_pharmacy_event
   drop column if exists primary_payer_id,
   drop column if exists source_drug_id,
   drop column if exists drug_ndc,
@@ -23,7 +27,7 @@ alter table analytics.canonical_pharmacy_event
   drop column if exists patient_pay_amount,
   drop column if exists copay_paid_amount;
 
-alter table analytics.canonical_event_payer_payment
+alter table canonical_event_payer_payment
   drop column if exists payer_name_snapshot,
   drop column if exists payer_bin_snapshot,
   drop column if exists payer_pcn_snapshot;

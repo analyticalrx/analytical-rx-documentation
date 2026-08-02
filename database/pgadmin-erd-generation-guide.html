@@ -215,7 +215,7 @@
           <tr><td>Port</td><td><code>5432</code></td></tr>
           <tr><td>Database</td><td><code>analytical_rx_design</code></td></tr>
           <tr><td>Username</td><td><code>your local PostgreSQL username</code></td></tr>
-          <tr><td>Schemas</td><td><code>core</code>, <code>ops</code>, <code>analytics</code></td></tr>
+          <tr><td>Review schema</td><td><code>tenant_template</code></td></tr>
         </tbody>
       </table>
       <div class="callout">
@@ -244,10 +244,8 @@
         <li>Execute the SQL.</li>
         <li>Refresh the database tree in pgAdmin.</li>
       </ol>
-      <p>After execution, pgAdmin should show these schemas:</p>
-      <pre><code>core
-ops
-analytics</code></pre>
+      <p>After execution, pgAdmin should show the review tenant schema:</p>
+      <pre><code>tenant_template</code></pre>
     </section>
 
     <section>
@@ -276,7 +274,7 @@ analytics</code></pre>
         <li>Use <code>Cardinality Notation</code> and choose Crow's Foot notation if preferred.</li>
       </ol>
       <div class="callout">
-        <p>pgAdmin can generate an ERD from an existing database, schema, or table. For this MVP schema, database-level generation is easiest because the foreign keys cross <code>core</code>, <code>ops</code>, and <code>analytics</code>.</p>
+        <p>pgAdmin can generate an ERD from an existing database, schema, or table. For this MVP model, schema-level generation against <code>tenant_template</code> is easiest because all tenant-owned tables live in one schema.</p>
       </div>
     </section>
 
@@ -329,47 +327,47 @@ analytics</code></pre>
         </thead>
         <tbody>
           <tr>
-            <td><code>core.tenant</code> to <code>core.pharmacy</code></td>
+            <td><code>tenant</code> to <code>pharmacy</code></td>
             <td>One tenant can have many pharmacies.</td>
           </tr>
           <tr>
-            <td><code>core.tenant</code> to <code>core.drug</code> and <code>core.payer</code></td>
+            <td><code>tenant</code> to <code>drug</code> and <code>payer</code></td>
             <td>Drug and payer lookup rows are tenant-scoped for source matching and isolation.</td>
           </tr>
           <tr>
-            <td><code>core.tenant</code> to <code>ops.raw_payload_archive</code></td>
+            <td><code>tenant</code> to <code>raw_payload_archive</code></td>
             <td>Raw payload metadata belongs to one tenant.</td>
           </tr>
           <tr>
-            <td><code>core.pharmacy</code> to <code>ops.raw_payload_archive</code></td>
+            <td><code>pharmacy</code> to <code>raw_payload_archive</code></td>
             <td>Raw payload metadata may be linked to one pharmacy when known.</td>
           </tr>
           <tr>
-            <td><code>core.pharmacy</code> to <code>ops.source_prescription_reference_restricted</code></td>
+            <td><code>pharmacy</code> to <code>source_prescription_reference_restricted</code></td>
             <td>Restricted prescription/fill source references belong to one pharmacy.</td>
           </tr>
           <tr>
-            <td><code>ops.source_prescription_reference_restricted</code> to <code>ops.webhook_event_audit</code></td>
+            <td><code>source_prescription_reference_restricted</code> to <code>webhook_event_audit</code></td>
             <td>An audit event can link to the restricted prescription/fill reference used for API enrichment.</td>
           </tr>
           <tr>
-            <td><code>ops.raw_payload_archive</code> to <code>ops.webhook_event_audit</code></td>
+            <td><code>raw_payload_archive</code> to <code>webhook_event_audit</code></td>
             <td>An audit event can link to raw payload archive metadata if raw retention is enabled.</td>
           </tr>
           <tr>
-            <td><code>ops.webhook_event_audit</code> to <code>analytics.canonical_pharmacy_event</code></td>
+            <td><code>webhook_event_audit</code> to <code>canonical_pharmacy_event</code></td>
             <td>One processed audit event should create at most one canonical event row.</td>
           </tr>
           <tr>
-            <td><code>core.drug</code> to <code>analytics.canonical_pharmacy_event</code></td>
+            <td><code>drug</code> to <code>canonical_pharmacy_event</code></td>
             <td>A canonical event can link to a normalized drug when available.</td>
           </tr>
           <tr>
-            <td><code>analytics.canonical_pharmacy_event</code> to <code>analytics.canonical_event_payer_payment</code></td>
+            <td><code>canonical_pharmacy_event</code> to <code>canonical_event_payer_payment</code></td>
             <td>A canonical event can have multiple payment rows for primary, secondary, tertiary, patient pay, cash, or other components.</td>
           </tr>
           <tr>
-            <td><code>core.payer</code> to <code>analytics.canonical_event_payer_payment</code></td>
+            <td><code>payer</code> to <code>canonical_event_payer_payment</code></td>
             <td>Insurance payment rows can link to a payer. Cash payment rows intentionally keep <code>payer_id</code> null.</td>
           </tr>
         </tbody>
@@ -382,7 +380,7 @@ analytics</code></pre>
         <li>Confirm the SQL ran successfully.</li>
         <li>Confirm the foreign keys exist under each table's constraints.</li>
         <li>Refresh the database tree before generating the ERD.</li>
-        <li>Generate ERD for the full database, not only one schema, because the model uses cross-schema foreign keys.</li>
+        <li>Generate ERD for the tenant schema, for example <code>tenant_template</code>, because the model keeps tenant-owned tables together in one schema.</li>
       </ul>
     </section>
   </main>

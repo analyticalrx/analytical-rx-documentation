@@ -1,15 +1,23 @@
 direction: right
 
-core_tenant: {
+tenant_schema_note: "Tenant schema\nexample: tenant_acme_pharmacy_group\nall tables shown here live together" {
+  style.fill: "#f8fafc"
+  style.stroke: "#64748b"
+  style.stroke-dash: 4
+}
+
+tenant_table: {
   shape: sql_table
+  label: "tenant"
   id: uuid {constraint: primary_key}
   tenant_key: text
   display_name: text
   status: text
 }
 
-core_pharmacy: {
+pharmacy_table: {
   shape: sql_table
+  label: "pharmacy"
   id: uuid {constraint: primary_key}
   tenant_id: uuid {constraint: foreign_key}
   pharmacy_key: text
@@ -17,8 +25,9 @@ core_pharmacy: {
   source_pharmacy_id: text
 }
 
-core_drug: {
+drug_table: {
   shape: sql_table
+  label: "drug"
   id: uuid {constraint: primary_key}
   tenant_id: uuid {constraint: foreign_key}
   source_system: text
@@ -27,8 +36,9 @@ core_drug: {
   drug_name: text
 }
 
-core_payer: {
+payer_table: {
   shape: sql_table
+  label: "payer"
   id: uuid {constraint: primary_key}
   tenant_id: uuid {constraint: foreign_key}
   source_system: text
@@ -38,8 +48,9 @@ core_payer: {
   payer_pcn: text
 }
 
-ops_raw_payload_archive: {
+raw_payload_archive_table: {
   shape: sql_table
+  label: "raw_payload_archive"
   id: uuid {constraint: primary_key}
   tenant_id: uuid {constraint: foreign_key}
   pharmacy_id: uuid {constraint: foreign_key}
@@ -47,8 +58,9 @@ ops_raw_payload_archive: {
   raw_payload_sha256: text
 }
 
-ops_source_reference: {
+source_reference_table: {
   shape: sql_table
+  label: "source_prescription_reference_restricted"
   id: uuid {constraint: primary_key}
   tenant_id: uuid {constraint: foreign_key}
   pharmacy_id: uuid {constraint: foreign_key}
@@ -58,8 +70,9 @@ ops_source_reference: {
   fill_reference_token: text
 }
 
-ops_webhook_event_audit: {
+webhook_event_audit_table: {
   shape: sql_table
+  label: "webhook_event_audit"
   id: uuid {constraint: primary_key}
   tenant_id: uuid {constraint: foreign_key}
   pharmacy_id: uuid {constraint: foreign_key}
@@ -69,8 +82,9 @@ ops_webhook_event_audit: {
   status: text
 }
 
-analytics_canonical_event: {
+canonical_event_table: {
   shape: sql_table
+  label: "canonical_pharmacy_event"
   id: uuid {constraint: primary_key}
   tenant_id: uuid {constraint: foreign_key}
   pharmacy_id: uuid {constraint: foreign_key}
@@ -84,8 +98,9 @@ analytics_canonical_event: {
   enrichment_status: text
 }
 
-analytics_event_payment: {
+event_payment_table: {
   shape: sql_table
+  label: "canonical_event_payer_payment"
   id: uuid {constraint: primary_key}
   tenant_id: uuid {constraint: foreign_key}
   pharmacy_id: uuid {constraint: foreign_key}
@@ -102,21 +117,22 @@ payer_event_link_note: "Payer-event link\nNo payer_id on canonical event\nUse pa
   style.stroke-dash: 4
 }
 
-core_tenant.id -> core_pharmacy.tenant_id: "1 to many"
-core_tenant.id -> core_drug.tenant_id: "1 to many"
-core_tenant.id -> core_payer.tenant_id: "1 to many"
-core_tenant.id -> ops_raw_payload_archive.tenant_id: "1 to many"
-core_pharmacy.id -> ops_raw_payload_archive.pharmacy_id: "1 to many"
-core_tenant.id -> ops_source_reference.tenant_id: "1 to many"
-core_pharmacy.id -> ops_source_reference.pharmacy_id: "1 to many"
-core_tenant.id -> ops_webhook_event_audit.tenant_id: "1 to many"
-core_pharmacy.id -> ops_webhook_event_audit.pharmacy_id: "1 to many"
-ops_source_reference.id -> ops_webhook_event_audit.source_reference_id: "optional"
-ops_raw_payload_archive.id -> ops_webhook_event_audit.raw_payload_archive_id: "optional"
-core_tenant.id -> analytics_canonical_event.tenant_id: "1 to many"
-core_pharmacy.id -> analytics_canonical_event.pharmacy_id: "1 to many"
-ops_webhook_event_audit.id -> analytics_canonical_event.audit_event_id: "1 to 1"
-core_drug.id -> analytics_canonical_event.drug_id: "optional"
-analytics_canonical_event.id -> analytics_event_payment.canonical_event_id: "1 to many"
-core_payer.id -> analytics_event_payment.payer_id: "optional; null for cash"
-payer_event_link_note -> analytics_event_payment: "bridge table"
+tenant_table.id -> pharmacy_table.tenant_id: "1 to many"
+tenant_table.id -> drug_table.tenant_id: "1 to many"
+tenant_table.id -> payer_table.tenant_id: "1 to many"
+tenant_table.id -> raw_payload_archive_table.tenant_id: "1 to many"
+pharmacy_table.id -> raw_payload_archive_table.pharmacy_id: "1 to many"
+tenant_table.id -> source_reference_table.tenant_id: "1 to many"
+pharmacy_table.id -> source_reference_table.pharmacy_id: "1 to many"
+tenant_table.id -> webhook_event_audit_table.tenant_id: "1 to many"
+pharmacy_table.id -> webhook_event_audit_table.pharmacy_id: "1 to many"
+source_reference_table.id -> webhook_event_audit_table.source_reference_id: "optional"
+raw_payload_archive_table.id -> webhook_event_audit_table.raw_payload_archive_id: "optional"
+tenant_table.id -> canonical_event_table.tenant_id: "1 to many"
+pharmacy_table.id -> canonical_event_table.pharmacy_id: "1 to many"
+webhook_event_audit_table.id -> canonical_event_table.audit_event_id: "1 to 1"
+drug_table.id -> canonical_event_table.drug_id: "optional"
+canonical_event_table.id -> event_payment_table.canonical_event_id: "1 to many"
+payer_table.id -> event_payment_table.payer_id: "optional; null for cash"
+payer_event_link_note -> event_payment_table: "bridge table"
+tenant_schema_note -> tenant_table: "contains"

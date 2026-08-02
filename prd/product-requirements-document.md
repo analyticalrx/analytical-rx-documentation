@@ -77,8 +77,9 @@ As an engineering/data user, I want incoming pharmacy events mapped into a canon
 Acceptance criteria:
 
 - Events are stored with tenant, pharmacy, audit, canonical event type, date/time, status, quantity, payment, drug, and payer relationships where available.
-- Drug details are stored in `core.drug`, linked by `drug_id`, and not duplicated as snapshots in the canonical event row.
-- Payer details are stored in `core.payer` and linked through event payment rows.
+- Tenant-owned data tables are deployed inside one PostgreSQL schema per tenant.
+- Drug details are stored in `drug`, linked by `drug_id`, and not duplicated as snapshots in the canonical event row.
+- Payer details are stored in `payer` and linked through event payment rows.
 - Cash payments use `payment_type = cash` and `payer_id = null`.
 - Real `RxNo` and `RefillNo` are stored only in restricted operational tables for API enrichment.
 
@@ -104,6 +105,7 @@ Acceptance criteria:
 
 - Users can be assigned to tenant, store/pharmacy, and role scope.
 - Dashboard APIs enforce tenant, store, and role scope.
+- Backend services select the tenant schema from authenticated tenant context, not from untrusted request parameters.
 - Restricted operational tables are not directly available to normal dashboard users.
 - Finance, compliance, and admin views can be restricted by role.
 - Access behavior is testable for each defined role.
@@ -281,7 +283,7 @@ Phase 1 architecture:
 1. PrimeRx/Micro Merchant sends events or files through approved webhook, API, or SFTP paths.
 2. The ingestion layer validates inbound data, applies idempotency, records audit status, and stores restricted raw source details separately from normal dashboard data.
 3. The processing layer maps safe fields into the canonical pharmacy event model.
-4. PostgreSQL/RDS stores tenants, pharmacies, restricted operational references, audit rows, drugs, payers, canonical events, and payment rows.
+4. PostgreSQL/RDS stores each tenant's owned data in one tenant-specific schema containing tenant, pharmacy, restricted operational reference, audit, drug, payer, canonical event, and payment tables.
 5. The Spring backend service exposes tenant/role-scoped APIs.
 6. The frontend application displays role-based starter dashboards and import/audit visibility.
 
@@ -322,6 +324,7 @@ Phase 2 architecture:
 
 - Role-based access must be enforced at API level, not only in the frontend.
 - Users only see data for authorized tenant, store, role, and workflow scope.
+- The backend must route each request/job to the tenant schema from authenticated tenant context or trusted job configuration. The client must not be allowed to choose arbitrary schemas.
 - Normal dashboards must not expose restricted raw payloads, real Rx numbers, real refill numbers, direct patient identifiers, or raw vendor responses.
 - Real `RxNo` and `RefillNo` may be stored only in restricted operational tables because API enrichment needs them.
 - Raw payload archive, if enabled, defaults to 30-day MVP retention and must be revisited with legal/security before production.

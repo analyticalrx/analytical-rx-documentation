@@ -22,7 +22,7 @@ The searched architecture has useful business direction, but it should not be tr
 - It assumes raw webhook events alone are enough for revenue prediction. They probably are not.
 - PBM clawback/DIR prediction likely requires data beyond webhooks: remittance data, payer statements, DIR fee reports, acquisition cost, claim reversals, payment timing, and adjustment history.
 - Patient-level adherence prediction is PHI-heavy and should not be the first analytics deliverable unless tokenization and compliance boundaries are fully defined.
-- SageMaker Feature Store and serverless inference are likely premature for MVP. Start with SQL feature marts and baseline forecasts. Move to SageMaker only after we prove field coverage, data quality, and forecast value.
+- SageMaker Feature Store and serverless inference are likely premature for Phase 1. Start with SQL feature marts and baseline forecasts later, after we prove field coverage, data quality, and forecast value.
 - The first analytics work should be data inventory, canonical modeling, data quality, feature marts, and baseline forecasting.
 
 ---
@@ -143,7 +143,7 @@ The API appears more reliable for analytics enrichment fields such as NDC, BIN, 
 
 The webhook appears better for event awareness: something happened, when it happened, and what prescription/fill may need follow-up processing.
 
-Recommended MVP pattern:
+Recommended Phase 1 data pattern:
 
 ```text
 Webhook event
@@ -157,9 +157,10 @@ Important identifier handling decision:
 
 - PrimeRx API enrichment needs real source identifiers such as `RxNo`, `RefillNo`, and pharmacy identifier.
 - A hash/token alone cannot be used to call the vendor API.
-- Real `RxNo` and `RefillNo` may be stored only in a restricted operational/source-reference layer.
+- Real `RxNo` and `RefillNo` may be stored only in a restricted source-reference table inside the tenant's PostgreSQL schema.
 - Analytics tables and feature marts should use `prescription_reference_token` and `fill_reference_token`.
 - Tokens should be generated with tenant/pharmacy context, for example: `HMAC_SHA256(secret, tenant_id + pharmacy_id + rx_no + refill_no)`.
+- The Phase 1 database decision is one PostgreSQL schema per tenant. Future analytics tables should either live inside the same tenant schema or use an explicitly approved tenant-isolated analytics store.
 
 ### Unknowns To Confirm
 
@@ -238,21 +239,21 @@ Inventory these field groups:
 
 ### Suggested Labels
 
-`analytics`, `data-engineering`, `data-discovery`, `primerx`, `mvp`
+`analytics`, `data-engineering`, `data-discovery`, `primerx`, `backlog`
 
 ---
 
-## Task 12: Define Canonical Analytics Data Model
+## Task 12: Define Analytics Data Model
 
 ### Objective
 
-Define the MVP canonical analytics schema that will support revenue analysis, refill/adherence analysis, and baseline forecasting without tying dashboards directly to raw PrimeRx webhook/API field names.
+Define the future analytics data model that will support revenue analysis, refill/adherence analysis, and baseline forecasting without tying dashboards directly to raw PrimeRx webhook/API field names.
 
 ### Background
 
-The webhook pipeline creates processed event records, but analytics requires stable dimensional and fact tables. The first version should focus on prescription/fill, payer, drug, prescriber, store, and financial facts. It should avoid storing direct patient identifiers in analytics tables.
+The webhook pipeline creates processed event records inside each tenant schema, but later analytics requires stable dimensional and fact tables. The first analytics version should focus on prescription/fill, payer, drug, prescriber, store, and financial facts. It should avoid storing direct patient identifiers in analytics tables.
 
-### Proposed MVP Tables
+### Proposed Analytics Tables
 
 Consider these tables for the first analytics model:
 
@@ -272,6 +273,7 @@ fact_daily_store_metrics
 ### Design Requirements
 
 - Every table must include tenant/pharmacy isolation fields.
+- Analytics tables must respect the one-schema-per-tenant SaaS model unless a separate tenant-isolated analytics store is approved later.
 - Direct patient identifiers must be excluded.
 - Real `RxNo` and `RefillNo` must be excluded from analytics-facing fact tables.
 - Real `RxNo` and `RefillNo` may be stored in a restricted source-reference table used only by backend enrichment/reconciliation jobs.
@@ -295,7 +297,7 @@ fact_daily_store_metrics
 
 ### Acceptance Criteria
 
-- [ ] MVP analytics tables are documented.
+- [ ] Analytics tables are documented.
 - [ ] Field definitions are documented.
 - [ ] Tenant/pharmacy isolation is defined.
 - [ ] PHI-excluded fields are listed.
@@ -308,7 +310,7 @@ fact_daily_store_metrics
 
 ### Suggested Labels
 
-`analytics`, `database`, `canonical-model`, `phi`, `mvp`
+`analytics`, `database`, `canonical-model`, `phi`, `backlog`
 
 ---
 
@@ -373,7 +375,7 @@ Define rules for:
 
 ### Suggested Labels
 
-`analytics`, `data-quality`, `reconciliation`, `data-engineering`, `mvp`
+`analytics`, `data-quality`, `reconciliation`, `data-engineering`, `backlog`
 
 ---
 
@@ -435,7 +437,7 @@ Do not call this final PBM/DIR prediction yet. True net revenue prediction may r
 
 ### Suggested Labels
 
-`analytics`, `data-engineering`, `revenue`, `feature-mart`, `mvp`
+`analytics`, `data-engineering`, `revenue`, `feature-mart`, `backlog`
 
 ---
 
@@ -447,7 +449,7 @@ Design and build the first refill/adherence feature mart using PHI-minimized pat
 
 ### Background
 
-Refill behavior can indicate revenue erosion, but this area is PHI-sensitive. The MVP should avoid exposing direct patient identifiers and should start with tokenized patient continuity and store/drug-level aggregates.
+Refill behavior can indicate revenue erosion, but this area is PHI-sensitive. The initial analytics version should avoid exposing direct patient identifiers and should start with tokenized patient continuity and store/drug-level aggregates.
 
 ### Scope
 
@@ -501,7 +503,7 @@ Include features such as:
 
 ### Suggested Labels
 
-`analytics`, `data-engineering`, `refill`, `adherence`, `phi`, `mvp`
+`analytics`, `data-engineering`, `refill`, `adherence`, `phi`, `backlog`
 
 ---
 
@@ -515,7 +517,7 @@ Build a baseline forecasting proof of concept using the revenue and refill featu
 
 The first forecasting goal should be simple, measurable, and explainable. This task should prove whether available data can support useful predictions before moving to SageMaker Feature Store, complex ML pipelines, or serverless model endpoints.
 
-### MVP Forecast Targets
+### Initial Forecast Targets
 
 Start with one or more of:
 
@@ -557,4 +559,4 @@ Do not start with complex patient-level adherence prediction or PBM clawback pre
 
 ### Suggested Labels
 
-`analytics`, `forecasting`, `ml`, `data-engineering`, `mvp`
+`analytics`, `forecasting`, `ml`, `data-engineering`, `backlog`

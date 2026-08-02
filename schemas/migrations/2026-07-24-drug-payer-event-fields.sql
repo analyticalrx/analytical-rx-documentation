@@ -1,9 +1,13 @@
 -- AnalyticalRx MVP canonical event schema migration.
 -- Purpose: add normalized drug/payer tables, payer payment rows, and additional safe prescription event fields.
+-- Tenant schema model: run inside the target tenant schema. tenant_template is the local review schema.
 
-create table if not exists core.drug (
+create schema if not exists tenant_template;
+set search_path to tenant_template, public;
+
+create table if not exists drug (
   id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null references core.tenant(id),
+  tenant_id uuid not null references tenant(id),
   source_system text not null,
   source_drug_id text,
   ndc text,
@@ -24,9 +28,9 @@ create table if not exists core.drug (
   updated_at timestamptz not null default now()
 );
 
-create table if not exists core.payer (
+create table if not exists payer (
   id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null references core.tenant(id),
+  tenant_id uuid not null references tenant(id),
   source_system text not null,
   source_payer_id text,
   payer_type text not null default 'insurance' check (
@@ -41,8 +45,8 @@ create table if not exists core.payer (
   updated_at timestamptz not null default now()
 );
 
-alter table analytics.canonical_pharmacy_event
-  add column if not exists drug_id uuid references core.drug(id),
+alter table canonical_pharmacy_event
+  add column if not exists drug_id uuid references drug(id),
   add column if not exists date_ordered timestamptz,
   add column if not exists date_filled timestamptz,
   add column if not exists date_dispensed timestamptz,
@@ -72,10 +76,10 @@ alter table analytics.canonical_pharmacy_event
   add column if not exists amount_due numeric(12,2),
   add column if not exists enriched_at timestamptz;
 
-alter table analytics.canonical_pharmacy_event
+alter table canonical_pharmacy_event
   drop constraint if exists canonical_pharmacy_event_canonical_event_type_check;
 
-alter table analytics.canonical_pharmacy_event
+alter table canonical_pharmacy_event
   add constraint canonical_pharmacy_event_canonical_event_type_check
   check (
     canonical_event_type in (
@@ -99,12 +103,12 @@ alter table analytics.canonical_pharmacy_event
     )
   );
 
-create table if not exists analytics.canonical_event_payer_payment (
+create table if not exists canonical_event_payer_payment (
   id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null references core.tenant(id),
-  pharmacy_id uuid not null references core.pharmacy(id),
-  canonical_event_id uuid not null references analytics.canonical_pharmacy_event(id) on delete cascade,
-  payer_id uuid references core.payer(id),
+  tenant_id uuid not null references tenant(id),
+  pharmacy_id uuid not null references pharmacy(id),
+  canonical_event_id uuid not null references canonical_pharmacy_event(id) on delete cascade,
+  payer_id uuid references payer(id),
   payment_type text not null check (
     payment_type in ('insurance', 'cash', 'patient_pay', 'other', 'unknown')
   ),
@@ -121,20 +125,20 @@ create table if not exists analytics.canonical_event_payer_payment (
   check (payment_type <> 'cash' or payer_id is null)
 );
 
-create index if not exists idx_drug_tenant_name on core.drug (tenant_id, drug_name);
+create index if not exists idx_drug_tenant_name on drug (tenant_id, drug_name);
 create unique index if not exists uq_drug_source_ndc
-  on core.drug (tenant_id, source_system, ndc)
+  on drug (tenant_id, source_system, ndc)
   where ndc is not null;
 create unique index if not exists uq_drug_source_drug_id
-  on core.drug (tenant_id, source_system, source_drug_id)
+  on drug (tenant_id, source_system, source_drug_id)
   where source_drug_id is not null;
 
-create index if not exists idx_payer_tenant_name on core.payer (tenant_id, payer_name);
+create index if not exists idx_payer_tenant_name on payer (tenant_id, payer_name);
 create unique index if not exists uq_payer_source_id
-  on core.payer (tenant_id, source_system, source_payer_id)
+  on payer (tenant_id, source_system, source_payer_id)
   where source_payer_id is not null;
 create unique index if not exists uq_payer_bin_pcn_name
-  on core.payer (
+  on payer (
     tenant_id,
     source_system,
     coalesce(payer_bin, ''),
@@ -143,11 +147,11 @@ create unique index if not exists uq_payer_bin_pcn_name
   )
   where payer_bin is not null or payer_pcn is not null or payer_name is not null;
 
-create index if not exists idx_canonical_drug on analytics.canonical_pharmacy_event (tenant_id, drug_id, business_date);
-create index if not exists idx_event_payment_event on analytics.canonical_event_payer_payment (canonical_event_id);
-create index if not exists idx_event_payment_payer on analytics.canonical_event_payer_payment (tenant_id, payer_id);
+create index if not exists idx_canonical_drug on canonical_pharmacy_event (tenant_id, drug_id, business_date);
+create index if not exists idx_event_payment_event on canonical_event_payer_payment (canonical_event_id);
+create index if not exists idx_event_payment_payer on canonical_event_payer_payment (tenant_id, payer_id);
 create unique index if not exists uq_event_payment_sequence
-  on analytics.canonical_event_payer_payment (
+  on canonical_event_payer_payment (
     canonical_event_id,
     payment_type,
     coalesce(payer_sequence, '')

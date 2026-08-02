@@ -532,7 +532,7 @@ Create a test/demo flow that:
 
 # Follow-Up Storage / Schema Task Drafts
 
-These tasks should come after the basic webhook intake path is agreed, but before the processor Lambda is considered complete. The goal is to define where processed webhook events go, how we audit the pipeline, and how we avoid storing PHI in the analytics layer.
+These tasks should come after the basic webhook intake path is agreed, but before the processor Lambda is considered complete. The goal is to define where processed webhook events go, how we audit the pipeline, and how we avoid storing PHI in canonical/dashboard-facing storage.
 
 Target storage concept:
 
@@ -544,7 +544,7 @@ Webhook processing audit
   -> operational database records for traceability
 
 Canonical processed event
-  -> safe analytics-ready database records
+  -> safe dashboard-ready canonical database records
 ```
 
 Important identifier handling decision:
@@ -553,7 +553,7 @@ Important identifier handling decision:
 Restricted operational tables
   -> may store real RxNo, RefillNo, tenant_id, and pharmacy_id for API enrichment/reconciliation
 
-Analytics/canonical tables
+Canonical/dashboard tables
   -> should use prescription_reference_token / fill_reference_token instead of raw RxNo
 ```
 
@@ -571,7 +571,7 @@ Define the MVP storage architecture for processed PrimeRx webhook events, includ
 
 ### Background
 
-The webhook pipeline can receive and process events, but the system still needs a clear destination for processed outputs. Without a defined storage model, the processor Lambda will either log too much, create ad hoc records, or mix raw webhook data with analytics-ready data. This task should establish the storage boundaries before persistence is implemented.
+The webhook pipeline can receive and process events, but the system still needs a clear destination for processed outputs. Without a defined storage model, the processor Lambda will either log too much, create ad hoc records, or mix raw webhook data with dashboard-ready canonical data. This task should establish the storage boundaries before persistence is implemented.
 
 ### Scope
 
@@ -588,9 +588,10 @@ The design should answer:
 - Which data is allowed in SQS messages?
 - Which data is allowed in restricted raw storage?
 - Which data is allowed in the operational audit database?
-- Which data is allowed in the analytics/canonical database tables?
+- Which data is allowed in the canonical/dashboard database tables?
 - Where real `RxNo` and `RefillNo` are stored for later PrimeRx API enrichment.
-- Where tokenized prescription/fill references are stored for analytics.
+- Where tokenized prescription/fill references are stored for dashboards and later analytics.
+- How the target tenant schema is selected for writes.
 - How long each category should be retained for MVP.
 - Which AWS services should be used for MVP.
 
@@ -605,6 +606,8 @@ Use this as the starting recommendation unless the team identifies a better reas
 
 PostgreSQL can be AWS RDS PostgreSQL or Aurora PostgreSQL depending on cost, operations preference, and environment maturity. For the first implementation, the schema should stay portable and not rely on database-specific behavior unless needed.
 
+SaaS isolation decision: tenant-owned tables should be created inside one PostgreSQL schema per tenant. The processor must route writes to the tenant schema from trusted tenant configuration, not from untrusted payload fields alone.
+
 ### PHI Boundary
 
 Assume PrimeRx webhook payloads may contain PHI until PrimeRx confirms otherwise.
@@ -613,12 +616,12 @@ The storage architecture must clearly separate:
 
 - Restricted raw/event intake data.
 - Safe audit metadata.
-- Analytics-ready canonical records.
+- Dashboard-ready canonical records.
 - Restricted source identifiers required for API enrichment.
 
-Direct patient identifiers should not be stored in canonical analytics tables unless explicitly approved later.
+Direct patient identifiers should not be stored in canonical dashboard tables unless explicitly approved later.
 
-`RxNo` and `RefillNo` should be treated as restricted source identifiers. They may be stored in a restricted operational table with tenant/pharmacy isolation and strict backend-only access, but analytics tables should use HMAC/tokenized references.
+`RxNo` and `RefillNo` should be treated as restricted source identifiers. They may be stored in a restricted operational table with tenant/pharmacy isolation and strict backend-only access, but canonical/dashboard tables should use HMAC/tokenized references.
 
 ### Key Design Questions
 
@@ -646,7 +649,8 @@ Direct patient identifiers should not be stored in canonical analytics tables un
 - [ ] MVP database recommendation is documented.
 - [ ] Raw payload retention decision is documented.
 - [ ] Restricted source-reference storage for `RxNo`, `RefillNo`, `tenant_id`, and `pharmacy_id` is documented.
-- [ ] Tokenized prescription/fill reference strategy for analytics tables is documented.
+- [ ] Tokenized prescription/fill reference strategy for canonical/dashboard tables is documented.
+- [ ] Tenant-schema write routing is documented.
 - [ ] Audit retention decision is documented.
 - [ ] Canonical event retention decision is documented.
 - [ ] Processor Lambda persistence responsibilities are clearly defined.
@@ -818,7 +822,7 @@ The schema should support queries like:
 
 ### Objective
 
-Define the PHI-minimized canonical event schema that stores processed PrimeRx webhook events in a stable format for analytics, reconciliation, and future dashboard work.
+Define the PHI-minimized canonical event schema that stores processed PrimeRx webhook events in a stable format for dashboards, reconciliation, and future analytics work.
 
 ### Background
 
@@ -864,10 +868,10 @@ The final schema may remove fields if PrimeRx does not provide them through webh
 
 ### Canonical Model Principles
 
-- Keep raw PrimeRx payload fields out of analytics tables.
+- Keep raw PrimeRx payload fields out of canonical/dashboard tables.
 - Store event-level business facts in stable internal names.
 - Use safe tokens or approved references instead of direct patient identifiers.
-- Do not store raw `RxNo` in analytics-facing tables.
+- Do not store raw `RxNo` in canonical/dashboard-facing tables.
 - Use `prescription_reference_token` and `fill_reference_token` generated from restricted source identifiers.
 - Allow nullable fields where webhook payloads are incomplete.
 - Link each canonical record back to the audit record.
@@ -891,7 +895,7 @@ Do not include:
 
 If patient or prescription continuity is required, use only approved tokens, hashes, or source references after the PHI policy is reviewed.
 
-Raw `RxNo` and `RefillNo` should remain available only in restricted operational tables for API enrichment and reconciliation. The canonical analytics table should store tokenized references and link back to the audit/source-reference record.
+Raw `RxNo` and `RefillNo` should remain available only in restricted operational tables for API enrichment and reconciliation. The canonical event table should store tokenized references and link back to the audit/source-reference record.
 
 ### Open Data Questions
 
@@ -921,7 +925,7 @@ The schema should call out fields that depend on PrimeRx payload/API details:
 - [ ] Required vs nullable fields are identified.
 - [ ] PHI-excluded fields are explicitly listed.
 - [ ] Link from canonical event to audit record is defined.
-- [ ] Raw `RxNo` is excluded from analytics-facing canonical tables.
+- [ ] Raw `RxNo` is excluded from canonical/dashboard-facing tables.
 - [ ] `prescription_reference_token` / `fill_reference_token` strategy is defined.
 - [ ] Mapping assumptions from webhook payload/envelope are documented.
 - [ ] Open PrimeRx data questions are documented.
@@ -985,7 +989,7 @@ SQS message received
 - Database writes should be idempotent.
 - Duplicate events should not create duplicate canonical records.
 - Real `RxNo` and `RefillNo` should be written only to restricted operational tables.
-- Canonical/analytics tables should receive tokenized prescription/fill references only.
+- Canonical/dashboard tables should receive tokenized prescription/fill references only.
 - Audit status should be updated even when canonical mapping fails.
 - Logs should contain correlation IDs and safe metadata only.
 - Raw payloads should not be written to general logs.
@@ -997,7 +1001,7 @@ The processor should support:
 
 - Insert audit record when processing starts if one does not already exist.
 - Persist `tenant_id`, `pharmacy_id`, `RxNo`, and `RefillNo` in the restricted source-reference layer for later API enrichment.
-- Generate `prescription_reference_token` and `fill_reference_token` for analytics-facing records.
+- Generate `prescription_reference_token` and `fill_reference_token` for canonical/dashboard-facing records.
 - Update audit status as processing moves forward.
 - Enforce idempotency before writing canonical output.
 - Insert canonical record only after PHI minimization.

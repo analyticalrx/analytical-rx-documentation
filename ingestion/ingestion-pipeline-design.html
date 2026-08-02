@@ -179,13 +179,13 @@
     <nav><a href="../index.html">Back to design index</a></nav>
     <article>
       <h1 id="primerx-ingestion-pipeline-design">PrimeRx Ingestion Pipeline Design</h1>
-      <p>This document defines the ingestion path for PrimeRx and Micro Merchant data into the analytics platform.</p>
+      <p>This document defines the ingestion path for PrimeRx and Micro Merchant data into the AnalyticalRx platform.</p>
       <h2 id="scope">Scope</h2>
       <p>The pipeline must support three ingestion modes:</p>
       <ol>
       <li>Webhooks for near-real-time event triggers.</li>
       <li>API sync for backfill, enrichment, and reconciliation.</li>
-      <li>Bulk export or scheduled batch send if PrimeRx provides one.</li>
+      <li>SFTP historical and daily batch feeds after field specification and setup approval.</li>
       </ol>
       <h2 id="reference-diagram">Reference Diagram</h2>
       <ul>
@@ -195,7 +195,7 @@
       <h2 id="goals">Goals</h2>
       <ul>
       <li>Accept source data safely</li>
-      <li>Prevent PHI leakage into analytics storage</li>
+      <li>Prevent PHI leakage into canonical dashboard storage</li>
       <li>Normalize source payloads into a canonical model</li>
       <li>Support initial load, daily sync, and missed-event recovery</li>
       <li>Produce audit logs and exception reports</li>
@@ -294,7 +294,7 @@
       </ul>
       <h2 id="data-handling-rules">Data Handling Rules</h2>
       <ul>
-      <li>Do not allow patient name, street address, DOB, phone, email, driver license, prescription images, or free-text identifier fields into analytics storage</li>
+      <li>Do not allow patient name, street address, DOB, phone, email, driver license, prescription images, or free-text identifier fields into canonical dashboard storage</li>
       <li>Use age bands instead of DOB</li>
       <li>Use ZIP3 or region grouping instead of full address when needed</li>
       <li>Use internal IDs or approved pseudonymous tokens for continuity</li>

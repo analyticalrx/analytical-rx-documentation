@@ -1,14 +1,16 @@
 -- AnalyticalRx MVP canonical event schema draft.
 -- Target database: PostgreSQL-compatible engine such as AWS RDS PostgreSQL or Aurora PostgreSQL.
--- Purpose: store PrimeRx webhook/API events safely while separating restricted source identifiers from analytics-facing canonical records.
+-- Purpose: store PrimeRx webhook/API events safely inside one tenant-owned schema.
+-- SaaS isolation decision: create one PostgreSQL schema per tenant and create all tenant data tables inside that schema.
+-- This design file uses tenant_template as the review/template schema. In production, replace it with the tenant schema name,
+-- for example tenant_acme_pharmacy_group.
 
 create extension if not exists pgcrypto;
 
-create schema if not exists core;
-create schema if not exists ops;
-create schema if not exists analytics;
+create schema if not exists tenant_template;
+set search_path to tenant_template, public;
 
-create table if not exists core.tenant (
+create table if not exists tenant (
   id uuid primary key default gen_random_uuid(),
   tenant_key text not null unique,
   display_name text not null,
@@ -17,9 +19,9 @@ create table if not exists core.tenant (
   updated_at timestamptz not null default now()
 );
 
-create table if not exists core.pharmacy (
+create table if not exists pharmacy (
   id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null references core.tenant(id),
+  tenant_id uuid not null references tenant(id),
   pharmacy_key text not null,
   source_system text not null,
   source_pharmacy_id text,
@@ -33,9 +35,9 @@ create table if not exists core.pharmacy (
   unique (tenant_id, pharmacy_key)
 );
 
-create table if not exists core.drug (
+create table if not exists drug (
   id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null references core.tenant(id),
+  tenant_id uuid not null references tenant(id),
   source_system text not null,
   source_drug_id text,
   ndc text,
@@ -56,9 +58,9 @@ create table if not exists core.drug (
   updated_at timestamptz not null default now()
 );
 
-create table if not exists core.payer (
+create table if not exists payer (
   id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null references core.tenant(id),
+  tenant_id uuid not null references tenant(id),
   source_system text not null,
   source_payer_id text,
   payer_type text not null default 'insurance' check (
@@ -73,10 +75,10 @@ create table if not exists core.payer (
   updated_at timestamptz not null default now()
 );
 
-create table if not exists ops.raw_payload_archive (
+create table if not exists raw_payload_archive (
   id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null references core.tenant(id),
-  pharmacy_id uuid references core.pharmacy(id),
+  tenant_id uuid not null references tenant(id),
+  pharmacy_id uuid references pharmacy(id),
   source_system text not null,
   source_event_type text,
   raw_payload_reference text not null,
@@ -88,10 +90,10 @@ create table if not exists ops.raw_payload_archive (
   unique (tenant_id, source_system, raw_payload_sha256)
 );
 
-create table if not exists ops.source_prescription_reference_restricted (
+create table if not exists source_prescription_reference_restricted (
   id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null references core.tenant(id),
-  pharmacy_id uuid not null references core.pharmacy(id),
+  tenant_id uuid not null references tenant(id),
+  pharmacy_id uuid not null references pharmacy(id),
   source_system text not null,
   source_pharmacy_id text,
   rx_no text not null,
@@ -105,17 +107,17 @@ create table if not exists ops.source_prescription_reference_restricted (
   unique (tenant_id, fill_reference_token)
 );
 
-create table if not exists ops.webhook_event_audit (
+create table if not exists webhook_event_audit (
   id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null references core.tenant(id),
-  pharmacy_id uuid references core.pharmacy(id),
+  tenant_id uuid not null references tenant(id),
+  pharmacy_id uuid references pharmacy(id),
   source_system text not null,
   source_event_id text,
   source_event_type text not null,
   receiver_request_id text,
   idempotency_key text not null,
-  source_reference_id uuid references ops.source_prescription_reference_restricted(id),
-  raw_payload_archive_id uuid references ops.raw_payload_archive(id),
+  source_reference_id uuid references source_prescription_reference_restricted(id),
+  raw_payload_archive_id uuid references raw_payload_archive(id),
   received_at timestamptz not null default now(),
   queued_at timestamptz,
   processing_started_at timestamptz,
@@ -135,7 +137,7 @@ create table if not exists ops.webhook_event_audit (
   phi_suppression_status text not null default 'not_started' check (
     phi_suppression_status in ('not_started', 'suppressed', 'not_required', 'failed')
   ),
-  duplicate_of uuid references ops.webhook_event_audit(id),
+  duplicate_of uuid references webhook_event_audit(id),
   failure_code text,
   failure_reason text,
   schema_version text,
@@ -144,12 +146,12 @@ create table if not exists ops.webhook_event_audit (
   unique (tenant_id, source_system, idempotency_key)
 );
 
-create table if not exists analytics.canonical_pharmacy_event (
+create table if not exists canonical_pharmacy_event (
   id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null references core.tenant(id),
-  pharmacy_id uuid not null references core.pharmacy(id),
-  audit_event_id uuid not null unique references ops.webhook_event_audit(id),
-  drug_id uuid references core.drug(id),
+  tenant_id uuid not null references tenant(id),
+  pharmacy_id uuid not null references pharmacy(id),
+  audit_event_id uuid not null unique references webhook_event_audit(id),
+  drug_id uuid references drug(id),
   source_system text not null,
   source_event_type text not null,
   canonical_event_type text not null check (
@@ -224,12 +226,12 @@ create table if not exists analytics.canonical_pharmacy_event (
   updated_at timestamptz not null default now()
 );
 
-create table if not exists analytics.canonical_event_payer_payment (
+create table if not exists canonical_event_payer_payment (
   id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null references core.tenant(id),
-  pharmacy_id uuid not null references core.pharmacy(id),
-  canonical_event_id uuid not null references analytics.canonical_pharmacy_event(id) on delete cascade,
-  payer_id uuid references core.payer(id),
+  tenant_id uuid not null references tenant(id),
+  pharmacy_id uuid not null references pharmacy(id),
+  canonical_event_id uuid not null references canonical_pharmacy_event(id) on delete cascade,
+  payer_id uuid references payer(id),
   payment_type text not null check (
     payment_type in ('insurance', 'cash', 'patient_pay', 'other', 'unknown')
   ),
@@ -246,22 +248,22 @@ create table if not exists analytics.canonical_event_payer_payment (
   check (payment_type <> 'cash' or payer_id is null)
 );
 
-create index if not exists idx_pharmacy_tenant on core.pharmacy (tenant_id);
+create index if not exists idx_pharmacy_tenant on pharmacy (tenant_id);
 create unique index if not exists uq_pharmacy_source_id
-  on core.pharmacy (tenant_id, source_system, (coalesce(source_pharmacy_id, '')));
-create index if not exists idx_drug_tenant_name on core.drug (tenant_id, drug_name);
+  on pharmacy (tenant_id, source_system, (coalesce(source_pharmacy_id, '')));
+create index if not exists idx_drug_tenant_name on drug (tenant_id, drug_name);
 create unique index if not exists uq_drug_source_ndc
-  on core.drug (tenant_id, source_system, ndc)
+  on drug (tenant_id, source_system, ndc)
   where ndc is not null;
 create unique index if not exists uq_drug_source_drug_id
-  on core.drug (tenant_id, source_system, source_drug_id)
+  on drug (tenant_id, source_system, source_drug_id)
   where source_drug_id is not null;
-create index if not exists idx_payer_tenant_name on core.payer (tenant_id, payer_name);
+create index if not exists idx_payer_tenant_name on payer (tenant_id, payer_name);
 create unique index if not exists uq_payer_source_id
-  on core.payer (tenant_id, source_system, source_payer_id)
+  on payer (tenant_id, source_system, source_payer_id)
   where source_payer_id is not null;
 create unique index if not exists uq_payer_bin_pcn_name
-  on core.payer (
+  on payer (
     tenant_id,
     source_system,
     coalesce(payer_bin, ''),
@@ -269,29 +271,30 @@ create unique index if not exists uq_payer_bin_pcn_name
     coalesce(payer_name, '')
   )
   where payer_bin is not null or payer_pcn is not null or payer_name is not null;
-create index if not exists idx_raw_payload_tenant_received on ops.raw_payload_archive (tenant_id, received_at);
-create index if not exists idx_source_ref_prescription_token on ops.source_prescription_reference_restricted (tenant_id, prescription_reference_token);
-create index if not exists idx_source_ref_fill_token on ops.source_prescription_reference_restricted (tenant_id, fill_reference_token);
+create index if not exists idx_raw_payload_tenant_received on raw_payload_archive (tenant_id, received_at);
+create index if not exists idx_source_ref_prescription_token on source_prescription_reference_restricted (tenant_id, prescription_reference_token);
+create index if not exists idx_source_ref_fill_token on source_prescription_reference_restricted (tenant_id, fill_reference_token);
 create unique index if not exists uq_source_ref_rx_fill
-  on ops.source_prescription_reference_restricted (tenant_id, pharmacy_id, source_system, rx_no, (coalesce(refill_no, '')));
-create index if not exists idx_source_ref_rx on ops.source_prescription_reference_restricted (tenant_id, pharmacy_id, source_system, rx_no, refill_no);
-create index if not exists idx_audit_status_received on ops.webhook_event_audit (tenant_id, status, received_at);
-create index if not exists idx_audit_source_type on ops.webhook_event_audit (tenant_id, source_system, source_event_type, received_at);
-create index if not exists idx_canonical_business_date on analytics.canonical_pharmacy_event (tenant_id, pharmacy_id, business_date);
-create index if not exists idx_canonical_event_type on analytics.canonical_pharmacy_event (tenant_id, canonical_event_type, business_date);
-create index if not exists idx_canonical_fill_token on analytics.canonical_pharmacy_event (tenant_id, fill_reference_token);
-create index if not exists idx_canonical_drug on analytics.canonical_pharmacy_event (tenant_id, drug_id, business_date);
-create index if not exists idx_event_payment_event on analytics.canonical_event_payer_payment (canonical_event_id);
-create index if not exists idx_event_payment_payer on analytics.canonical_event_payer_payment (tenant_id, payer_id);
+  on source_prescription_reference_restricted (tenant_id, pharmacy_id, source_system, rx_no, (coalesce(refill_no, '')));
+create index if not exists idx_source_ref_rx on source_prescription_reference_restricted (tenant_id, pharmacy_id, source_system, rx_no, refill_no);
+create index if not exists idx_audit_status_received on webhook_event_audit (tenant_id, status, received_at);
+create index if not exists idx_audit_source_type on webhook_event_audit (tenant_id, source_system, source_event_type, received_at);
+create index if not exists idx_canonical_business_date on canonical_pharmacy_event (tenant_id, pharmacy_id, business_date);
+create index if not exists idx_canonical_event_type on canonical_pharmacy_event (tenant_id, canonical_event_type, business_date);
+create index if not exists idx_canonical_fill_token on canonical_pharmacy_event (tenant_id, fill_reference_token);
+create index if not exists idx_canonical_drug on canonical_pharmacy_event (tenant_id, drug_id, business_date);
+create index if not exists idx_event_payment_event on canonical_event_payer_payment (canonical_event_id);
+create index if not exists idx_event_payment_payer on canonical_event_payer_payment (tenant_id, payer_id);
 create unique index if not exists uq_event_payment_sequence
-  on analytics.canonical_event_payer_payment (
+  on canonical_event_payer_payment (
     canonical_event_id,
     payment_type,
     coalesce(payer_sequence, '')
   );
 
 -- Recommended access model:
--- 1. Ingestion/processor service role can write ops.*, safe core lookup rows, and analytics event/payment rows.
--- 2. API enrichment service role can read ops.source_prescription_reference_restricted.
--- 3. Dashboard/analytics role should read analytics.* plus safe core lookup labels only.
--- 4. Raw payload archive references point to restricted encrypted object storage; raw JSON should not be copied into analytics tables.
+-- 1. Ingestion/processor service role can write audit/source-reference rows, safe lookup rows, and event/payment rows inside the tenant schema.
+-- 2. API enrichment service role can read source_prescription_reference_restricted.
+-- 3. Dashboard role should read only dashboard-safe tables/views inside the selected tenant schema.
+-- 4. Raw payload archive references point to restricted encrypted object storage; raw JSON should not be copied into canonical dashboard tables.
+-- 5. The application must choose the tenant schema from authenticated tenant context, never from untrusted request parameters.

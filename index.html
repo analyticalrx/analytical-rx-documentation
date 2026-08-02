@@ -186,12 +186,12 @@
         <a class="link-card" href="database/canonical-event-database-schema.html">
           <span class="badge">Database</span>
           <strong>Canonical Event Database Schema</strong>
-          <span>PostgreSQL schema for raw references, audit/idempotency, restricted source IDs, drug/payer lookups, payment rows, and PHI-minimized canonical events.</span>
+          <span>Tenant-schema PostgreSQL model for raw references, audit/idempotency, restricted source IDs, drug/payer lookups, payment rows, and PHI-minimized canonical events.</span>
         </a>
         <a class="link-card" href="database/canonical-event-table-dictionary.html">
           <span class="badge">Database</span>
           <strong>Canonical Event Table Dictionary</strong>
-          <span>ER diagram, field-level definitions, table access rules, and restrictions for webhook canonical storage.</span>
+          <span>ER diagram, field-level definitions, tenant-schema access rules, and restrictions for webhook canonical storage.</span>
         </a>
         <a class="link-card" href="database/pgadmin-erd-generation-guide.html">
           <span class="badge">Database</span>
@@ -201,7 +201,7 @@
         <a class="link-card" href="schemas/mvp_canonical_event_schema.sql">
           <span class="badge secondary">Schema</span>
           <strong>MVP Canonical Event SQL</strong>
-          <span>Executable first-pass PostgreSQL DDL for the canonical event, drug, payer, and payment storage model.</span>
+          <span>Executable first-pass PostgreSQL DDL for the tenant schema template and canonical event, drug, payer, and payment model.</span>
         </a>
         <a class="link-card" href="schemas/migrations/2026-07-24-drug-payer-event-fields.sql">
           <span class="badge secondary">Schema</span>
