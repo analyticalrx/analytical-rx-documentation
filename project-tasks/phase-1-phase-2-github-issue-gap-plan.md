@@ -12,16 +12,16 @@ The parent epic `#40: Epic: Pharmacy Data Platform And Role-Based Dashboards` wa
 
 | Issue | Project status | Labels |
 | --- | --- | --- |
-| #40: Epic: Pharmacy Data Platform And Role-Based Dashboards | Todo | `epic`, `platform` |
-| #26: Define Phase 1 API/SFTP Backfill And Enrichment Plan | Todo | `mvp`, `platform` |
+| #40: Epic: Pharmacy Data Platform And Role-Based Dashboards | Todo | `epic`, `data-platform` |
+| #26: Define Phase 1 API/SFTP Backfill And Enrichment Plan | Todo | `mvp`, `data-platform` |
 | #27: Design Phase 1 Spring Backend Service For RBAC, Dashboard APIs, And PostgreSQL | Todo | `mvp`, `data-platform` |
 | #28: Provision Phase 1 AWS PostgreSQL Database And Tenant Schema Template | Todo | `mvp`, `data-platform` |
 | #29: Build Spring Boot Core Service Auth And Tenant/Pharmacy RBAC Foundation | Todo | `mvp`, `data-platform` |
-| #30: Build Import And Pipeline Audit View | Todo | `mvp`, `platform` |
+| #30: Build Internal Admin Module For User Permissions And Pipeline Audit Views | Todo | `mvp`, `data-platform` |
 | #41: Build Phase 1 Frontend Application And Role-Based Dashboard Screens | Todo | `mvp`, `data-platform` |
-| #31: Build Phase 1 Role-Level Starter Dashboards | Todo | `mvp`, `dashboard` |
+| #31: Define Phase 1 Role-Level Starter Dashboard Requirements | Todo | `mvp`, `data-platform` |
 | #32: Build Dashboard Read Models And APIs For Phase 1 Starter Metrics | Todo | `mvp`, `data-platform` |
-| #33: Create Phase 1 Demo And Data Readiness Checklist | Todo | `mvp`, `testing` |
+| #33: Create Phase 1 Demo And Data Readiness Checklist | Todo | `mvp`, `data-platform` |
 | #34: Design Phase 2 Workflow Automation Architecture | Todo | `phase-2`, `workflow` |
 | #35: Build Doctor CRM Foundation | Todo | `phase-2`, `crm` |
 | #36: Build Internal Scheduling And Follow-Up Tasks | Todo | `phase-2`, `workflow` |
@@ -37,14 +37,14 @@ Live project status after update:
 
 | Issue | Current project status | Reason |
 | --- | --- | --- |
-| #11: Review Analytics Documentation And Validate MVP Data Engineering Direction | Backlog | Data engineering review should wait until Phase 1 ingestion and source availability are clearer. |
+| #11: Review Analytics Documentation And Validate Future Data Engineering Direction | Backlog | Data engineering review should wait until Phase 1 ingestion and source availability are clearer. |
 | #12: Define Analytics Data Inventory And Source Coverage | Backlog | Needed later for analytics readiness, but not required before Phase 1 ingestion and starter dashboards are live. |
-| #13: Define Canonical Analytics Data Model | Backlog | Analytics model should wait until the Phase 1 canonical event pipeline and source field coverage are stable. |
+| #13: Define Analytics Data Model | Backlog | Analytics model should wait until the Phase 1 canonical event pipeline and source field coverage are stable. |
 | #14: Define Data Quality And Reconciliation Rules | Backlog | Important, but should follow initial ingestion and canonical persistence. |
 | #15: Build Revenue Analytics Feature Mart | Backlog | Phase 3-oriented analytics work, not immediate Phase 1 delivery. |
 | #16: Build Refill And Adherence Feature Mart | Backlog | Requires stable refill data and PHI-safe tokenization; should wait until Phase 2 refill workflow data shape is clearer. |
 | #17: Build Baseline Forecasting Proof Of Concept | Backlog | Forecasting is explicitly future/Phase 3, not Phase 1 or Phase 2 baseline. |
-| #21: Epic: Analytics Data Engineering MVP | Backlog | Parent epic for analytics/data-engineering work. |
+| #21: Epic: Future Analytics Data Engineering Backlog | Backlog | Parent epic for analytics/data-engineering work. |
 
 Issue `#23: Define PrimeRx SFTP Historical And Daily Feed Specification` remains `Todo` because it supports Phase 1 backfill/SFTP planning and should not be treated as future analytics backlog.
 
@@ -176,28 +176,37 @@ Build the Phase 1 Spring Boot core service foundation and authentication module 
 - [ ] Restricted raw/source data is not available to normal roles.
 - [ ] Basic admin setup path exists.
 
-### #30: Build Import And Pipeline Audit View
+### #30: Build Internal Admin Module For User Permissions And Pipeline Audit Views
 
 **Phase:** Phase 1  
 **Type:** Backend/frontend  
 **Labels:** `mvp`, `data-platform`
 
 **Description:**  
-Build an internal/admin-facing view that shows whether webhook events and future files were received, accepted, rejected, retried, enriched, skipped, failed, or persisted.
+Build an internal admin module inside the Phase 1 Spring core service for AnalyticalRx platform administrators to manage user access across tenants/pharmacies and review pipeline/import audit activity.
+
+This is not a separate application. It should be part of the same core service and frontend experience, restricted to internal/admin users.
 
 **Scope:**
-- Show event counts by status.
-- Show recent failures and retryable errors.
-- Show duplicate/idempotency outcomes.
-- Show source type where available: webhook, API enrichment, SFTP/file.
-- Link audit view to pipeline run/debug information without exposing PHI in normal UI.
+- Show all tenants and pharmacies available to an internal platform admin.
+- Show users and their assigned roles across tenants and pharmacies.
+- Allow authorized internal admins to review and manage user-to-tenant, user-to-pharmacy, and role assignments.
+- Track who changed permissions, what changed, and when.
+- Show pipeline/import audit activity across tenants for internal admins.
+- Show tenant-scoped audit activity for tenant admins/support users.
+- Show event/file/API processing counts by status: received, accepted, rejected, retried, enriched, skipped, failed, persisted.
+- Show recent failures and retryable errors without exposing PHI/raw payloads in the normal UI.
 
 **Acceptance criteria:**
-- [ ] Authorized admin/support user can see recent pipeline activity.
-- [ ] Status counts and failures are visible.
+- [ ] Internal platform admin can list tenants, pharmacies, users, and role assignments.
+- [ ] Internal platform admin can update user role assignments where authorized.
+- [ ] Tenant admin cannot access another tenant's users, schema, pharmacies, or audit records.
+- [ ] Permission changes are recorded with actor, target user, tenant, pharmacy, old/new values, timestamp, and reason/comment where provided.
+- [ ] Authorized admin/support user can see recent pipeline/import activity.
+- [ ] Status counts and failures are visible by tenant, pharmacy, source type, and date range.
 - [ ] PHI/raw payload content is not shown in the normal audit UI.
 - [ ] Failed/retryable items are identifiable.
-- [ ] View supports Phase 1 operational debugging.
+- [ ] All admin actions are protected by RBAC and auditable.
 
 ### #41: Build Phase 1 Frontend Application And Role-Based Dashboard Screens
 
@@ -208,7 +217,7 @@ Build an internal/admin-facing view that shows whether webhook events and future
 **Description:**  
 Build the Phase 1 frontend application foundation that users will interact with for role-based dashboards, pipeline visibility, and later workflow features.
 
-This issue is separate from the individual dashboard issue so the team has a clear task for shared frontend structure, navigation, reusable components, and integration points with the Spring backend APIs.
+This issue owns frontend implementation. It should use the dashboard requirements defined in #31 and consume the backend APIs built in #32.
 
 **Scope:**
 - Choose and document the frontend framework and project structure.
@@ -217,7 +226,8 @@ This issue is separate from the individual dashboard issue so the team has a cle
 - Create shared UI components for dashboard pages, metric panels, tables, filters, status badges, empty states, loading states, and error states.
 - Add route-level access checks so users only see pages allowed for their role and tenant/pharmacy access.
 - Define API client patterns for calling the Phase 1 backend service.
-- Add placeholder routes for Phase 1 dashboards and import/pipeline audit views so feature teams can build into a consistent structure.
+- Build starter dashboard screens for all Phase 1 roles.
+- Add an entry point for the Phase 1 internal admin and pipeline audit module from #30.
 - Keep restricted raw payload / PHI screens out of normal dashboard navigation.
 
 **Acceptance criteria:**
@@ -229,32 +239,33 @@ This issue is separate from the individual dashboard issue so the team has a cle
 - [ ] Loading, empty, and error states are represented in the shared UI patterns.
 - [ ] Restricted raw data is not reachable from normal role dashboard navigation.
 
-### #31: Build Role-Level Starter Dashboards
+### #31: Define Phase 1 Role-Level Starter Dashboard Requirements
 
 **Phase:** Phase 1  
-**Type:** Frontend/product  
+**Type:** Product/design
 **Labels:** `mvp`, `data-platform`
 
 **Description:**  
-Build simple starter dashboards for all roles. These are intentionally not final dashboards; they prove role-level visibility and become the base that Phase 2 improves with workflow execution.
+Define the Phase 1 role-level starter dashboard requirements so backend and frontend teams know exactly what each dashboard must show first.
+
+This issue is a product/design definition task. It should not build backend APIs or frontend screens. Backend dashboard APIs are covered by #32. Frontend dashboard screens are covered by #41.
 
 **Scope:**
-- Owner / Executive starter dashboard.
-- Store Manager starter dashboard.
-- Pharmacist / Technician starter dashboard.
-- Bookkeeper / Finance starter dashboard.
-- Compliance / Admin starter dashboard.
-- Business Development starter dashboard.
-- Basic role navigation and data visibility rules.
+- Define each Phase 1 dashboard role and its starter purpose.
+- Define the minimum metrics, tables, filters, and empty states needed for each role.
+- Define which data can come from webhook/API/SFTP-backed canonical records in Phase 1.
+- Define which dashboard elements can be placeholders until real source data is available.
+- Define role and pharmacy visibility rules at a product level.
 
 **Acceptance criteria:**
-- [ ] Each role has a dashboard route/view.
-- [ ] Each dashboard shows at least the Phase 1 starter content from the PRD.
-- [ ] Dashboards use role-appropriate data only.
-- [ ] Empty/loading/error states are handled.
-- [ ] Phase 2 enhancement areas are visible or documented as future additions.
+- [ ] Each Phase 1 role has a documented starter dashboard definition.
+- [ ] Each dashboard has a minimum list of summary cards, tables/lists, filters, and states.
+- [ ] Role and pharmacy visibility expectations are documented.
+- [ ] Placeholder sections are clearly marked so the team does not overbuild Phase 1.
+- [ ] Backend API work can proceed in #32 without guessing dashboard requirements.
+- [ ] Frontend screen work can proceed in #41 without guessing dashboard layout/content intent.
 
-### #32: Build Dashboard Read Models / APIs For Phase 1 Starter Metrics
+### #32: Build Dashboard Read Models And APIs For Phase 1 Starter Metrics
 
 **Phase:** Phase 1  
 **Type:** Backend/API  
@@ -262,6 +273,8 @@ Build simple starter dashboards for all roles. These are intentionally not final
 
 **Description:**  
 Create backend query/read models that provide stable data for Phase 1 starter dashboards without making frontend components query raw PrimeRx data directly.
+
+This issue owns backend read models and API contracts only. It should implement the dashboard requirements defined in #31 and provide stable APIs for the frontend work in #41.
 
 **Scope:**
 - Owner/company overview read model.
