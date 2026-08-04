@@ -19,7 +19,23 @@ This is the Phase 1 development PostgreSQL database for the webhook/canonical ev
 | Storage | `20 GB gp3`, encrypted |
 | Backups | 7-day retention |
 | Deletion protection | Enabled |
-| Public endpoint | Enabled, but restricted by security group |
+| Public endpoint | Disabled |
+
+The RDS instance should not be used directly by application services or local developer tools. Use RDS Proxy for application connections and SSM port forwarding for local pgAdmin/psql access.
+
+## RDS Proxy
+
+| Field | Value |
+| --- | --- |
+| Proxy name | `analytical-rx-phase1-rds-proxy` |
+| Proxy endpoint | `analytical-rx-phase1-rds-proxy.proxy-c6ry4mqo6ydb.us-east-1.rds.amazonaws.com` |
+| Engine family | PostgreSQL |
+| TLS required | Yes |
+| Target status | `AVAILABLE` |
+| IAM role | `analytical-rx-phase1-rds-proxy-role` |
+| Credential secret | `analytical-rx/phase1/dev/postgres/app-rw` |
+
+Lambda/ECS services should connect to the proxy endpoint, not the direct RDS endpoint.
 
 ## Schemas Created
 
@@ -34,25 +50,78 @@ Both schemas currently have 9 tables from `schemas/mvp_canonical_event_schema.sq
 
 | Security group | ID | Purpose |
 | --- | --- | --- |
-| `analytical-rx-phase1-db-sg` | `sg-0baa533faee336e7b` | Attached to RDS. Allows PostgreSQL only from approved sources. |
-| `analytical-rx-phase1-app-sg` | `sg-05d7ea352dbbb1de8` | Attach this to Lambda/ECS/app services that need database access. |
+| `analytical-rx-phase1-db-sg` | `sg-0baa533faee336e7b` | Attached to RDS. Allows PostgreSQL only from the RDS Proxy security group. |
+| `analytical-rx-phase1-rds-proxy-sg` | `sg-07b9975f425288f7f` | Attached to RDS Proxy. Allows PostgreSQL from app services and the SSM tunnel host. |
+| `analytical-rx-phase1-app-sg` | `sg-05d7ea352dbbb1de8` | Attach this to Lambda/ECS/app services that need database access through RDS Proxy. |
+| `analytical-rx-phase1-ssm-db-tunnel-sg` | `sg-063dbd4e747686437` | Attached to the SSM tunnel host. Has no inbound rules. |
 
-Current DB inbound access:
+Current access rules:
 
-- TCP `5432` from Bhanu's current public IP: `124.123.132.215/32`.
-- TCP `5432` from `analytical-rx-phase1-app-sg`.
+- RDS accepts TCP `5432` only from `analytical-rx-phase1-rds-proxy-sg`.
+- RDS Proxy accepts TCP `5432` from `analytical-rx-phase1-app-sg`.
+- RDS Proxy accepts TCP `5432` from `analytical-rx-phase1-ssm-db-tunnel-sg`.
+- SSM tunnel host has no inbound rules.
 
-If a developer needs direct local access, add only that person's current public IP as `/32`. Do not open PostgreSQL to `0.0.0.0/0`.
+Do not add changing developer public IP addresses to the database security group. Use SSM port forwarding for local access.
 
-Example:
+## SSM Tunnel Host
+
+| Field | Value |
+| --- | --- |
+| Instance name | `analytical-rx-phase1-ssm-db-tunnel` |
+| Instance ID | `i-0ee64eae7d8505bfc` |
+| Private IP | `172.31.13.30` |
+| Platform | Amazon Linux |
+| IAM role | `analytical-rx-phase1-ssm-db-tunnel-role` |
+| Instance profile | `analytical-rx-phase1-ssm-db-tunnel-profile` |
+
+This instance exists only to provide Session Manager tunnel access. It should not expose SSH or any public inbound ports.
+
+The IAM group `analytical-rx-developers-webhook` has an inline policy named `AnalyticalRxPhase1DevDatabaseAccess` that allows:
+
+- Reading the app database secret.
+- Starting an SSM port forwarding session to the tunnel host.
+- Describing the relevant RDS/SSM/EC2 resources.
+
+## Local pgAdmin / psql Access
+
+Local access flow:
+
+```text
+Developer laptop
+  -> AWS SSM Session Manager tunnel
+  -> analytical-rx-phase1-ssm-db-tunnel
+  -> RDS Proxy
+  -> RDS PostgreSQL
+```
+
+Prerequisites:
+
+- AWS CLI configured with an IAM user in `analytical-rx-developers-webhook`.
+- Session Manager plugin installed locally.
+- Permission to read `analytical-rx/phase1/dev/postgres/app-rw`.
+
+Start the tunnel:
 
 ```bash
-aws ec2 authorize-security-group-ingress \
-  --group-id sg-0baa533faee336e7b \
-  --protocol tcp \
-  --port 5432 \
-  --cidr YOUR_PUBLIC_IP/32
+aws ssm start-session \
+  --target i-0ee64eae7d8505bfc \
+  --document-name AWS-StartPortForwardingSessionToRemoteHost \
+  --parameters '{"host":["analytical-rx-phase1-rds-proxy.proxy-c6ry4mqo6ydb.us-east-1.rds.amazonaws.com"],"portNumber":["5432"],"localPortNumber":["5433"]}'
 ```
+
+Keep that terminal open while using pgAdmin or psql.
+
+pgAdmin connection settings:
+
+| Setting | Value |
+| --- | --- |
+| Host | `localhost` |
+| Port | `5433` |
+| Maintenance database | `analyticalrx` |
+| Username | From `analytical-rx/phase1/dev/postgres/app-rw` |
+| Password | From `analytical-rx/phase1/dev/postgres/app-rw` |
+| SSL mode | `Require` |
 
 ## Credentials
 
@@ -67,7 +136,7 @@ Use the app-level read/write secret:
 | Database user | `analyticalrx_app_rw` |
 | Default schema | `tenant_analyticalrx_dev` |
 
-The IAM group `analytical-rx-developers-webhook` has an inline policy named `AnalyticalRxPhase1DevPostgresSecretRead` that allows reading this secret.
+The secret's `host` value points to the RDS Proxy endpoint. It also includes `rds_host`, `proxy_host`, `ssm_tunnel_instance_id`, and `recommended_local_port`.
 
 ## Fetch The Connection Secret
 
@@ -88,14 +157,18 @@ The secret JSON contains:
 - `password`
 - `sslmode`
 - `default_schema`
+- `proxy_host`
+- `rds_host`
+- `ssm_tunnel_instance_id`
+- `recommended_local_port`
 
 ## Connect With psql
 
-After retrieving the secret, connect with SSL:
+Start the SSM tunnel first. Then connect locally with SSL:
 
 ```bash
 PGPASSWORD='PASSWORD_FROM_SECRET' psql \
-  "host=analytical-rx-phase1-dev-db.c6ry4mqo6ydb.us-east-1.rds.amazonaws.com port=5432 dbname=analyticalrx user=analyticalrx_app_rw sslmode=require"
+  "host=localhost port=5433 dbname=analyticalrx user=analyticalrx_app_rw sslmode=require"
 ```
 
 Use the development tenant schema:
@@ -114,10 +187,18 @@ order by table_schema;
 For AWS Lambda/ECS/app services:
 
 - Attach `analytical-rx-phase1-app-sg` to the compute service.
+- Place the function/service in the same VPC/subnets as the database/proxy.
 - Read the database connection secret from Secrets Manager.
+- Connect to `analytical-rx-phase1-rds-proxy.proxy-c6ry4mqo6ydb.us-east-1.rds.amazonaws.com`.
 - Connect with `sslmode=require`.
 - Resolve tenant schema server-side from authenticated tenant context or trusted job configuration.
 - Do not accept a schema name from frontend input or raw webhook payloads.
+
+Lambda execution role requirements:
+
+- Basic Lambda logging permissions.
+- VPC execution permissions, typically via `AWSLambdaVPCAccessExecutionRole`.
+- `secretsmanager:GetSecretValue` and `secretsmanager:DescribeSecret` for `analytical-rx/phase1/dev/postgres/app-rw`.
 
 ## Operational Notes
 
