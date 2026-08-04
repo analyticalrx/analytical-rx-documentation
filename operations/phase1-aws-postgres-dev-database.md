@@ -101,6 +101,82 @@ Prerequisites:
 - Session Manager plugin installed locally.
 - Permission to read `analytical-rx/phase1/dev/postgres/app-rw`.
 
+## Create AWS Access Key For Local Setup
+
+Each teammate needs AWS CLI credentials for an IAM user that belongs to `analytical-rx-developers-webhook`.
+
+Create the access key from AWS Console:
+
+1. Sign in to the AnalyticalRx AWS account: `209556026827`.
+2. Open **IAM**.
+3. Go to **Users**.
+4. Select your IAM user.
+5. Open the **Security credentials** tab.
+6. In **Access keys**, click **Create access key**.
+7. Select **Command Line Interface (CLI)** as the use case.
+8. Confirm the recommendation acknowledgement.
+9. Click **Create access key**.
+10. Copy the **Access key** and **Secret access key** immediately. The secret is shown only once.
+
+Create a local `.env` file in the repository root:
+
+```text
+AWS_ACCESS_KEY=YOUR_ACCESS_KEY
+AWS_SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY
+```
+
+Do not commit `.env`. It is already ignored by git.
+
+The Windows tunnel script also supports the standard AWS variable name `AWS_ACCESS_KEY_ID` if a developer prefers that instead of `AWS_ACCESS_KEY`.
+
+## Windows One-Shot Tunnel Script
+
+Windows users can use this script:
+
+```powershell
+.\operations\start-phase1-db-tunnel.ps1 -EnvFile .env
+```
+
+What it does:
+
+- Loads AWS credentials from `.env`.
+- Clears any stale `AWS_PROFILE` value for this PowerShell process.
+- Sets region to `us-east-1`.
+- Verifies the AWS account is `209556026827`.
+- Fetches the database connection secret from Secrets Manager.
+- Copies the database password to the Windows clipboard by default.
+- Prints pgAdmin connection settings.
+- Starts the SSM tunnel on local port `5433`.
+
+If PowerShell blocks local scripts, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\operations\start-phase1-db-tunnel.ps1 -EnvFile .env
+```
+
+Optional flags:
+
+```powershell
+.\operations\start-phase1-db-tunnel.ps1 -EnvFile .env -LocalPort 5434
+.\operations\start-phase1-db-tunnel.ps1 -EnvFile .env -ShowPassword
+.\operations\start-phase1-db-tunnel.ps1 -EnvFile .env -CopyPasswordToClipboard:$false
+```
+
+Keep the PowerShell window open while using pgAdmin or psql. Closing the PowerShell window closes the tunnel.
+
+After the script starts, pgAdmin should use:
+
+| Setting | Value |
+| --- | --- |
+| Host | `localhost` |
+| Port | `5433` |
+| Maintenance database | `analyticalrx` |
+| Username | `analyticalrx_app_rw` |
+| Password | Copied to clipboard by the script |
+| SSL mode | `Require` |
+
+## Manual Tunnel Command
+
 Verify that the local AWS CLI is using the AnalyticalRx AWS account and region before starting the tunnel:
 
 ```bash
