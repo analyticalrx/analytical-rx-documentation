@@ -304,11 +304,44 @@ For AWS Lambda/ECS/app services:
 - Resolve tenant schema server-side from authenticated tenant context or trusted job configuration.
 - Do not accept a schema name from frontend input or raw webhook payloads.
 
+## Processor Lambda Current Configuration
+
+The Phase 1 processor Lambda has been configured for the intended RDS Proxy path.
+
+| Field | Value |
+| --- | --- |
+| Lambda function | `primeRx-webhook-processor` |
+| Execution role | `primerx-processor-role-ykjld9us` |
+| VPC | `vpc-009878654ad2bac42` |
+| Subnets | `subnet-03f5fb7199efed202`, `subnet-0c885192fece53c98`, `subnet-0cea0eb252ebca70e` |
+| Security group | `sg-05d7ea352dbbb1de8` / `analytical-rx-phase1-app-sg` |
+| DB secret env var | `DB_SECRET_ID=analytical-rx/phase1/dev/postgres/app-rw` |
+| Tenant schema env var | `DB_SCHEMA=tenant_analyticalrx_dev` |
+
+Processor code should:
+
+- Read `DB_SECRET_ID`.
+- Fetch the secret from Secrets Manager.
+- Use the secret's `host` value, which points to the RDS Proxy endpoint.
+- Connect with PostgreSQL JDBC using `sslmode=require`.
+- Set the schema from `DB_SCHEMA`.
+
 Lambda execution role requirements:
 
 - Basic Lambda logging permissions.
 - VPC execution permissions, typically via `AWSLambdaVPCAccessExecutionRole`.
 - `secretsmanager:GetSecretValue` and `secretsmanager:DescribeSecret` for `analytical-rx/phase1/dev/postgres/app-rw`.
+- `rds-db:connect` for `analyticalrx_app_rw` through the Phase 1 RDS Proxy.
+
+Do not use the Lambda console direct RDS connection path for this processor. The console can create direct security groups such as `lambda-rds-1` and `rds-lambda-1`, which bypass the RDS Proxy. Those console-created security groups were removed after cleanup. The intended path is:
+
+```text
+primeRx-webhook-processor
+  -> analytical-rx-phase1-app-sg
+  -> analytical-rx-phase1-rds-proxy
+  -> analytical-rx-phase1-db-sg
+  -> analytical-rx-phase1-dev-db
+```
 
 ## Operational Notes
 
