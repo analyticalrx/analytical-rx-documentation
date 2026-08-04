@@ -101,6 +101,40 @@ Prerequisites:
 - Session Manager plugin installed locally.
 - Permission to read `analytical-rx/phase1/dev/postgres/app-rw`.
 
+Verify that the local AWS CLI is using the AnalyticalRx AWS account and region before starting the tunnel:
+
+```bash
+aws sts get-caller-identity
+aws configure get region
+```
+
+Expected values:
+
+- Account: `209556026827`
+- Region: `us-east-1`
+
+If the command shows a different account or region, switch to the correct AWS profile before continuing. Example:
+
+```bash
+export AWS_PROFILE=analyticalrx-dev
+export AWS_REGION=us-east-1
+export AWS_DEFAULT_REGION=us-east-1
+aws sts get-caller-identity
+```
+
+If using the repository `.env` temporarily, map the local variable names to AWS CLI variable names:
+
+```bash
+set -a
+source .env
+set +a
+export AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY"
+export AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY"
+export AWS_REGION=us-east-1
+export AWS_DEFAULT_REGION=us-east-1
+aws sts get-caller-identity
+```
+
 Start the tunnel:
 
 ```bash
