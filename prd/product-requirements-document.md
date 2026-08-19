@@ -104,8 +104,10 @@ As an admin, I want tenant, pharmacy, and role-based visibility rules so that us
 Acceptance criteria:
 
 - Users can be assigned to tenant, store/pharmacy, and role scope.
+- Phase 1 authentication uses username/password login with backend-issued JWT bearer tokens containing tenant-scoped role claims.
 - Dashboard APIs enforce tenant, store, and role scope.
 - Backend services select the tenant schema from authenticated tenant context, not from untrusted request parameters.
+- The backend validates JWT claims and still resolves tenant schema and sensitive authorization from trusted server-side control-plane data.
 - Restricted operational tables are not directly available to normal dashboard users.
 - Finance, compliance, and admin views can be restricted by role.
 - Access behavior is testable for each defined role.
@@ -284,7 +286,7 @@ Phase 1 architecture:
 2. The ingestion layer validates inbound data, applies idempotency, records audit status, and stores restricted raw source details separately from normal dashboard data.
 3. The processing layer maps safe fields into the canonical pharmacy event model.
 4. PostgreSQL/RDS stores each tenant's owned data in one tenant-specific schema containing tenant, pharmacy, restricted operational reference, audit, drug, payer, canonical event, and payment tables.
-5. The Spring backend service exposes tenant/role-scoped APIs.
+5. The Spring backend service exposes JWT-secured tenant/role-scoped APIs.
 6. The frontend application displays role-based starter dashboards and import/audit visibility.
 
 Phase 2 architecture:
@@ -323,8 +325,10 @@ Phase 2 architecture:
 ### Security & Privacy
 
 - Role-based access must be enforced at API level, not only in the frontend.
+- Phase 1 APIs use JWT bearer authentication. JWTs may contain tenant-scoped role claims, but they must not contain PHI, raw source payloads, real Rx numbers, real refill numbers, or database schema names.
 - Users only see data for authorized tenant, store, role, and workflow scope.
 - The backend must route each request/job to the tenant schema from authenticated tenant context or trusted job configuration. The client must not be allowed to choose arbitrary schemas.
+- The backend must resolve tenant schema names from trusted control-plane configuration, not directly from JWT claims or request input.
 - Normal dashboards must not expose restricted raw payloads, real Rx numbers, real refill numbers, direct patient identifiers, or raw vendor responses.
 - Real `RxNo` and `RefillNo` may be stored only in restricted operational tables because API enrichment needs them.
 - Raw payload archive, if enabled, defaults to 30-day MVP retention and must be revisited with legal/security before production.

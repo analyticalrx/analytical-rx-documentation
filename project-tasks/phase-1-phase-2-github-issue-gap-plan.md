@@ -104,6 +104,8 @@ Design the Phase 1 application service that powers role-based access, starter da
 **Technology Direction:**
 - Java Spring Boot service.
 - Container image deployed in AWS.
+- Username/password login with backend-issued JWT bearer tokens.
+- JWT tokens include tenant-scoped role claims, but not PHI, raw source identifiers, or database schema names.
 - PostgreSQL/RDS as the application database.
 - One PostgreSQL schema per tenant for tenant-owned data.
 - Role-based access, tenant schema routing, and pharmacy scoping handled in the service layer.
@@ -111,6 +113,7 @@ Design the Phase 1 application service that powers role-based access, starter da
 **Scope:**
 - Define service boundaries and responsibilities.
 - Define module structure for authentication, authorization, tenants/pharmacies, dashboard APIs, audit views, and database access.
+- Define JWT bearer token claims, expiry, signing secret, and role-change behavior.
 - Define RBAC model for Phase 1 roles.
 - Define dashboard API groups for all Phase 1 starter dashboards.
 - Define how authenticated tenant context maps to the active tenant schema.
@@ -120,6 +123,7 @@ Design the Phase 1 application service that powers role-based access, starter da
 **Acceptance criteria:**
 - [ ] Service boundary is clearly documented.
 - [ ] Spring Boot is confirmed or a clearly justified alternative is documented.
+- [ ] JWT bearer auth model is documented.
 - [ ] RBAC model covers all Phase 1 roles.
 - [ ] Tenant schema routing model is documented.
 - [ ] Starter dashboard API groups are listed.
@@ -163,6 +167,9 @@ Build the Phase 1 Spring Boot core service foundation and authentication module 
 
 **Scope:**
 - Define Phase 1 roles: owner/executive, store manager, pharmacist, technician, bookkeeper/finance, compliance/admin, business development, internal admin.
+- Implement username/password login that returns a signed JWT bearer access token.
+- Include tenant-scoped role claims in the JWT without including PHI, raw `RxNo`, raw `RefillNo`, raw payload references, or database schema names.
+- Validate JWT signature, issuer, audience, expiry, and permission version on protected APIs.
 - Define tenant and pharmacy assignment rules.
 - Implement or document how APIs choose the tenant schema from authenticated tenant context and enforce pharmacy/role scope.
 - Define restricted-source access rules for backend-only tables.
@@ -170,8 +177,11 @@ Build the Phase 1 Spring Boot core service foundation and authentication module 
 
 **Acceptance criteria:**
 - [ ] Phase 1 roles are defined in code/config.
+- [ ] Login returns a signed JWT bearer token with tenant-scoped role claims.
+- [ ] Protected APIs require a valid JWT bearer token.
 - [ ] Users can be assigned to tenant and pharmacy scope.
 - [ ] Tenant schema is selected server-side from authenticated tenant context.
+- [ ] Tenant schema is resolved from trusted control-plane data, not from a JWT schema claim or request parameter.
 - [ ] Dashboard APIs enforce scope.
 - [ ] Restricted raw/source data is not available to normal roles.
 - [ ] Basic admin setup path exists.

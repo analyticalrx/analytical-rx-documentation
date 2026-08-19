@@ -1,0 +1,136 @@
+vars: {
+  d2-config: {
+    layout-engine: elk
+    theme-id: 101
+  }
+}
+
+direction: right
+
+classes: {
+  user: {
+    style.fill: "#eef2ff"
+    style.stroke: "#4338ca"
+  }
+  service: {
+    style.fill: "#ecfdf5"
+    style.stroke: "#047857"
+  }
+  data: {
+    style.fill: "#f8fafc"
+    style.stroke: "#475569"
+  }
+  restricted: {
+    style.fill: "#fff7ed"
+    style.stroke: "#c2410c"
+  }
+  future: {
+    style.fill: "#fdf2f8"
+    style.stroke: "#be185d"
+  }
+}
+
+users: {
+  label: "Users"
+  class: user
+  frontend: "Frontend Application\nRole-Based Screens"
+  roles: "Owner, Manager,\nPharmacist, Technician,\nFinance, Admin, BD"
+}
+
+service: {
+  label: "Data Platform Service\nSpring Boot / Java 21"
+  class: service
+  auth: "JWT Auth\nLogin + Current User"
+  rbac: "RBAC\nTenant + Pharmacy Scope"
+  tenant: "Tenant Resolver\nKey to Schema"
+  dashboards: "Dashboard APIs\nRole-Specific Read Models"
+  admin: "Internal Admin APIs\nUsers + Audit Views"
+}
+
+control: {
+  label: "Control Plane Schema\nNo PHI"
+  class: data
+  users: "Users + Password Hashes"
+  registry: "Tenant Registry\nSchema Mapping"
+  assignments: "Roles + Pharmacy Access"
+  audit: "App Permission Audit"
+}
+
+tenant: {
+  label: "Tenant Schema\nPharmacy-Owned Data"
+  class: data
+  canonical: "Canonical Pharmacy Events"
+  payments: "Payment Rows"
+  lookups: "Drug + Payer Lookups"
+  pipeline_audit: "Pipeline Audit Status"
+}
+
+restricted: {
+  label: "Restricted Boundary"
+  class: restricted
+  refs: "Rx / Refill Source References"
+  raw: "Raw Payload Archive Reference"
+}
+
+ingestion: {
+  label: "Ingestion Pipeline"
+  class: restricted
+  receiver: "API Gateway + Receiver Lambda"
+  queue: "SQS"
+  processor: "Processor Lambda"
+}
+
+aws: {
+  label: "AWS Data Access"
+  class: data
+  proxy: "RDS Proxy"
+  rds: "RDS PostgreSQL"
+  secrets: "Secrets Manager"
+}
+
+phase2: {
+  label: "Phase 2 Extensions"
+  class: future
+  workflows: "Workflows"
+  refill: "Refill Queue"
+  crm: "Doctor CRM"
+  alerts: "Alerts + Optional Email"
+}
+
+users.frontend -> service.auth: "sign in / API calls"
+users.roles -> users.frontend
+service.auth -> service.rbac
+service.rbac -> service.tenant
+service.tenant -> service.dashboards
+service.tenant -> service.admin
+
+service.auth -> control.users
+service.tenant -> control.registry
+service.rbac -> control.assignments
+service.admin -> control.audit
+
+service.dashboards -> tenant.canonical: "safe reads"
+service.dashboards -> tenant.payments: "safe reads"
+service.dashboards -> tenant.lookups: "safe reads"
+service.admin -> tenant.pipeline_audit: "status only"
+service.admin -> restricted.refs: "backend-only when needed"
+
+ingestion.receiver -> ingestion.queue
+ingestion.queue -> ingestion.processor
+ingestion.processor -> tenant.canonical
+ingestion.processor -> tenant.payments
+ingestion.processor -> tenant.lookups
+ingestion.processor -> tenant.pipeline_audit
+ingestion.processor -> restricted.refs
+ingestion.processor -> restricted.raw
+
+service -> aws.proxy
+ingestion.processor -> aws.proxy
+aws.proxy -> aws.rds
+service -> aws.secrets
+ingestion.processor -> aws.secrets
+
+phase2.workflows -> service
+phase2.refill -> tenant.canonical
+phase2.crm -> service
+phase2.alerts -> service
