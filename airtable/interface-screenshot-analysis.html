@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Airtable Interface Screenshot Analysis</title>
+  <style>
+    :root {
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --ink: #1f2937;
+      --muted: #5b6472;
+      --line: #d8dee9;
+      --accent: #0f62fe;
+      --warn-bg: #fff7ed;
+      --warn-line: #fed7aa;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+
+    main {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 28px 0 56px;
+    }
+
+    nav {
+      margin-bottom: 20px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    header,
+    section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 18px;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0 0 10px;
+      line-height: 1.2;
+    }
+
+    h1 {
+      font-size: 32px;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin-top: 4px;
+    }
+
+    h3 {
+      font-size: 18px;
+    }
+
+    p {
+      margin: 0 0 12px;
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .callout {
+      background: var(--warn-bg);
+      border: 1px solid var(--warn-line);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-top: 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .shot {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    .shot img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .shot div {
+      padding: 12px 14px 14px;
+    }
+
+    .shot p {
+      color: var(--muted);
+      font-size: 13px;
+      margin: 4px 0 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #eef2f7;
+      font-weight: 700;
+    }
+
+    ul {
+      margin: 8px 0 0;
+      padding-left: 22px;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    code {
+      background: #eef2f7;
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    @media (max-width: 720px) {
+      main {
+        width: min(100% - 24px, 1180px);
+      }
+
+      header,
+      section {
+        padding: 18px;
+      }
+
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <nav><a href="../index.html">Back to design index</a> | <a href="index.html">Airtable docs</a> | <a href="interfaces.html">Interface metadata</a></nav>
+    <header>
+      <h1>Airtable Interface Screenshot Analysis</h1>
+      <p class="lead">Visual review of the Airtable dashboard screenshots captured from the client base on August 14, 2026.</p>
+    </header>
+
+    <section>
+      <h2>Source And Scope</h2>
+      <p>The screenshots were copied from the Desktop into <code>airtable/assets/interface-screenshots</code> and renamed with stable filenames from <code>airtable-interface-01.png</code> through <code>airtable-interface-14.png</code>.</p>
+      <p>This page analyzes what the visible interface screens are trying to accomplish. It should be read together with <a href="interfaces.html">Airtable Interfaces</a>, which contains the metadata extracted from Airtable for page names, source tables, dashboard elements, fields, and aggregation logic.</p>
+      <div class="callout">
+        <p>Use these screenshots as product intent evidence only. They are not a final UI specification, and they should not be shared outside the project without confirming whether visible screenshots contain any client-sensitive data.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Screenshot Map</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Screenshots</th>
+            <th>Airtable page</th>
+            <th>Visible intent</th>
+            <th>Product mapping</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a href="assets/interface-screenshots/airtable-interface-01.png">01</a>, <a href="assets/interface-screenshots/airtable-interface-02.png">02</a></td>
+            <td>Daily Sales Dashboard</td>
+            <td>Store and date-range filters, summary cards for sales/prescriptions/vaccines/OTC, trend charts, day-of-week comparison, and a store leaderboard.</td>
+            <td>Phase 1 starter Daily Sales dashboard.</td>
+          </tr>
+          <tr>
+            <td><a href="assets/interface-screenshots/airtable-interface-03.png">03</a></td>
+            <td>KPI Dashboard</td>
+            <td>Store filter, latest KPI count, and scorecard rows grouped by pharmacy.</td>
+            <td>Phase 1 KPI scorecard view for tracking target, actual, and status by store.</td>
+          </tr>
+          <tr>
+            <td><a href="assets/interface-screenshots/airtable-interface-04.png">04</a>, <a href="assets/interface-screenshots/airtable-interface-05.png">05</a>, <a href="assets/interface-screenshots/airtable-interface-06.png">06</a></td>
+            <td>Technician Dashboard</td>
+            <td>Assigned task workload, high-priority and overdue task counts, task status/category charts, task list, and fridge temperature logging history.</td>
+            <td>Phase 1 role dashboard foundation; richer task and compliance workflow automation belongs to Phase 2.</td>
+          </tr>
+          <tr>
+            <td><a href="assets/interface-screenshots/airtable-interface-07.png">07</a>, <a href="assets/interface-screenshots/airtable-interface-08.png">08</a>, <a href="assets/interface-screenshots/airtable-interface-09.png">09</a>, <a href="assets/interface-screenshots/airtable-interface-10.png">10</a></td>
+            <td>Bookkeeper Financials</td>
+            <td>Store/month filters, monthly revenue, gross profit, EBITDA, gross margin, revenue trends, revenue type breakdown, year-to-date pivot, and KPI/margin scorecards.</td>
+            <td>Phase 1 financial dashboard shell with real values filled from approved operational and batch sources as data becomes available.</td>
+          </tr>
+          <tr>
+            <td><a href="assets/interface-screenshots/airtable-interface-11.png">11</a>, <a href="assets/interface-screenshots/airtable-interface-12.png">12</a></td>
+            <td>Owner Dashboard - business insight section</td>
+            <td>Cross-store executive view for monthly revenue, prescription volume, KPI trend charts, KPI status distribution, KPI matrix, and business oversight rows.</td>
+            <td>Phase 1 owner dashboard with cross-store rollups and drill-down tables.</td>
+          </tr>
+          <tr>
+            <td><a href="assets/interface-screenshots/airtable-interface-13.png">13</a>, <a href="assets/interface-screenshots/airtable-interface-14.png">14</a></td>
+            <td>Owner Dashboard - sales/store performance section</td>
+            <td>All-store daily sales, prescription volume, vaccine count, OTC sales, record count, store/day trends, and pivot-style daily sales comparisons.</td>
+            <td>Phase 1 owner-level sales dashboard, with the same source metrics reused from Daily Sales.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Quick Analysis</h2>
+      <ul>
+        <li>The Airtable setup is already organized around roles: owner, bookkeeper, technician, plus shared KPI and daily sales views.</li>
+        <li>The visible dashboards follow a consistent pattern: filters first, headline metric cards, trend charts, then detail grids or pivot tables.</li>
+        <li>Phase 1 can replicate this at starter level without advanced analytics: role-specific pages, store/date/month filters, KPI cards, simple charts, and drill-down tables.</li>
+        <li>Several screens show zero or empty values, so the screenshots are stronger as workflow/design evidence than as data evidence.</li>
+        <li>Technician views are more operational than analytical. They point toward task queues, proof of completion, and compliance logging.</li>
+        <li>Bookkeeper views need both monthly financial data and KPI scorecard data. These should be treated as business reporting models, not raw webhook tables.</li>
+        <li>Owner views combine financial KPIs, sales activity, operational tasks, compliance, and doctor relationship data. Phase 1 should keep this simple and readable; Phase 2 can add workflow health and automation depth.</li>
+        <li>The product should reuse the same underlying dashboard API patterns across roles, with role-based access determining pharmacy scope and allowed widgets.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Implications For Our Product</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Area</th>
+            <th>Recommendation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Navigation</td>
+            <td>Use role-specific dashboard routes instead of exposing every Airtable-style page to every user.</td>
+          </tr>
+          <tr>
+            <td>Dashboards</td>
+            <td>Implement reusable dashboard components: metric card, trend chart, breakdown chart, pivot/table, status badge, and filter bar.</td>
+          </tr>
+          <tr>
+            <td>Data access</td>
+            <td>Owner can see cross-store summaries; bookkeeper sees assigned financial scope; technician sees assigned store and own task/compliance work.</td>
+          </tr>
+          <tr>
+            <td>Data model</td>
+            <td>Do not query raw PrimeRx payloads from dashboards. Use canonical event data, approved financial snapshots, and dashboard-ready read models.</td>
+          </tr>
+          <tr>
+            <td>Phase 1</td>
+            <td>Build starter dashboards for all roles using the visible Airtable layout pattern, even if some values are placeholders until data feeds are finalized.</td>
+          </tr>
+          <tr>
+            <td>Phase 2</td>
+            <td>Add operational workflows, refill queues, reminders, doctor CRM follow-ups, and automation-driven task generation.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Screenshot Gallery</h2>
+      <div class="grid">
+        <a class="shot" href="assets/interface-screenshots/airtable-interface-01.png"><img src="assets/interface-screenshots/airtable-interface-01.png" alt="Daily Sales Dashboard top section"><div><h3>Daily Sales Dashboard</h3><p>Filters, metric cards, and trend chart placeholders.</p></div></a>
+        <a class="shot" href="assets/interface-screenshots/airtable-interface-02.png"><img src="assets/interface-screenshots/airtable-interface-02.png" alt="Daily Sales Dashboard lower section"><div><h3>Daily Sales Detail</h3><p>OTC/day-of-week charts and leaderboard table.</p></div></a>
+        <a class="shot" href="assets/interface-screenshots/airtable-interface-03.png"><img src="assets/interface-screenshots/airtable-interface-03.png" alt="KPI Dashboard"><div><h3>KPI Dashboard</h3><p>Store-filtered scorecard overview.</p></div></a>
+        <a class="shot" href="assets/interface-screenshots/airtable-interface-04.png"><img src="assets/interface-screenshots/airtable-interface-04.png" alt="Technician Dashboard top section"><div><h3>Technician Tasks</h3><p>Assigned, high-priority, overdue, status, and category views.</p></div></a>
+        <a class="shot" href="assets/interface-screenshots/airtable-interface-05.png"><img src="assets/interface-screenshots/airtable-interface-05.png" alt="Technician task list and fridge section"><div><h3>Technician Task List</h3><p>Task rows and fridge log entry starting point.</p></div></a>
+        <a class="shot" href="assets/interface-screenshots/airtable-interface-06.png"><img src="assets/interface-screenshots/airtable-interface-06.png" alt="Technician fridge log history"><div><h3>Fridge Log History</h3><p>Compliance log count, trend chart, and history rows.</p></div></a>
+        <a class="shot" href="assets/interface-screenshots/airtable-interface-07.png"><img src="assets/interface-screenshots/airtable-interface-07.png" alt="Bookkeeper financial performance top section"><div><h3>Bookkeeper Financials</h3><p>Monthly financial cards and trend charts.</p></div></a>
+        <a class="shot" href="assets/interface-screenshots/airtable-interface-08.png"><img src="assets/interface-screenshots/airtable-interface-08.png" alt="Bookkeeper year-to-date pivot"><div><h3>Financial Pivot</h3><p>Year-to-date store comparison table.</p></div></a>
+        <a class="shot" href="assets/interface-screenshots/airtable-interface-09.png"><img src="assets/interface-screenshots/airtable-interface-09.png" alt="Bookkeeper KPI and margin performance"><div><h3>KPI And Margin</h3><p>Revenue, Rx volume, gross margin, and EBITDA margin view.</p></div></a>
+        <a class="shot" href="assets/interface-screenshots/airtable-interface-10.png"><img src="assets/interface-screenshots/airtable-interface-10.png" alt="Bookkeeper KPI scorecard grid"><div><h3>KPI Scorecard Grid</h3><p>Actual, target, and status rows grouped by store.</p></div></a>
+        <a class="shot" href="assets/interface-screenshots/airtable-interface-11.png"><img src="assets/interface-screenshots/airtable-interface-11.png" alt="Owner dashboard business insights"><div><h3>Owner Insights</h3><p>Executive KPI cards and cross-store trend charts.</p></div></a>
+        <a class="shot" href="assets/interface-screenshots/airtable-interface-12.png"><img src="assets/interface-screenshots/airtable-interface-12.png" alt="Owner KPI matrix and business oversight"><div><h3>Business Oversight</h3><p>KPI matrix and store-level oversight rows.</p></div></a>
+        <a class="shot" href="assets/interface-screenshots/airtable-interface-13.png"><img src="assets/interface-screenshots/airtable-interface-13.png" alt="Owner daily sales and store performance"><div><h3>Owner Sales</h3><p>All-store daily sales and prescription activity view.</p></div></a>
+        <a class="shot" href="assets/interface-screenshots/airtable-interface-14.png"><img src="assets/interface-screenshots/airtable-interface-14.png" alt="Owner daily sales pivot"><div><h3>Sales Pivot</h3><p>Daily sales and volume trends by store and day.</p></div></a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

@@ -65,7 +65,7 @@ As an implementation/admin user, I want PrimeRx/Micro Merchant data to be receiv
 Acceptance criteria:
 
 - The system can receive data through the agreed Phase 1 path: webhook, API, SFTP, or an approved combination.
-- Each received item creates an audit record with source, status, timestamps, and processing result.
+- Each received item creates an ingestion record with source, status, timestamps, and processing result.
 - Duplicate, failed, skipped, retryable, processed, and enrichment-needed records are identifiable.
 - Failures are visible to authorized admin/support users.
 - Raw payload content is not logged or exposed in normal dashboards.
@@ -283,7 +283,7 @@ If future AI features are approved, evaluation must include source traceability,
 Phase 1 architecture:
 
 1. PrimeRx/Micro Merchant sends events or files through approved webhook, API, or SFTP paths.
-2. The ingestion layer validates inbound data, applies idempotency, records audit status, and stores restricted raw source details separately from normal dashboard data.
+2. The ingestion layer validates inbound data, applies idempotency, records ingestion status, and stores restricted raw source details separately from normal dashboard data.
 3. The processing layer maps safe fields into the canonical pharmacy event model.
 4. PostgreSQL/RDS stores each tenant's owned data in one tenant-specific schema containing tenant, pharmacy, restricted operational reference, audit, drug, payer, canonical event, and payment tables.
 5. The Spring backend service exposes JWT-secured tenant/role-scoped APIs.
@@ -301,10 +301,10 @@ Phase 2 architecture:
 
 | Component | Phase | Responsibility |
 | --- | --- | --- |
-| PrimeRx webhook receiver | Phase 1 | Receive events, validate requests, write audit records, and enqueue processing. |
+| PrimeRx webhook receiver | Phase 1 | Receive events, validate requests, write ingestion records, and enqueue processing. |
 | SQS / queue | Phase 1 | Buffer events for asynchronous processing and retries. |
-| Processor Lambda/service | Phase 1 | Validate payloads, suppress PHI, map canonical events, upsert drug/payer/payment data, and update audit status. |
-| PostgreSQL/RDS | Phase 1+ | Store canonical data, restricted references, audit records, application data, workflow data, CRM data, and dashboard read data. |
+| Processor Lambda/service | Phase 1 | Validate payloads, suppress PHI, map pharmacy events, upsert drug/payer/payment data, and update ingestion status. |
+| PostgreSQL/RDS | Phase 1+ | Store pharmacy event data, restricted references, ingestion records, application data, workflow data, CRM data, and dashboard read data. |
 | Spring backend service | Phase 1+ | Provide APIs for RBAC, dashboards, audit views, CRM, workflows, tasks, alerts, and admin settings. |
 | Frontend application | Phase 1+ | Provide role-based dashboards, audit views, CRM views, queues, workflow settings, and alerts. |
 | Workflow scheduler/component | Phase 2 | Run predefined workflows, create tasks/queues/alerts, and record workflow audit history. |
@@ -380,7 +380,7 @@ Phase 2 architecture:
 
 | Release | Scope | Exit Criteria |
 | --- | --- | --- |
-| MVP / Phase 1A | Ingestion foundation, canonical schema, restricted source references, audit visibility, API/SFTP enrichment planning. | At least one pharmacy's source data can enter the canonical model and audit statuses are visible. |
+| MVP / Phase 1A | Ingestion foundation, pharmacy event schema, restricted source references, ingestion status visibility, API/SFTP enrichment planning. | At least one pharmacy's source data can enter the canonical model and ingestion statuses are visible. |
 | MVP / Phase 1B | Spring backend service, RBAC foundation, frontend application, role-based starter dashboards. | All defined roles have starter dashboards with scoped, safe data and empty/error states. |
 | Phase 2A | Workflow foundation, internal scheduling, tasks, audit records, basic in-app alerts. | Admin can enable a predefined workflow and users can see created tasks/alerts. |
 | Phase 2B | Daily refill queue and upcoming refill suggestions. | Pharmacist/technician users can use today's queue and upcoming views with role-safe data. |

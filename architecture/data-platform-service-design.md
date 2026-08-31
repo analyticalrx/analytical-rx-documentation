@@ -400,6 +400,8 @@ Key fields:
 
 ## 10. Phase 1 Roles And Access Rules
 
+Detailed role definitions, role bundles, service principals, API permission codes, field restrictions, and RBAC test cases are maintained in [AnalyticalRx Role-Based Access Control Standard](role-based-access-control-standard.md). The table below is the short service-design summary.
+
 | Role | Tenant Scope | Pharmacy Scope | Initial Access |
 | --- | --- | --- | --- |
 | `OWNER_EXECUTIVE` | Assigned tenant | Usually all pharmacies in tenant | Owner dashboard, cross-store summaries, high-level exceptions. |

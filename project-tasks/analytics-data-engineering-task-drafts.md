@@ -263,7 +263,7 @@ dim_drug
 dim_payer
 dim_prescriber
 dim_patient_token
-source_prescription_reference_restricted
+source_rx_reference
 fact_prescription_event
 fact_claim_financial
 fact_refill_activity
@@ -280,7 +280,7 @@ fact_daily_store_metrics
 - Analytics fact tables should use `prescription_reference_token` and `fill_reference_token`.
 - Patient continuity, if required, must use an approved pseudonymous token.
 - Raw PrimeRx payload fields must not leak into analytics tables.
-- Fact tables must link back to source/audit records where useful.
+- Fact tables must link back to source/ingestion records where useful.
 - Nullable fields should be allowed where webhook data is incomplete and API enrichment is pending.
 
 ### Deliverables
@@ -292,7 +292,7 @@ fact_daily_store_metrics
 - PHI exclusion policy.
 - Restricted source-reference table design for `tenant_id`, `pharmacy_id`, `RxNo`, and `RefillNo`.
 - Prescription/fill token strategy.
-- Mapping from canonical processed webhook event to analytics tables.
+- Mapping from `pharmacy_event`, `event_payment`, and lookup tables to analytics tables.
 - List of fields requiring API enrichment.
 
 ### Acceptance Criteria

@@ -191,7 +191,7 @@
         </thead>
         <tbody>
           <tr>
-            <td>Webhook/API event audit and idempotency tracking.</td>
+            <td>Webhook/API event ingestion and idempotency tracking.</td>
             <td>Forecasting models or machine learning feature marts.</td>
           </tr>
           <tr>
@@ -237,7 +237,7 @@
           </tr>
           <tr>
             <td>Real <code>RxNo</code> and <code>RefillNo</code></td>
-            <td><code>source_prescription_reference_restricted</code></td>
+            <td><code>source_rx_reference</code></td>
             <td>Store only in the restricted source-reference table because API enrichment may need these values.</td>
           </tr>
           <tr>
@@ -252,12 +252,12 @@
           </tr>
           <tr>
             <td>Prescription/fill event facts</td>
-            <td><code>canonical_pharmacy_event</code></td>
+            <td><code>pharmacy_event</code></td>
             <td>Store safe event facts, statuses, dates, quantities, costs, and tokens.</td>
           </tr>
           <tr>
             <td>Payment components</td>
-            <td><code>canonical_event_payer_payment</code></td>
+            <td><code>event_payment</code></td>
             <td>Store insurance, patient pay, cash, and other payment components as rows.</td>
           </tr>
         </tbody>
@@ -275,7 +275,7 @@
       <p>The current SaaS design uses one PostgreSQL schema per tenant. All tenant-owned tables live together inside that schema, for example <code>tenant_acme_pharmacy_group</code>. The checked-in SQL uses <code>tenant_template</code> as the local review schema.</p>
 
       <h3>Table responsibility groups</h3>
-      <p>Inside each tenant schema, tables are separated by responsibility: tenant/store lookup tables, restricted source-reference tables, audit tables, PHI-minimized canonical event tables, and payment rows. This keeps the model understandable without splitting one tenant's data across multiple logical database schemas.</p>
+      <p>Inside each tenant schema, tables are separated by responsibility: tenant/store lookup tables, restricted source-reference tables, ingestion tables, PHI-minimized canonical event tables, and payment rows. This keeps the model understandable without splitting one tenant's data across multiple logical database schemas.</p>
     </section>
 
     <section>
@@ -297,19 +297,19 @@
             <td>Each canonical event belongs to a pharmacy when the source data provides or resolves the store.</td>
           </tr>
           <tr>
-            <td><code>webhook_event_audit</code> to <code>canonical_pharmacy_event</code></td>
-            <td>Each canonical event links back to the audit record that explains source, status, duplicate handling, and processing result.</td>
+            <td><code>ingestion_event</code> to <code>pharmacy_event</code></td>
+            <td>Each event links back to the ingestion record that explains source, status, duplicate handling, and processing result.</td>
           </tr>
           <tr>
-            <td><code>drug</code> to <code>canonical_pharmacy_event</code></td>
+            <td><code>drug</code> to <code>pharmacy_event</code></td>
             <td>Canonical events use <code>drug_id</code> when the drug is available or can be matched.</td>
           </tr>
           <tr>
-            <td><code>canonical_pharmacy_event</code> to <code>canonical_event_payer_payment</code></td>
+            <td><code>pharmacy_event</code> to <code>event_payment</code></td>
             <td>One event may have zero or more payment rows.</td>
           </tr>
           <tr>
-            <td><code>canonical_event_payer_payment</code> to <code>payer</code></td>
+            <td><code>event_payment</code> to <code>payer</code></td>
             <td>Insurance payment rows can link to a payer. Cash payment rows intentionally keep <code>payer_id = null</code>.</td>
           </tr>
         </tbody>
@@ -319,10 +319,10 @@
     <section>
       <h2>Processing Flow</h2>
       <ol>
-        <li>Webhook receiver accepts the event and creates an audit record.</li>
+        <li>Webhook receiver accepts the event and creates an <code>ingestion_event</code> record.</li>
         <li>Receiver optionally stores raw payload in restricted encrypted storage and stores only archive metadata in the database.</li>
-        <li>Processor validates the queued event, applies idempotency checks, and updates audit status.</li>
-        <li>Processor stores real <code>RxNo</code> and <code>RefillNo</code> only in <code>source_prescription_reference_restricted</code> when present.</li>
+        <li>Processor validates the queued event, applies idempotency checks, and updates ingestion status.</li>
+        <li>Processor stores real <code>RxNo</code> and <code>RefillNo</code> only in <code>source_rx_reference</code> when present.</li>
         <li>Processor upserts safe drug and payer lookup rows.</li>
         <li>Processor writes one canonical event row and related payment rows.</li>
         <li>API enrichment can later use restricted source references to fetch missing details and update only safe fields.</li>
@@ -342,12 +342,12 @@
         <tbody>
           <tr>
             <td>Webhook receiver</td>
-            <td>Insert audit rows and raw archive metadata.</td>
+            <td>Insert ingestion rows and raw archive metadata.</td>
             <td>Do not write canonical rows directly. Do not log raw payloads.</td>
           </tr>
           <tr>
             <td>Webhook processor</td>
-            <td>Update audit rows, write restricted references, upsert lookups, and write canonical/payment rows.</td>
+            <td>Update ingestion rows, write restricted references, upsert lookups, and write canonical/payment rows.</td>
             <td>Do not copy direct patient identifiers into canonical tables or logs.</td>
           </tr>
           <tr>
@@ -357,7 +357,7 @@
           </tr>
           <tr>
             <td>Dashboard/API application</td>
-            <td>Read safe lookup labels, <code>canonical_pharmacy_event</code>, and <code>canonical_event_payer_payment</code> from the authenticated user's tenant schema and authorized pharmacy scope.</td>
+            <td>Read safe lookup labels, <code>pharmacy_event</code>, and <code>event_payment</code> from the authenticated user's tenant schema and authorized pharmacy scope.</td>
             <td>No direct access to restricted source-reference tables or raw payload archive.</td>
           </tr>
           <tr>
@@ -381,7 +381,7 @@
       <h2>Reviewer Checklist</h2>
       <ul>
         <li>Confirm that the Phase 1 webhook/API fields can map into the current canonical event, drug, payer, and payment tables.</li>
-        <li>Confirm that <code>RxNo</code> and <code>RefillNo</code> being restricted to <code>source_prescription_reference_restricted</code> still supports API enrichment.</li>
+        <li>Confirm that <code>RxNo</code> and <code>RefillNo</code> being restricted to <code>source_rx_reference</code> still supports API enrichment.</li>
         <li>Confirm that drug details belong in <code>drug</code> and are linked by <code>drug_id</code>, not duplicated in the event row.</li>
         <li>Confirm that payer details belong in <code>payer</code> and are linked through payment rows.</li>
         <li>Confirm that cash payment handling is clear: <code>payment_type = 'cash'</code> and <code>payer_id = null</code>.</li>

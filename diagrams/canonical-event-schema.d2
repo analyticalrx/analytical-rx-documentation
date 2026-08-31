@@ -35,11 +35,11 @@ raw: "Restricted Raw Payload Archive\nS3 pointer + payload hash\nshort retention
   class: restricted
 }
 
-audit: "webhook_event_audit\nstatus, idempotency, retry state\nno raw PHI payload" {
+ingestion_event: "ingestion_event\nstatus, idempotency, retry state\nno raw PHI payload" {
   class: restricted
 }
 
-source_ref: "source_prescription_reference_restricted\nreal RxNo + RefillNo\nbackend-only API lookup" {
+source_ref: "source_rx_reference\nreal RxNo + RefillNo\nbackend-only API lookup" {
   class: restricted
 }
 
@@ -51,15 +51,15 @@ payer_lookup: "payer\nnormalized payer lookup\nlinked through payment rows" {
   class: safe
 }
 
-canonical: "canonical_pharmacy_event\nPHI-minimized event facts\ndrug_id + prescription/fill tokens" {
+pharmacy_event: "pharmacy_event\nPHI-minimized event facts\ndrug_id + prescription/fill tokens" {
   class: safe
 }
 
-payments: "canonical_event_payer_payment\npayer-event bridge\ncanonical_event_id + payer_id\ncash uses null payer_id" {
+payments: "event_payment\npayer-event bridge\npharmacy_event_id + payer_id\ncash uses null payer_id" {
   class: safe
 }
 
-dashboards: "Dashboards + Basic Reporting\nquery canonical tables only" {
+dashboards: "Dashboards + Basic Reporting\nquery safe event tables only" {
   class: safe
 }
 
@@ -70,20 +70,20 @@ enrichment: "API Enrichment Worker\nuses restricted source reference\nupdates ca
 primerx -> receiver: "POST event"
 receiver -> tenant_schema: "select by authenticated tenant context"
 receiver -> raw: "optional archive"
-receiver -> audit: "receipt + processing audit"
-audit -> source_ref: "restricted source IDs"
-source_ref -> canonical: "tokens only"
+receiver -> ingestion_event: "receipt + processing status"
+ingestion_event -> source_ref: "restricted source IDs"
+source_ref -> pharmacy_event: "tokens only"
 receiver -> drug_lookup: "drug upsert"
 receiver -> payer_lookup: "payer upsert"
-audit -> canonical: "one processed event"
-drug_lookup -> canonical: "drug_id FK"
-canonical -> payments: "canonical_event_id FK"
+ingestion_event -> pharmacy_event: "one processed event"
+drug_lookup -> pharmacy_event: "drug_id FK"
+pharmacy_event -> payments: "pharmacy_event_id FK"
 payer_lookup -> payments: "payer_id FK when insurance"
-canonical -> dashboards: "safe reads"
+pharmacy_event -> dashboards: "safe reads"
 payments -> dashboards: "safe payment breakdown"
 source_ref -> enrichment: "RxNo / RefillNo"
 enrichment -> primerx: "detail lookup"
 enrichment -> drug_lookup: "safe drug updates"
 enrichment -> payer_lookup: "safe payer updates"
-enrichment -> canonical: "safe event enrichment"
+enrichment -> pharmacy_event: "safe event enrichment"
 enrichment -> payments: "safe payment enrichment"

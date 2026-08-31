@@ -54,7 +54,7 @@ The HLD should include:
 ### Important Design Decisions
 
 - The receiver Lambda should do minimal work before returning a success response.
-- The processor Lambda should handle heavier validation, normalization, enrichment placeholders, and audit logging.
+- The processor Lambda should handle heavier validation, normalization, enrichment placeholders, and ingestion status updates.
 - The queue boundary should protect the receiver from downstream failures.
 - The first version does not need to solve historical backfill or full API enrichment.
 - The first version must assume webhook payloads may contain PHI until proven otherwise.
@@ -305,7 +305,7 @@ The queue message should contain the internal event envelope created by the rece
 The message should include enough information for:
 
 - Correlation.
-- Processing audit.
+- Processing/ingestion status.
 - Event type routing.
 - Duplicate detection.
 - PHI minimization.
@@ -379,7 +379,7 @@ The processor Lambda should:
 - Apply PHI minimization rules.
 - Generate or evaluate an idempotency key.
 - Normalize the event into the initial canonical webhook event format.
-- Write processing audit status.
+- Write processing/ingestion status.
 - Handle unknown or unsupported event types safely.
 - Fail intentionally when a message should be retried.
 - Avoid logging raw PHI payloads.
@@ -458,7 +458,7 @@ The normalized record should include:
 - Duplicate events are detected and do not create duplicate output.
 - PHI minimization is applied before analytics/canonical output.
 - Unknown event types are handled without crashing the whole pipeline.
-- Processing audit status is written for success and failure cases.
+- Processing/ingestion status is written for success and failure cases.
 - Logs do not include raw webhook payloads.
 - Tests cover happy path, invalid message, duplicate message, unsupported event type, and PHI suppression.
 
@@ -567,7 +567,7 @@ For MVP, keep the storage design small and explicit. We do not need to model the
 
 ### Objective
 
-Define the MVP storage architecture for processed PrimeRx webhook events, including where raw payloads may live, where processing audit records are stored, and where PHI-minimized canonical event records are stored.
+Define the MVP storage architecture for processed PrimeRx webhook events, including where raw payloads may live, where ingestion records are stored, and where PHI-minimized pharmacy event records are stored.
 
 ### Background
 
@@ -578,8 +578,8 @@ The webhook pipeline can receive and process events, but the system still needs 
 Define the storage approach for three categories of data:
 
 - Raw webhook payloads.
-- Processing audit records.
-- PHI-minimized canonical event records.
+- Ingestion records.
+- PHI-minimized pharmacy event records.
 - Restricted source-reference records required for later API enrichment.
 
 The design should answer:
@@ -627,7 +627,7 @@ Direct patient identifiers should not be stored in canonical dashboard tables un
 
 - Do we need to persist full raw webhook payloads outside SQS for MVP?
 - If yes, should raw payloads go to restricted S3 with encryption and short retention?
-- What is the minimum audit record needed to troubleshoot webhook processing?
+- What is the minimum ingestion record needed to troubleshoot webhook processing?
 - What is the minimum canonical record needed for dashboards and future analytics?
 - What restricted table owns real `RxNo`, `RefillNo`, `tenant_id`, and `pharmacy_id`?
 - What HMAC/token strategy creates `prescription_reference_token` and `fill_reference_token`?
@@ -644,7 +644,7 @@ Direct patient identifiers should not be stored in canonical dashboard tables un
 
 ### Acceptance Criteria
 
-- [ ] Storage architecture distinguishes raw payloads, audit records, and canonical processed events.
+- [ ] Storage architecture distinguishes raw payloads, ingestion records, and pharmacy event records.
 - [ ] PHI boundary is explicitly documented.
 - [ ] MVP database recommendation is documented.
 - [ ] Raw payload retention decision is documented.
@@ -662,11 +662,11 @@ Direct patient identifiers should not be stored in canonical dashboard tables un
 
 ---
 
-## Task 8: Define Webhook Audit And Idempotency Schema
+## Task 8: Define Ingestion Event And Idempotency Schema
 
 ### Objective
 
-Define the database schema for webhook processing audit records and idempotency tracking so the pipeline can be traced, retried safely, and protected from duplicate event processing.
+Define the database schema for webhook/API ingestion records and idempotency tracking so the pipeline can be traced, retried safely, and protected from duplicate event processing.
 
 ### Background
 
@@ -676,9 +676,10 @@ Webhook delivery is usually at-least-once. SQS/Lambda processing is also at-leas
 
 Design the operational schema for:
 
-- Webhook receipt audit.
+- Webhook/API receipt tracking.
 - Queue/processing status.
-- Restricted source identifiers needed for API enrichment.
+- Link to restricted source identifiers needed for API enrichment.
+- Link to raw payload archive metadata when raw retention is enabled.
 - Idempotency keys.
 - Duplicate detection.
 - Failure reasons.
@@ -686,7 +687,7 @@ Design the operational schema for:
 
 This task is about the schema and lifecycle model, not full processor implementation.
 
-### Proposed Table: `webhook_event_audit`
+### Proposed Table: `ingestion_event`
 
 Initial fields to consider:
 
@@ -696,12 +697,10 @@ tenant_id
 pharmacy_id
 source_system
 source_event_id
-event_type
+source_event_type
 idempotency_key
-rx_no
-refill_no
-prescription_reference_token
-fill_reference_token
+source_rx_reference_id
+raw_payload_archive_id
 receiver_request_id
 received_at
 queued_at
@@ -728,10 +727,10 @@ processed
 failed
 duplicate
 unsupported_event_type
-phi_suppressed
+needs_enrichment
 ```
 
-The team can refine names, but status values must be consistent enough for operations queries and dashboard/debug views.
+The team can refine names, but status values must be consistent enough for operations queries and dashboard/debug views. PHI suppression should be tracked separately through `phi_suppression_status`.
 
 ### Idempotency Requirements
 
@@ -767,7 +766,7 @@ Avoid storing:
 
 If an identifier is needed for debugging or continuity, define whether it should be dropped, hashed, tokenized, or replaced with a reference.
 
-`RxNo` and `RefillNo` are allowed only in the restricted audit/source-reference layer because backend jobs need them for PrimeRx API enrichment. Analytics-facing tables should use `prescription_reference_token` and `fill_reference_token`.
+`RxNo` and `RefillNo` are allowed only in the restricted `source_rx_reference` table because backend jobs need them for PrimeRx API enrichment. Analytics-facing tables should use `prescription_reference_token` and `fill_reference_token`.
 
 The token should be generated using a keyed hash such as:
 
@@ -790,17 +789,17 @@ The schema should support queries like:
 
 ### Deliverables
 
-- Database schema proposal for webhook audit/idempotency.
+- Database schema proposal for webhook/API ingestion and idempotency.
 - Status lifecycle definition.
 - Idempotency key strategy.
 - Restricted source-reference strategy for `RxNo` and `RefillNo`.
 - Token strategy for PHI-minimized prescription/fill references.
-- PHI exclusion list for audit records.
+- PHI exclusion list for ingestion records.
 - Example operational queries.
 
 ### Acceptance Criteria
 
-- [ ] Proposed audit table fields are documented.
+- [ ] Proposed `ingestion_event` fields are documented.
 - [ ] Required indexes/unique constraints are documented.
 - [ ] Status lifecycle is documented.
 - [ ] Idempotency key strategy is documented.
@@ -808,7 +807,7 @@ The schema should support queries like:
 - [ ] `tenant_id` and `pharmacy_id` are included in the source-reference model.
 - [ ] Prescription/fill token strategy is documented.
 - [ ] Duplicate handling behavior is documented.
-- [ ] PHI fields excluded from audit are documented.
+- [ ] PHI fields excluded from ingestion records are documented.
 - [ ] Example operational queries are included.
 - [ ] Schema is reviewed before processor persistence work begins.
 
@@ -818,11 +817,11 @@ The schema should support queries like:
 
 ---
 
-## Task 9: Define Canonical Processed Webhook Event Schema
+## Task 9: Define Pharmacy Event And Payment Schema
 
 ### Objective
 
-Define the PHI-minimized canonical event schema that stores processed PrimeRx webhook events in a stable format for dashboards, reconciliation, and future analytics work.
+Define the PHI-minimized `pharmacy_event` and `event_payment` schema that stores processed PrimeRx webhook/API events in a stable format for dashboards, reconciliation, and future analytics work.
 
 ### Background
 
@@ -830,11 +829,11 @@ PrimeRx webhook payloads are vendor-specific. The product should not make dashbo
 
 ### Scope
 
-Design the first canonical event table for processed webhook events.
+Design the first processed event model for webhook/API events.
 
-This schema should be intentionally small. It should capture safe event-level business facts, not the full prescription analytics model. The goal is to create a clean destination for processor Lambda output.
+This schema should capture safe event-level business facts, not the full prescription analytics model. The goal is to create a clean destination for processor Lambda output without duplicating drug or payer attributes.
 
-### Proposed Table: `canonical_pharmacy_event`
+### Proposed Table: `pharmacy_event`
 
 Initial fields to consider:
 
@@ -843,26 +842,40 @@ id
 tenant_id
 pharmacy_id
 source_system
-source_event_id
-event_type
+source_event_type
+canonical_event_type
 prescription_reference_token
 fill_reference_token
 event_timestamp
 business_date
+drug_id
 rx_status
+claim_status
+fulfillment_status
 queue_status
-payer_name
-drug_ndc
-drug_name
+days_supply
+quantity_ordered
+quantity_dispensed
+quantity_remaining
 prescriber_npi
-amount_paid
-copay_amount
 total_amount
-gross_profit_estimate
-audit_event_id
+ingredient_cost_amount
+dispensing_fee_amount
+other_fee_amount
+tax_amount
+discount_amount
+amount_due
+reversal_flag
+rejection_code
+rejection_reason_category
+enrichment_status
+data_quality_status
+ingestion_event_id
 created_at
 updated_at
 ```
+
+Drug attributes such as NDC and drug name belong in `drug`. Payer attributes such as payer name, BIN, and PCN belong in `payer`. Payer/payment amounts belong in `event_payment`, linked through `pharmacy_event_id`.
 
 The final schema may remove fields if PrimeRx does not provide them through webhook payloads. It may also leave some fields nullable until API enrichment is added.
 
@@ -874,7 +887,7 @@ The final schema may remove fields if PrimeRx does not provide them through webh
 - Do not store raw `RxNo` in canonical/dashboard-facing tables.
 - Use `prescription_reference_token` and `fill_reference_token` generated from restricted source identifiers.
 - Allow nullable fields where webhook payloads are incomplete.
-- Link each canonical record back to the audit record.
+- Link each pharmacy event back to the `ingestion_event` record.
 - Keep the schema extensible for API enrichment later.
 
 ### PHI Handling Requirements
@@ -895,7 +908,7 @@ Do not include:
 
 If patient or prescription continuity is required, use only approved tokens, hashes, or source references after the PHI policy is reviewed.
 
-Raw `RxNo` and `RefillNo` should remain available only in restricted operational tables for API enrichment and reconciliation. The canonical event table should store tokenized references and link back to the audit/source-reference record.
+Raw `RxNo` and `RefillNo` should remain available only in `source_rx_reference` for API enrichment and reconciliation. The `pharmacy_event` table should store tokenized references and link back to the ingestion/source-reference path.
 
 ### Open Data Questions
 
@@ -911,20 +924,22 @@ The schema should call out fields that depend on PrimeRx payload/API details:
 
 ### Deliverables
 
-- Canonical event schema proposal.
+- `pharmacy_event` schema proposal.
+- `event_payment` schema proposal.
 - Field definitions and nullable/required guidance.
 - PHI exclusion list.
 - Tokenized prescription/fill reference strategy.
-- Mapping notes from webhook envelope to canonical event.
+- Mapping notes from webhook envelope to `pharmacy_event`, `drug`, `payer`, and `event_payment`.
 - Open questions for fields requiring PrimeRx confirmation.
 
 ### Acceptance Criteria
 
-- [ ] Canonical event table is documented.
+- [ ] `pharmacy_event` table is documented.
+- [ ] `event_payment` table is documented.
 - [ ] Field definitions are documented.
 - [ ] Required vs nullable fields are identified.
 - [ ] PHI-excluded fields are explicitly listed.
-- [ ] Link from canonical event to audit record is defined.
+- [ ] Link from `pharmacy_event` to `ingestion_event` is defined.
 - [ ] Raw `RxNo` is excluded from canonical/dashboard-facing tables.
 - [ ] `prescription_reference_token` / `fill_reference_token` strategy is defined.
 - [ ] Mapping assumptions from webhook payload/envelope are documented.
@@ -936,26 +951,27 @@ The schema should call out fields that depend on PrimeRx payload/API details:
 
 ---
 
-## Task 10: Update Processor Lambda To Persist Audit And Canonical Event Records
+## Task 10: Update Processor Lambda To Persist Ingestion, Pharmacy Event, And Payment Records
 
 ### Objective
 
-Update the processor Lambda so processed webhook events are written to the approved audit and canonical event tables.
+Update the processor Lambda so processed webhook events are written to the approved `ingestion_event`, `source_rx_reference`, `pharmacy_event`, and `event_payment` tables.
 
 ### Background
 
-After the webhook audit schema and canonical processed event schema are approved, the processor Lambda should write structured records instead of only logging processing results. This closes the loop from webhook receipt to durable, queryable, PHI-minimized output.
+After the ingestion and processed event schema is approved, the processor Lambda should write structured records instead of only logging processing results. This closes the loop from webhook receipt to durable, queryable, PHI-minimized output.
 
 ### Scope
 
 Implement processor persistence for:
 
-- Audit lifecycle updates.
+- Ingestion lifecycle updates.
 - Restricted source-reference persistence for real `RxNo`, `RefillNo`, `tenant_id`, and `pharmacy_id`.
 - Idempotency checks.
 - Duplicate event handling.
 - PHI minimization result.
-- Canonical processed event write.
+- Pharmacy event write.
+- Event payment row writes.
 - Failure status updates.
 
 ### Expected Processing Flow
@@ -963,22 +979,24 @@ Implement processor persistence for:
 ```text
 SQS message received
   -> parse internal event envelope
-  -> create/update audit record
+  -> create/update ingestion_event record
   -> store restricted source identifiers for API enrichment
   -> compute idempotency key
   -> check duplicate status
   -> apply PHI minimization
   -> generate PHI-minimized prescription/fill tokens
-  -> map safe fields to canonical event
-  -> write canonical event
-  -> mark audit record processed
+  -> upsert safe drug and payer lookup rows
+  -> map safe fields to pharmacy_event
+  -> write pharmacy_event
+  -> write event_payment rows when payment details exist
+  -> mark ingestion_event record processed
 ```
 
 If processing fails:
 
 ```text
 SQS message received
-  -> create/update audit record
+  -> create/update ingestion_event record
   -> failure occurs
   -> write safe failure reason
   -> allow retry or route to DLQ based on failure type
@@ -987,10 +1005,10 @@ SQS message received
 ### Implementation Notes
 
 - Database writes should be idempotent.
-- Duplicate events should not create duplicate canonical records.
+- Duplicate events should not create duplicate `pharmacy_event` or `event_payment` records.
 - Real `RxNo` and `RefillNo` should be written only to restricted operational tables.
 - Canonical/dashboard tables should receive tokenized prescription/fill references only.
-- Audit status should be updated even when canonical mapping fails.
+- Ingestion status should be updated even when pharmacy event mapping fails.
 - Logs should contain correlation IDs and safe metadata only.
 - Raw payloads should not be written to general logs.
 - Database connection handling must work safely inside Lambda.
@@ -999,12 +1017,13 @@ SQS message received
 
 The processor should support:
 
-- Insert audit record when processing starts if one does not already exist.
+- Insert or update `ingestion_event` when processing starts if one does not already exist.
 - Persist `tenant_id`, `pharmacy_id`, `RxNo`, and `RefillNo` in the restricted source-reference layer for later API enrichment.
 - Generate `prescription_reference_token` and `fill_reference_token` for canonical/dashboard-facing records.
-- Update audit status as processing moves forward.
+- Update ingestion status as processing moves forward.
 - Enforce idempotency before writing canonical output.
-- Insert canonical record only after PHI minimization.
+- Insert `pharmacy_event` only after PHI minimization.
+- Insert `event_payment` rows only from safe payment components.
 - Mark duplicates clearly.
 - Write failure reason without raw payload or PHI.
 
@@ -1012,6 +1031,8 @@ The processor should support:
 
 - Processor Lambda database persistence code.
 - Restricted source-reference persistence code.
+- Drug and payer lookup upsert code.
+- Pharmacy event and payment persistence code.
 - Database migration or setup script for required tables.
 - Configuration for database connection secrets.
 - Unit tests for persistence behavior.
@@ -1020,14 +1041,15 @@ The processor should support:
 
 ### Acceptance Criteria
 
-- [ ] Processor writes audit records.
+- [ ] Processor writes `ingestion_event` records.
 - [ ] Processor writes restricted source-reference records containing `tenant_id`, `pharmacy_id`, `RxNo`, and `RefillNo`.
-- [ ] Processor writes canonical processed event records.
+- [ ] Processor writes `pharmacy_event` records.
+- [ ] Processor writes `event_payment` records when payment components exist.
 - [ ] Canonical records use tokenized prescription/fill references instead of raw `RxNo`.
 - [ ] Processor detects duplicate events using the approved idempotency strategy.
 - [ ] Duplicate processing does not create duplicate canonical output.
-- [ ] Processor updates audit status on success.
-- [ ] Processor updates audit status on failure.
+- [ ] Processor updates ingestion status on success.
+- [ ] Processor updates ingestion status on failure.
 - [ ] Processor writes PHI minimization status.
 - [ ] Processor logs safe metadata only.
 - [ ] Tests cover success, failure, duplicate, unsupported event type, and PHI suppression.

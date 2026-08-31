@@ -3,9 +3,116 @@ digraph canonical_event_erd {
   node [shape=plain, fontname="Helvetica"];
   edge [fontname="Helvetica", fontsize=9, color="#475569", arrowsize=0.7];
 
-  "tenant_template.canonical_event_payer_payment" [label=<
+  "tenant_template.drug" [label=<
     <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" COLOR="#2563eb">
-      <TR><TD BGCOLOR="#dbeafe" COLSPAN="3"><B>tenant_template.canonical_event_payer_payment</B></TD></TR>
+      <TR><TD BGCOLOR="#dbeafe" COLSPAN="3"><B>tenant_template.drug</B></TD></TR>
+      <TR><TD BGCOLOR="#f8fafc"><B>Key</B></TD><TD BGCOLOR="#f8fafc"><B>Column</B></TD><TD BGCOLOR="#f8fafc"><B>Type</B></TD></TR>
+      <TR>
+        <TD>PK NN</TD>
+        <TD PORT="id" ALIGN="LEFT">id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD>FK NN</TD>
+        <TD PORT="tenant_id" ALIGN="LEFT">tenant_id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="source_system" ALIGN="LEFT">source_system</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="source_drug_id" ALIGN="LEFT">source_drug_id</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="ndc" ALIGN="LEFT">ndc</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="drug_name" ALIGN="LEFT">drug_name</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="generic_name" ALIGN="LEFT">generic_name</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="brand_name" ALIGN="LEFT">brand_name</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="is_brand" ALIGN="LEFT">is_brand</TD>
+        <TD ALIGN="LEFT">boolean</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="strength" ALIGN="LEFT">strength</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="strength_unit" ALIGN="LEFT">strength_unit</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="form" ALIGN="LEFT">form</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="manufacturer_name" ALIGN="LEFT">manufacturer_name</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="drug_class" ALIGN="LEFT">drug_class</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="unit_of_measure" ALIGN="LEFT">unit_of_measure</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="quantity_per_pack" ALIGN="LEFT">quantity_per_pack</TD>
+        <TD ALIGN="LEFT">numeric(12,3)</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="first_seen_at" ALIGN="LEFT">first_seen_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="last_seen_at" ALIGN="LEFT">last_seen_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="created_at" ALIGN="LEFT">created_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="updated_at" ALIGN="LEFT">updated_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+    </TABLE>
+  >];
+
+  "tenant_template.event_payment" [label=<
+    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" COLOR="#2563eb">
+      <TR><TD BGCOLOR="#dbeafe" COLSPAN="3"><B>tenant_template.event_payment</B></TD></TR>
       <TR><TD BGCOLOR="#f8fafc"><B>Key</B></TD><TD BGCOLOR="#f8fafc"><B>Column</B></TD><TD BGCOLOR="#f8fafc"><B>Type</B></TD></TR>
       <TR>
         <TD>PK NN</TD>
@@ -24,7 +131,7 @@ digraph canonical_event_erd {
       </TR>
       <TR>
         <TD>FK NN</TD>
-        <TD PORT="canonical_event_id" ALIGN="LEFT">canonical_event_id</TD>
+        <TD PORT="pharmacy_event_id" ALIGN="LEFT">pharmacy_event_id</TD>
         <TD ALIGN="LEFT">uuid</TD>
       </TR>
       <TR>
@@ -80,9 +187,260 @@ digraph canonical_event_erd {
     </TABLE>
   >];
 
-  "tenant_template.canonical_pharmacy_event" [label=<
+  "tenant_template.ingestion_event" [label=<
     <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" COLOR="#2563eb">
-      <TR><TD BGCOLOR="#dbeafe" COLSPAN="3"><B>tenant_template.canonical_pharmacy_event</B></TD></TR>
+      <TR><TD BGCOLOR="#dbeafe" COLSPAN="3"><B>tenant_template.ingestion_event</B></TD></TR>
+      <TR><TD BGCOLOR="#f8fafc"><B>Key</B></TD><TD BGCOLOR="#f8fafc"><B>Column</B></TD><TD BGCOLOR="#f8fafc"><B>Type</B></TD></TR>
+      <TR>
+        <TD>PK NN</TD>
+        <TD PORT="id" ALIGN="LEFT">id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD>FK NN</TD>
+        <TD PORT="tenant_id" ALIGN="LEFT">tenant_id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD>FK</TD>
+        <TD PORT="pharmacy_id" ALIGN="LEFT">pharmacy_id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="source_system" ALIGN="LEFT">source_system</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="source_event_id" ALIGN="LEFT">source_event_id</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="source_event_type" ALIGN="LEFT">source_event_type</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="receiver_request_id" ALIGN="LEFT">receiver_request_id</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="idempotency_key" ALIGN="LEFT">idempotency_key</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD>FK</TD>
+        <TD PORT="source_rx_reference_id" ALIGN="LEFT">source_rx_reference_id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD>FK</TD>
+        <TD PORT="raw_payload_archive_id" ALIGN="LEFT">raw_payload_archive_id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="received_at" ALIGN="LEFT">received_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="queued_at" ALIGN="LEFT">queued_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="processing_started_at" ALIGN="LEFT">processing_started_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="processed_at" ALIGN="LEFT">processed_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="status" ALIGN="LEFT">status</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="phi_suppression_status" ALIGN="LEFT">phi_suppression_status</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD>FK</TD>
+        <TD PORT="duplicate_of" ALIGN="LEFT">duplicate_of</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="failure_code" ALIGN="LEFT">failure_code</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="failure_reason" ALIGN="LEFT">failure_reason</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="schema_version" ALIGN="LEFT">schema_version</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="created_at" ALIGN="LEFT">created_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="updated_at" ALIGN="LEFT">updated_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+    </TABLE>
+  >];
+
+  "tenant_template.payer" [label=<
+    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" COLOR="#2563eb">
+      <TR><TD BGCOLOR="#dbeafe" COLSPAN="3"><B>tenant_template.payer</B></TD></TR>
+      <TR><TD BGCOLOR="#f8fafc"><B>Key</B></TD><TD BGCOLOR="#f8fafc"><B>Column</B></TD><TD BGCOLOR="#f8fafc"><B>Type</B></TD></TR>
+      <TR>
+        <TD>PK NN</TD>
+        <TD PORT="id" ALIGN="LEFT">id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD>FK NN</TD>
+        <TD PORT="tenant_id" ALIGN="LEFT">tenant_id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="source_system" ALIGN="LEFT">source_system</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="source_payer_id" ALIGN="LEFT">source_payer_id</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="payer_type" ALIGN="LEFT">payer_type</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="payer_name" ALIGN="LEFT">payer_name</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="payer_bin" ALIGN="LEFT">payer_bin</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="payer_pcn" ALIGN="LEFT">payer_pcn</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="first_seen_at" ALIGN="LEFT">first_seen_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="last_seen_at" ALIGN="LEFT">last_seen_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="created_at" ALIGN="LEFT">created_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="updated_at" ALIGN="LEFT">updated_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+    </TABLE>
+  >];
+
+  "tenant_template.pharmacy" [label=<
+    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" COLOR="#2563eb">
+      <TR><TD BGCOLOR="#dbeafe" COLSPAN="3"><B>tenant_template.pharmacy</B></TD></TR>
+      <TR><TD BGCOLOR="#f8fafc"><B>Key</B></TD><TD BGCOLOR="#f8fafc"><B>Column</B></TD><TD BGCOLOR="#f8fafc"><B>Type</B></TD></TR>
+      <TR>
+        <TD>PK NN</TD>
+        <TD PORT="id" ALIGN="LEFT">id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD>FK NN</TD>
+        <TD PORT="tenant_id" ALIGN="LEFT">tenant_id</TD>
+        <TD ALIGN="LEFT">uuid</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="pharmacy_key" ALIGN="LEFT">pharmacy_key</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="source_system" ALIGN="LEFT">source_system</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="source_pharmacy_id" ALIGN="LEFT">source_pharmacy_id</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="display_name" ALIGN="LEFT">display_name</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="npi" ALIGN="LEFT">npi</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="ncpdp" ALIGN="LEFT">ncpdp</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD></TD>
+        <TD PORT="state_code" ALIGN="LEFT">state_code</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="status" ALIGN="LEFT">status</TD>
+        <TD ALIGN="LEFT">text</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="created_at" ALIGN="LEFT">created_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+      <TR>
+        <TD>NN</TD>
+        <TD PORT="updated_at" ALIGN="LEFT">updated_at</TD>
+        <TD ALIGN="LEFT">timestamp with time zone</TD>
+      </TR>
+    </TABLE>
+  >];
+
+  "tenant_template.pharmacy_event" [label=<
+    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" COLOR="#2563eb">
+      <TR><TD BGCOLOR="#dbeafe" COLSPAN="3"><B>tenant_template.pharmacy_event</B></TD></TR>
       <TR><TD BGCOLOR="#f8fafc"><B>Key</B></TD><TD BGCOLOR="#f8fafc"><B>Column</B></TD><TD BGCOLOR="#f8fafc"><B>Type</B></TD></TR>
       <TR>
         <TD>PK NN</TD>
@@ -101,7 +459,7 @@ digraph canonical_event_erd {
       </TR>
       <TR>
         <TD>FK NN</TD>
-        <TD PORT="audit_event_id" ALIGN="LEFT">audit_event_id</TD>
+        <TD PORT="ingestion_event_id" ALIGN="LEFT">ingestion_event_id</TD>
         <TD ALIGN="LEFT">uuid</TD>
       </TR>
       <TR>
@@ -352,247 +710,6 @@ digraph canonical_event_erd {
     </TABLE>
   >];
 
-  "tenant_template.drug" [label=<
-    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" COLOR="#2563eb">
-      <TR><TD BGCOLOR="#dbeafe" COLSPAN="3"><B>tenant_template.drug</B></TD></TR>
-      <TR><TD BGCOLOR="#f8fafc"><B>Key</B></TD><TD BGCOLOR="#f8fafc"><B>Column</B></TD><TD BGCOLOR="#f8fafc"><B>Type</B></TD></TR>
-      <TR>
-        <TD>PK NN</TD>
-        <TD PORT="id" ALIGN="LEFT">id</TD>
-        <TD ALIGN="LEFT">uuid</TD>
-      </TR>
-      <TR>
-        <TD>FK NN</TD>
-        <TD PORT="tenant_id" ALIGN="LEFT">tenant_id</TD>
-        <TD ALIGN="LEFT">uuid</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="source_system" ALIGN="LEFT">source_system</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="source_drug_id" ALIGN="LEFT">source_drug_id</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="ndc" ALIGN="LEFT">ndc</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="drug_name" ALIGN="LEFT">drug_name</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="generic_name" ALIGN="LEFT">generic_name</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="brand_name" ALIGN="LEFT">brand_name</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="is_brand" ALIGN="LEFT">is_brand</TD>
-        <TD ALIGN="LEFT">boolean</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="strength" ALIGN="LEFT">strength</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="strength_unit" ALIGN="LEFT">strength_unit</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="form" ALIGN="LEFT">form</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="manufacturer_name" ALIGN="LEFT">manufacturer_name</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="drug_class" ALIGN="LEFT">drug_class</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="unit_of_measure" ALIGN="LEFT">unit_of_measure</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="quantity_per_pack" ALIGN="LEFT">quantity_per_pack</TD>
-        <TD ALIGN="LEFT">numeric(12,3)</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="first_seen_at" ALIGN="LEFT">first_seen_at</TD>
-        <TD ALIGN="LEFT">timestamp with time zone</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="last_seen_at" ALIGN="LEFT">last_seen_at</TD>
-        <TD ALIGN="LEFT">timestamp with time zone</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="created_at" ALIGN="LEFT">created_at</TD>
-        <TD ALIGN="LEFT">timestamp with time zone</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="updated_at" ALIGN="LEFT">updated_at</TD>
-        <TD ALIGN="LEFT">timestamp with time zone</TD>
-      </TR>
-    </TABLE>
-  >];
-
-  "tenant_template.payer" [label=<
-    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" COLOR="#2563eb">
-      <TR><TD BGCOLOR="#dbeafe" COLSPAN="3"><B>tenant_template.payer</B></TD></TR>
-      <TR><TD BGCOLOR="#f8fafc"><B>Key</B></TD><TD BGCOLOR="#f8fafc"><B>Column</B></TD><TD BGCOLOR="#f8fafc"><B>Type</B></TD></TR>
-      <TR>
-        <TD>PK NN</TD>
-        <TD PORT="id" ALIGN="LEFT">id</TD>
-        <TD ALIGN="LEFT">uuid</TD>
-      </TR>
-      <TR>
-        <TD>FK NN</TD>
-        <TD PORT="tenant_id" ALIGN="LEFT">tenant_id</TD>
-        <TD ALIGN="LEFT">uuid</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="source_system" ALIGN="LEFT">source_system</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="source_payer_id" ALIGN="LEFT">source_payer_id</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="payer_type" ALIGN="LEFT">payer_type</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="payer_name" ALIGN="LEFT">payer_name</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="payer_bin" ALIGN="LEFT">payer_bin</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="payer_pcn" ALIGN="LEFT">payer_pcn</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="first_seen_at" ALIGN="LEFT">first_seen_at</TD>
-        <TD ALIGN="LEFT">timestamp with time zone</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="last_seen_at" ALIGN="LEFT">last_seen_at</TD>
-        <TD ALIGN="LEFT">timestamp with time zone</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="created_at" ALIGN="LEFT">created_at</TD>
-        <TD ALIGN="LEFT">timestamp with time zone</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="updated_at" ALIGN="LEFT">updated_at</TD>
-        <TD ALIGN="LEFT">timestamp with time zone</TD>
-      </TR>
-    </TABLE>
-  >];
-
-  "tenant_template.pharmacy" [label=<
-    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" COLOR="#2563eb">
-      <TR><TD BGCOLOR="#dbeafe" COLSPAN="3"><B>tenant_template.pharmacy</B></TD></TR>
-      <TR><TD BGCOLOR="#f8fafc"><B>Key</B></TD><TD BGCOLOR="#f8fafc"><B>Column</B></TD><TD BGCOLOR="#f8fafc"><B>Type</B></TD></TR>
-      <TR>
-        <TD>PK NN</TD>
-        <TD PORT="id" ALIGN="LEFT">id</TD>
-        <TD ALIGN="LEFT">uuid</TD>
-      </TR>
-      <TR>
-        <TD>FK NN</TD>
-        <TD PORT="tenant_id" ALIGN="LEFT">tenant_id</TD>
-        <TD ALIGN="LEFT">uuid</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="pharmacy_key" ALIGN="LEFT">pharmacy_key</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="source_system" ALIGN="LEFT">source_system</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="source_pharmacy_id" ALIGN="LEFT">source_pharmacy_id</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="display_name" ALIGN="LEFT">display_name</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="npi" ALIGN="LEFT">npi</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="ncpdp" ALIGN="LEFT">ncpdp</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="state_code" ALIGN="LEFT">state_code</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="status" ALIGN="LEFT">status</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="created_at" ALIGN="LEFT">created_at</TD>
-        <TD ALIGN="LEFT">timestamp with time zone</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="updated_at" ALIGN="LEFT">updated_at</TD>
-        <TD ALIGN="LEFT">timestamp with time zone</TD>
-      </TR>
-    </TABLE>
-  >];
-
   "tenant_template.raw_payload_archive" [label=<
     <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" COLOR="#2563eb">
       <TR><TD BGCOLOR="#dbeafe" COLSPAN="3"><B>tenant_template.raw_payload_archive</B></TD></TR>
@@ -655,9 +772,9 @@ digraph canonical_event_erd {
     </TABLE>
   >];
 
-  "tenant_template.source_prescription_reference_restricted" [label=<
+  "tenant_template.source_rx_reference" [label=<
     <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" COLOR="#2563eb">
-      <TR><TD BGCOLOR="#dbeafe" COLSPAN="3"><B>tenant_template.source_prescription_reference_restricted</B></TD></TR>
+      <TR><TD BGCOLOR="#dbeafe" COLSPAN="3"><B>tenant_template.source_rx_reference</B></TD></TR>
       <TR><TD BGCOLOR="#f8fafc"><B>Key</B></TD><TD BGCOLOR="#f8fafc"><B>Column</B></TD><TD BGCOLOR="#f8fafc"><B>Type</B></TD></TR>
       <TR>
         <TD>PK NN</TD>
@@ -764,141 +881,24 @@ digraph canonical_event_erd {
     </TABLE>
   >];
 
-  "tenant_template.webhook_event_audit" [label=<
-    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6" COLOR="#2563eb">
-      <TR><TD BGCOLOR="#dbeafe" COLSPAN="3"><B>tenant_template.webhook_event_audit</B></TD></TR>
-      <TR><TD BGCOLOR="#f8fafc"><B>Key</B></TD><TD BGCOLOR="#f8fafc"><B>Column</B></TD><TD BGCOLOR="#f8fafc"><B>Type</B></TD></TR>
-      <TR>
-        <TD>PK NN</TD>
-        <TD PORT="id" ALIGN="LEFT">id</TD>
-        <TD ALIGN="LEFT">uuid</TD>
-      </TR>
-      <TR>
-        <TD>FK NN</TD>
-        <TD PORT="tenant_id" ALIGN="LEFT">tenant_id</TD>
-        <TD ALIGN="LEFT">uuid</TD>
-      </TR>
-      <TR>
-        <TD>FK</TD>
-        <TD PORT="pharmacy_id" ALIGN="LEFT">pharmacy_id</TD>
-        <TD ALIGN="LEFT">uuid</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="source_system" ALIGN="LEFT">source_system</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="source_event_id" ALIGN="LEFT">source_event_id</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="source_event_type" ALIGN="LEFT">source_event_type</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="receiver_request_id" ALIGN="LEFT">receiver_request_id</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="idempotency_key" ALIGN="LEFT">idempotency_key</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD>FK</TD>
-        <TD PORT="source_reference_id" ALIGN="LEFT">source_reference_id</TD>
-        <TD ALIGN="LEFT">uuid</TD>
-      </TR>
-      <TR>
-        <TD>FK</TD>
-        <TD PORT="raw_payload_archive_id" ALIGN="LEFT">raw_payload_archive_id</TD>
-        <TD ALIGN="LEFT">uuid</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="received_at" ALIGN="LEFT">received_at</TD>
-        <TD ALIGN="LEFT">timestamp with time zone</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="queued_at" ALIGN="LEFT">queued_at</TD>
-        <TD ALIGN="LEFT">timestamp with time zone</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="processing_started_at" ALIGN="LEFT">processing_started_at</TD>
-        <TD ALIGN="LEFT">timestamp with time zone</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="processed_at" ALIGN="LEFT">processed_at</TD>
-        <TD ALIGN="LEFT">timestamp with time zone</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="status" ALIGN="LEFT">status</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="phi_suppression_status" ALIGN="LEFT">phi_suppression_status</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD>FK</TD>
-        <TD PORT="duplicate_of" ALIGN="LEFT">duplicate_of</TD>
-        <TD ALIGN="LEFT">uuid</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="failure_code" ALIGN="LEFT">failure_code</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="failure_reason" ALIGN="LEFT">failure_reason</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD></TD>
-        <TD PORT="schema_version" ALIGN="LEFT">schema_version</TD>
-        <TD ALIGN="LEFT">text</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="created_at" ALIGN="LEFT">created_at</TD>
-        <TD ALIGN="LEFT">timestamp with time zone</TD>
-      </TR>
-      <TR>
-        <TD>NN</TD>
-        <TD PORT="updated_at" ALIGN="LEFT">updated_at</TD>
-        <TD ALIGN="LEFT">timestamp with time zone</TD>
-      </TR>
-    </TABLE>
-  >];
-
-  "tenant_template.canonical_event_payer_payment":canonical_event_id:e -> "tenant_template.canonical_pharmacy_event":id:w [label="canonical_event_id", tooltip="canonical_event_payer_payment_canonical_event_id_fkey"];
-  "tenant_template.canonical_event_payer_payment":payer_id:e -> "tenant_template.payer":id:w [label="payer_id", tooltip="canonical_event_payer_payment_payer_id_fkey"];
-  "tenant_template.canonical_event_payer_payment":pharmacy_id:e -> "tenant_template.pharmacy":id:w [label="pharmacy_id", tooltip="canonical_event_payer_payment_pharmacy_id_fkey"];
-  "tenant_template.canonical_event_payer_payment":tenant_id:e -> "tenant_template.tenant":id:w [label="tenant_id", tooltip="canonical_event_payer_payment_tenant_id_fkey"];
-  "tenant_template.canonical_pharmacy_event":audit_event_id:e -> "tenant_template.webhook_event_audit":id:w [label="audit_event_id", tooltip="canonical_pharmacy_event_audit_event_id_fkey"];
-  "tenant_template.canonical_pharmacy_event":drug_id:e -> "tenant_template.drug":id:w [label="drug_id", tooltip="canonical_pharmacy_event_drug_id_fkey"];
-  "tenant_template.canonical_pharmacy_event":pharmacy_id:e -> "tenant_template.pharmacy":id:w [label="pharmacy_id", tooltip="canonical_pharmacy_event_pharmacy_id_fkey"];
-  "tenant_template.canonical_pharmacy_event":tenant_id:e -> "tenant_template.tenant":id:w [label="tenant_id", tooltip="canonical_pharmacy_event_tenant_id_fkey"];
   "tenant_template.drug":tenant_id:e -> "tenant_template.tenant":id:w [label="tenant_id", tooltip="drug_tenant_id_fkey"];
+  "tenant_template.event_payment":payer_id:e -> "tenant_template.payer":id:w [label="payer_id", tooltip="event_payment_payer_id_fkey"];
+  "tenant_template.event_payment":pharmacy_event_id:e -> "tenant_template.pharmacy_event":id:w [label="pharmacy_event_id", tooltip="event_payment_pharmacy_event_id_fkey"];
+  "tenant_template.event_payment":pharmacy_id:e -> "tenant_template.pharmacy":id:w [label="pharmacy_id", tooltip="event_payment_pharmacy_id_fkey"];
+  "tenant_template.event_payment":tenant_id:e -> "tenant_template.tenant":id:w [label="tenant_id", tooltip="event_payment_tenant_id_fkey"];
+  "tenant_template.ingestion_event":duplicate_of:e -> "tenant_template.ingestion_event":id:w [label="duplicate_of", tooltip="ingestion_event_duplicate_of_fkey"];
+  "tenant_template.ingestion_event":pharmacy_id:e -> "tenant_template.pharmacy":id:w [label="pharmacy_id", tooltip="ingestion_event_pharmacy_id_fkey"];
+  "tenant_template.ingestion_event":raw_payload_archive_id:e -> "tenant_template.raw_payload_archive":id:w [label="raw_payload_archive_id", tooltip="ingestion_event_raw_payload_archive_id_fkey"];
+  "tenant_template.ingestion_event":source_rx_reference_id:e -> "tenant_template.source_rx_reference":id:w [label="source_rx_reference_id", tooltip="ingestion_event_source_rx_reference_id_fkey"];
+  "tenant_template.ingestion_event":tenant_id:e -> "tenant_template.tenant":id:w [label="tenant_id", tooltip="ingestion_event_tenant_id_fkey"];
   "tenant_template.payer":tenant_id:e -> "tenant_template.tenant":id:w [label="tenant_id", tooltip="payer_tenant_id_fkey"];
   "tenant_template.pharmacy":tenant_id:e -> "tenant_template.tenant":id:w [label="tenant_id", tooltip="pharmacy_tenant_id_fkey"];
+  "tenant_template.pharmacy_event":drug_id:e -> "tenant_template.drug":id:w [label="drug_id", tooltip="pharmacy_event_drug_id_fkey"];
+  "tenant_template.pharmacy_event":ingestion_event_id:e -> "tenant_template.ingestion_event":id:w [label="ingestion_event_id", tooltip="pharmacy_event_ingestion_event_id_fkey"];
+  "tenant_template.pharmacy_event":pharmacy_id:e -> "tenant_template.pharmacy":id:w [label="pharmacy_id", tooltip="pharmacy_event_pharmacy_id_fkey"];
+  "tenant_template.pharmacy_event":tenant_id:e -> "tenant_template.tenant":id:w [label="tenant_id", tooltip="pharmacy_event_tenant_id_fkey"];
   "tenant_template.raw_payload_archive":pharmacy_id:e -> "tenant_template.pharmacy":id:w [label="pharmacy_id", tooltip="raw_payload_archive_pharmacy_id_fkey"];
   "tenant_template.raw_payload_archive":tenant_id:e -> "tenant_template.tenant":id:w [label="tenant_id", tooltip="raw_payload_archive_tenant_id_fkey"];
-  "tenant_template.source_prescription_reference_restricted":pharmacy_id:e -> "tenant_template.pharmacy":id:w [label="pharmacy_id", tooltip="source_prescription_reference_restricted_pharmacy_id_fkey"];
-  "tenant_template.source_prescription_reference_restricted":tenant_id:e -> "tenant_template.tenant":id:w [label="tenant_id", tooltip="source_prescription_reference_restricted_tenant_id_fkey"];
-  "tenant_template.webhook_event_audit":duplicate_of:e -> "tenant_template.webhook_event_audit":id:w [label="duplicate_of", tooltip="webhook_event_audit_duplicate_of_fkey"];
-  "tenant_template.webhook_event_audit":pharmacy_id:e -> "tenant_template.pharmacy":id:w [label="pharmacy_id", tooltip="webhook_event_audit_pharmacy_id_fkey"];
-  "tenant_template.webhook_event_audit":raw_payload_archive_id:e -> "tenant_template.raw_payload_archive":id:w [label="raw_payload_archive_id", tooltip="webhook_event_audit_raw_payload_archive_id_fkey"];
-  "tenant_template.webhook_event_audit":source_reference_id:e -> "tenant_template.source_prescription_reference_restricted":id:w [label="source_reference_id", tooltip="webhook_event_audit_source_reference_id_fkey"];
-  "tenant_template.webhook_event_audit":tenant_id:e -> "tenant_template.tenant":id:w [label="tenant_id", tooltip="webhook_event_audit_tenant_id_fkey"];
+  "tenant_template.source_rx_reference":pharmacy_id:e -> "tenant_template.pharmacy":id:w [label="pharmacy_id", tooltip="source_rx_reference_pharmacy_id_fkey"];
+  "tenant_template.source_rx_reference":tenant_id:e -> "tenant_template.tenant":id:w [label="tenant_id", tooltip="source_rx_reference_tenant_id_fkey"];
 }

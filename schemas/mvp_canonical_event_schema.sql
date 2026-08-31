@@ -90,7 +90,7 @@ create table if not exists raw_payload_archive (
   unique (tenant_id, source_system, raw_payload_sha256)
 );
 
-create table if not exists source_prescription_reference_restricted (
+create table if not exists source_rx_reference (
   id uuid primary key default gen_random_uuid(),
   tenant_id uuid not null references tenant(id),
   pharmacy_id uuid not null references pharmacy(id),
@@ -107,7 +107,7 @@ create table if not exists source_prescription_reference_restricted (
   unique (tenant_id, fill_reference_token)
 );
 
-create table if not exists webhook_event_audit (
+create table if not exists ingestion_event (
   id uuid primary key default gen_random_uuid(),
   tenant_id uuid not null references tenant(id),
   pharmacy_id uuid references pharmacy(id),
@@ -116,7 +116,7 @@ create table if not exists webhook_event_audit (
   source_event_type text not null,
   receiver_request_id text,
   idempotency_key text not null,
-  source_reference_id uuid references source_prescription_reference_restricted(id),
+  source_rx_reference_id uuid references source_rx_reference(id),
   raw_payload_archive_id uuid references raw_payload_archive(id),
   received_at timestamptz not null default now(),
   queued_at timestamptz,
@@ -137,7 +137,7 @@ create table if not exists webhook_event_audit (
   phi_suppression_status text not null default 'not_started' check (
     phi_suppression_status in ('not_started', 'suppressed', 'not_required', 'failed')
   ),
-  duplicate_of uuid references webhook_event_audit(id),
+  duplicate_of uuid references ingestion_event(id),
   failure_code text,
   failure_reason text,
   schema_version text,
@@ -146,11 +146,11 @@ create table if not exists webhook_event_audit (
   unique (tenant_id, source_system, idempotency_key)
 );
 
-create table if not exists canonical_pharmacy_event (
+create table if not exists pharmacy_event (
   id uuid primary key default gen_random_uuid(),
   tenant_id uuid not null references tenant(id),
   pharmacy_id uuid not null references pharmacy(id),
-  audit_event_id uuid not null unique references webhook_event_audit(id),
+  ingestion_event_id uuid not null unique references ingestion_event(id),
   drug_id uuid references drug(id),
   source_system text not null,
   source_event_type text not null,
@@ -226,11 +226,11 @@ create table if not exists canonical_pharmacy_event (
   updated_at timestamptz not null default now()
 );
 
-create table if not exists canonical_event_payer_payment (
+create table if not exists event_payment (
   id uuid primary key default gen_random_uuid(),
   tenant_id uuid not null references tenant(id),
   pharmacy_id uuid not null references pharmacy(id),
-  canonical_event_id uuid not null references canonical_pharmacy_event(id) on delete cascade,
+  pharmacy_event_id uuid not null references pharmacy_event(id) on delete cascade,
   payer_id uuid references payer(id),
   payment_type text not null check (
     payment_type in ('insurance', 'cash', 'patient_pay', 'other', 'unknown')
@@ -272,29 +272,29 @@ create unique index if not exists uq_payer_bin_pcn_name
   )
   where payer_bin is not null or payer_pcn is not null or payer_name is not null;
 create index if not exists idx_raw_payload_tenant_received on raw_payload_archive (tenant_id, received_at);
-create index if not exists idx_source_ref_prescription_token on source_prescription_reference_restricted (tenant_id, prescription_reference_token);
-create index if not exists idx_source_ref_fill_token on source_prescription_reference_restricted (tenant_id, fill_reference_token);
-create unique index if not exists uq_source_ref_rx_fill
-  on source_prescription_reference_restricted (tenant_id, pharmacy_id, source_system, rx_no, (coalesce(refill_no, '')));
-create index if not exists idx_source_ref_rx on source_prescription_reference_restricted (tenant_id, pharmacy_id, source_system, rx_no, refill_no);
-create index if not exists idx_audit_status_received on webhook_event_audit (tenant_id, status, received_at);
-create index if not exists idx_audit_source_type on webhook_event_audit (tenant_id, source_system, source_event_type, received_at);
-create index if not exists idx_canonical_business_date on canonical_pharmacy_event (tenant_id, pharmacy_id, business_date);
-create index if not exists idx_canonical_event_type on canonical_pharmacy_event (tenant_id, canonical_event_type, business_date);
-create index if not exists idx_canonical_fill_token on canonical_pharmacy_event (tenant_id, fill_reference_token);
-create index if not exists idx_canonical_drug on canonical_pharmacy_event (tenant_id, drug_id, business_date);
-create index if not exists idx_event_payment_event on canonical_event_payer_payment (canonical_event_id);
-create index if not exists idx_event_payment_payer on canonical_event_payer_payment (tenant_id, payer_id);
+create index if not exists idx_source_rx_ref_prescription_token on source_rx_reference (tenant_id, prescription_reference_token);
+create index if not exists idx_source_rx_ref_fill_token on source_rx_reference (tenant_id, fill_reference_token);
+create unique index if not exists uq_source_rx_ref_rx_fill
+  on source_rx_reference (tenant_id, pharmacy_id, source_system, rx_no, (coalesce(refill_no, '')));
+create index if not exists idx_source_rx_ref_rx on source_rx_reference (tenant_id, pharmacy_id, source_system, rx_no, refill_no);
+create index if not exists idx_ingestion_event_status_received on ingestion_event (tenant_id, status, received_at);
+create index if not exists idx_ingestion_event_source_type on ingestion_event (tenant_id, source_system, source_event_type, received_at);
+create index if not exists idx_pharmacy_event_business_date on pharmacy_event (tenant_id, pharmacy_id, business_date);
+create index if not exists idx_pharmacy_event_type on pharmacy_event (tenant_id, canonical_event_type, business_date);
+create index if not exists idx_pharmacy_event_fill_token on pharmacy_event (tenant_id, fill_reference_token);
+create index if not exists idx_pharmacy_event_drug on pharmacy_event (tenant_id, drug_id, business_date);
+create index if not exists idx_event_payment_event on event_payment (pharmacy_event_id);
+create index if not exists idx_event_payment_payer on event_payment (tenant_id, payer_id);
 create unique index if not exists uq_event_payment_sequence
-  on canonical_event_payer_payment (
-    canonical_event_id,
+  on event_payment (
+    pharmacy_event_id,
     payment_type,
     coalesce(payer_sequence, '')
   );
 
 -- Recommended access model:
--- 1. Ingestion/processor service role can write audit/source-reference rows, safe lookup rows, and event/payment rows inside the tenant schema.
--- 2. API enrichment service role can read source_prescription_reference_restricted.
+-- 1. Ingestion/processor service role can write ingestion/source-reference rows, safe lookup rows, and event/payment rows inside the tenant schema.
+-- 2. API enrichment service role can read source_rx_reference.
 -- 3. Dashboard role should read only dashboard-safe tables/views inside the selected tenant schema.
 -- 4. Raw payload archive references point to restricted encrypted object storage; raw JSON should not be copied into canonical dashboard tables.
 -- 5. The application must choose the tenant schema from authenticated tenant context, never from untrusted request parameters.

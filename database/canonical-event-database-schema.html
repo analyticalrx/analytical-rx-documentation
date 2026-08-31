@@ -228,7 +228,7 @@
           </tr>
           <tr>
             <td>Table zones</td>
-            <td>Restricted, lookup, audit, canonical, and payment tables are separated by table responsibility, not by database schema.</td>
+            <td>Restricted, lookup, ingestion, canonical, and payment tables are separated by table responsibility, not by database schema.</td>
             <td>Prevents accidental mixing of source identifiers and dashboard-facing data while keeping each tenant's data together.</td>
           </tr>
           <tr>
@@ -238,7 +238,7 @@
           </tr>
           <tr>
             <td>Source identifiers</td>
-            <td>Store real <code>RxNo</code> and <code>RefillNo</code> in <code>source_prescription_reference_restricted</code></td>
+            <td>Store real <code>RxNo</code> and <code>RefillNo</code> in <code>source_rx_reference</code></td>
             <td>API enrichment needs real vendor identifiers. Tokens alone cannot call PrimeRx.</td>
           </tr>
           <tr>
@@ -288,20 +288,20 @@
           <p>Pointer to restricted raw payload storage, not the raw JSON itself. Stores hash, size, source, and retention metadata.</p>
         </div>
         <div class="card">
-          <h3><code>webhook_event_audit</code></h3>
+          <h3><code>ingestion_event</code></h3>
           <p>Lifecycle record for each received event: received, queued, processing, processed, failed, duplicate, or needs enrichment.</p>
         </div>
         <div class="card">
-          <h3><code>source_prescription_reference_restricted</code></h3>
+          <h3><code>source_rx_reference</code></h3>
           <p>Restricted source lookup table containing real <code>RxNo</code> and <code>RefillNo</code>. Used by backend jobs for API enrichment and reconciliation.</p>
         </div>
         <div class="card">
-          <h3><code>canonical_pharmacy_event</code></h3>
+          <h3><code>pharmacy_event</code></h3>
           <p>PHI-minimized event facts used by dashboards, reconciliation, and API enrichment updates.</p>
         </div>
         <div class="card">
-          <h3><code>canonical_event_payer_payment</code></h3>
-          <p>Bridge table between canonical events and payers. One row per event payment component: primary insurance, secondary insurance, tertiary insurance, patient pay, cash, or other payment type.</p>
+          <h3><code>event_payment</code></h3>
+          <p>Bridge table between pharmacy events and payers. One row per event payment component: primary insurance, secondary insurance, tertiary insurance, patient pay, cash, or other payment type.</p>
         </div>
       </div>
     </section>
@@ -324,8 +324,8 @@
           </tr>
           <tr>
             <td>Lineage</td>
-            <td><code>audit_event_id</code>, <code>source_system</code>, <code>source_event_type</code></td>
-            <td>Links each canonical row back to the processing audit record.</td>
+            <td><code>ingestion_event_id</code>, <code>source_system</code>, <code>source_event_type</code></td>
+            <td>Links each event row back to the processing ingestion record.</td>
           </tr>
           <tr>
             <td>Canonical type</td>
@@ -335,7 +335,7 @@
           <tr>
             <td>Safe continuity</td>
             <td><code>prescription_reference_token</code>, <code>fill_reference_token</code></td>
-            <td>Tokens only. Real source identifiers stay in <code>source_prescription_reference_restricted</code>, which is backend-only.</td>
+            <td>Tokens only. Real source identifiers stay in <code>source_rx_reference</code>, which is backend-only.</td>
           </tr>
           <tr>
             <td>Status</td>
@@ -345,7 +345,7 @@
           <tr>
             <td>Drug/payer/prescriber</td>
             <td><code>drug_id</code>, <code>prescriber_npi</code></td>
-            <td>Drug details are read from <code>drug</code>. Payer details are reached through <code>canonical_event_payer_payment</code> to <code>payer</code>.</td>
+            <td>Drug details are read from <code>drug</code>. Payer details are reached through <code>event_payment</code> to <code>payer</code>.</td>
           </tr>
           <tr>
             <td>Prescription/fill details</td>
@@ -355,12 +355,12 @@
           <tr>
             <td>Financial</td>
             <td><code>total_amount</code>, <code>ingredient_cost_amount</code>, <code>dispensing_fee_amount</code>, <code>amount_due</code></td>
-            <td>Event-level Rx/cost facts live on the canonical event. Payer and patient payment amounts live in <code>canonical_event_payer_payment</code>.</td>
+            <td>Event-level Rx/cost facts live on the canonical event. Payer and patient payment amounts live in <code>event_payment</code>.</td>
           </tr>
           <tr>
             <td>Payment breakdown</td>
             <td><code>payment_type</code>, <code>payer_id</code>, <code>payer_sequence</code>, <code>paid_amount</code></td>
-            <td>Payer is linked through <code>canonical_event_payer_payment</code>: canonical event ID to payment row, then payment <code>payer_id</code> to <code>payer</code>. Cash rows use <code>payment_type = 'cash'</code> and <code>payer_id = null</code>.</td>
+            <td>Payer is linked through <code>event_payment</code>: <code>pharmacy_event.id</code> to payment row, then payment <code>payer_id</code> to <code>payer</code>. Cash rows use <code>payment_type = 'cash'</code> and <code>payer_id = null</code>.</td>
           </tr>
           <tr>
             <td>Quality</td>
@@ -380,13 +380,13 @@ fill_reference_token         = HMAC_SHA256(secret, tenant_id + pharmacy_id + rx_
 
     <section>
       <h2>Idempotency Strategy</h2>
-      <p>The audit table owns idempotency. The processor should create one canonical row only after the event is accepted as non-duplicate.</p>
+      <p>The <code>ingestion_event</code> table owns idempotency. The processor should create one <code>pharmacy_event</code> row only after the event is accepted as non-duplicate.</p>
       <ol>
         <li>Use PrimeRx event ID if PrimeRx provides one.</li>
         <li>Otherwise use tenant, pharmacy, source event type, source event timestamp, <code>RxNo</code>, and <code>RefillNo</code>.</li>
         <li>If no stable event identity exists, use the receiver request ID and raw payload hash as fallback.</li>
       </ol>
-      <p>The database enforces <code>unique (tenant_id, source_system, idempotency_key)</code> on <code>webhook_event_audit</code>.</p>
+      <p>The database enforces <code>unique (tenant_id, source_system, idempotency_key)</code> on <code>ingestion_event</code>.</p>
     </section>
 
     <section>
@@ -394,7 +394,7 @@ fill_reference_token         = HMAC_SHA256(secret, tenant_id + pharmacy_id + rx_
       <div class="callout risk">
         <p>The canonical event tables must not store patient first name, patient last name, full DOB, full address, phone number, email, driver license, insurance member ID, prescription images, or free-text notes.</p>
       </div>
-      <p>If a field is needed for debugging or API lookup, it belongs in the restricted operational layer, not in <code>canonical_pharmacy_event</code>.</p>
+      <p>If a field is needed for debugging or API lookup, it belongs in the restricted operational layer, not in <code>pharmacy_event</code>.</p>
     </section>
 
     <section>
@@ -410,7 +410,7 @@ fill_reference_token         = HMAC_SHA256(secret, tenant_id + pharmacy_id + rx_
         <tbody>
           <tr>
             <td>Webhook processor</td>
-            <td>Write <code>webhook_event_audit</code>, <code>source_prescription_reference_restricted</code>, <code>drug</code>, <code>payer</code>, <code>canonical_pharmacy_event</code>, and <code>canonical_event_payer_payment</code></td>
+            <td>Write <code>ingestion_event</code>, <code>source_rx_reference</code>, <code>drug</code>, <code>payer</code>, <code>pharmacy_event</code>, and <code>event_payment</code></td>
             <td>Logging raw payloads or exposing source identifiers to dashboards</td>
           </tr>
           <tr>
@@ -421,7 +421,7 @@ fill_reference_token         = HMAC_SHA256(secret, tenant_id + pharmacy_id + rx_
           <tr>
             <td>Dashboard/API application</td>
             <td>Read dashboard-safe lookup, canonical, and payment records from the authenticated user's tenant schema and authorized pharmacy scope</td>
-            <td>Reading <code>source_prescription_reference_restricted</code> or raw payload archive</td>
+            <td>Reading <code>source_rx_reference</code> or raw payload archive</td>
           </tr>
           <tr>
             <td>Data engineer</td>
@@ -436,12 +436,12 @@ fill_reference_token         = HMAC_SHA256(secret, tenant_id + pharmacy_id + rx_
     <section>
       <h2>Example Processing Write</h2>
       <ol>
-        <li>Receiver writes a metadata audit row with status <code>received</code> and optionally stores raw payload in restricted archive.</li>
-        <li>Processor validates payload and creates/updates <code>source_prescription_reference_restricted</code> with real <code>RxNo</code>, <code>RefillNo</code>, and tokens.</li>
-        <li>Processor updates audit status to <code>processing</code>.</li>
-        <li>Processor suppresses PHI, upserts safe drug/payer lookup rows, and maps safe fields into <code>canonical_pharmacy_event</code>.</li>
+        <li>Receiver writes an <code>ingestion_event</code> row with status <code>received</code> and optionally stores raw payload in restricted archive.</li>
+        <li>Processor validates payload and creates/updates <code>source_rx_reference</code> with real <code>RxNo</code>, <code>RefillNo</code>, and tokens.</li>
+        <li>Processor updates ingestion status to <code>processing</code>.</li>
+        <li>Processor suppresses PHI, upserts safe drug/payer lookup rows, and maps safe fields into <code>pharmacy_event</code>.</li>
         <li>Processor writes event payment rows for insurance, patient pay, cash, or other payment components.</li>
-        <li>Processor updates audit status to <code>processed</code>, <code>failed</code>, <code>duplicate</code>, or <code>needs_enrichment</code>.</li>
+        <li>Processor updates ingestion status to <code>processed</code>, <code>failed</code>, <code>duplicate</code>, or <code>needs_enrichment</code>.</li>
       </ol>
     </section>
 
@@ -450,6 +450,7 @@ fill_reference_token         = HMAC_SHA256(secret, tenant_id + pharmacy_id + rx_
       <p>The executable first-pass DDL lives here: <a href="../schemas/mvp_canonical_event_schema.sql"><code>schemas/mvp_canonical_event_schema.sql</code></a>.</p>
       <p>The incremental migration for an already-created local design database lives here: <a href="../schemas/migrations/2026-07-24-drug-payer-event-fields.sql"><code>schemas/migrations/2026-07-24-drug-payer-event-fields.sql</code></a>.</p>
       <p>The cleanup migration that removes duplicate canonical drug/payer snapshot columns lives here: <a href="../schemas/migrations/2026-07-24-remove-canonical-drug-payer-snapshots.sql"><code>schemas/migrations/2026-07-24-remove-canonical-drug-payer-snapshots.sql</code></a>.</p>
+      <p>The rename migration that moves early draft table names to the current simpler names lives here: <a href="../schemas/migrations/2026-08-29-rename-event-model-tables.sql"><code>schemas/migrations/2026-08-29-rename-event-model-tables.sql</code></a>.</p>
       <p>The migration that applies the MVP raw payload archive retention default lives here: <a href="../schemas/migrations/2026-07-29-raw-payload-retention-default.sql"><code>schemas/migrations/2026-07-29-raw-payload-retention-default.sql</code></a>.</p>
       <p>Detailed field definitions and table access rules are here: <a href="canonical-event-table-dictionary.html"><code>database/canonical-event-table-dictionary.html</code></a>.</p>
       <p>This SQL is a starting point for engineering review. Before production use, the team should add tenant schema provisioning, migrations, database roles, backups, schema-level access controls, and environment-specific retention settings.</p>

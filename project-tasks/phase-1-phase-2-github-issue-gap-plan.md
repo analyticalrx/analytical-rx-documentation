@@ -61,7 +61,7 @@ The existing webhook pipeline task draft already covers these Phase 1 backend/in
 | Task 5: Build Processor Lambda For Webhook Events | Event processing and PHI minimization. |
 | Task 6: Add End-To-End MVP Test For Webhook Pipeline | Pipeline verification. |
 | Task 7: Define MVP Storage Architecture For Processed Webhook Events | Storage boundary and canonical destination. |
-| Task 8: Define Webhook Audit And Idempotency Schema | Import/audit/idempotency foundation. |
+| Task 8: Define Ingestion Event And Idempotency Schema | Import/ingestion/idempotency foundation. |
 | Task 9: Define Canonical Processed Webhook Event Schema | Canonical event model. |
 | Task 10: Update Processor Lambda To Persist Audit And Canonical Event Records | Persistence into audit/canonical tables. |
 

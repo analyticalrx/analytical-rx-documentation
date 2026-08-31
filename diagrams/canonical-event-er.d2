@@ -58,9 +58,9 @@ raw_payload_archive_table: {
   raw_payload_sha256: text
 }
 
-source_reference_table: {
+source_rx_reference_table: {
   shape: sql_table
-  label: "source_prescription_reference_restricted"
+  label: "source_rx_reference"
   id: uuid {constraint: primary_key}
   tenant_id: uuid {constraint: foreign_key}
   pharmacy_id: uuid {constraint: foreign_key}
@@ -70,25 +70,25 @@ source_reference_table: {
   fill_reference_token: text
 }
 
-webhook_event_audit_table: {
+ingestion_event_table: {
   shape: sql_table
-  label: "webhook_event_audit"
+  label: "ingestion_event"
   id: uuid {constraint: primary_key}
   tenant_id: uuid {constraint: foreign_key}
   pharmacy_id: uuid {constraint: foreign_key}
-  source_reference_id: uuid {constraint: foreign_key}
+  source_rx_reference_id: uuid {constraint: foreign_key}
   raw_payload_archive_id: uuid {constraint: foreign_key}
   idempotency_key: text
   status: text
 }
 
-canonical_event_table: {
+pharmacy_event_table: {
   shape: sql_table
-  label: "canonical_pharmacy_event"
+  label: "pharmacy_event"
   id: uuid {constraint: primary_key}
   tenant_id: uuid {constraint: foreign_key}
   pharmacy_id: uuid {constraint: foreign_key}
-  audit_event_id: uuid {constraint: foreign_key}
+  ingestion_event_id: uuid {constraint: foreign_key}
   drug_id: uuid {constraint: foreign_key}
   canonical_event_type: text
   prescription_reference_token: text
@@ -100,18 +100,18 @@ canonical_event_table: {
 
 event_payment_table: {
   shape: sql_table
-  label: "canonical_event_payer_payment"
+  label: "event_payment"
   id: uuid {constraint: primary_key}
   tenant_id: uuid {constraint: foreign_key}
   pharmacy_id: uuid {constraint: foreign_key}
-  canonical_event_id: uuid {constraint: foreign_key}
+  pharmacy_event_id: uuid {constraint: foreign_key}
   payer_id: uuid {constraint: foreign_key}
   payment_type: text
   payer_sequence: text
   paid_amount: numeric
 }
 
-payer_event_link_note: "Payer-event link\nNo payer_id on canonical event\nUse payment.canonical_event_id + payment.payer_id" {
+payer_event_link_note: "Payer-event link\nNo payer_id on pharmacy_event\nUse payment.pharmacy_event_id + payment.payer_id" {
   style.fill: "#fff7ed"
   style.stroke: "#c2410c"
   style.stroke-dash: 4
@@ -122,17 +122,17 @@ tenant_table.id -> drug_table.tenant_id: "1 to many"
 tenant_table.id -> payer_table.tenant_id: "1 to many"
 tenant_table.id -> raw_payload_archive_table.tenant_id: "1 to many"
 pharmacy_table.id -> raw_payload_archive_table.pharmacy_id: "1 to many"
-tenant_table.id -> source_reference_table.tenant_id: "1 to many"
-pharmacy_table.id -> source_reference_table.pharmacy_id: "1 to many"
-tenant_table.id -> webhook_event_audit_table.tenant_id: "1 to many"
-pharmacy_table.id -> webhook_event_audit_table.pharmacy_id: "1 to many"
-source_reference_table.id -> webhook_event_audit_table.source_reference_id: "optional"
-raw_payload_archive_table.id -> webhook_event_audit_table.raw_payload_archive_id: "optional"
-tenant_table.id -> canonical_event_table.tenant_id: "1 to many"
-pharmacy_table.id -> canonical_event_table.pharmacy_id: "1 to many"
-webhook_event_audit_table.id -> canonical_event_table.audit_event_id: "1 to 1"
-drug_table.id -> canonical_event_table.drug_id: "optional"
-canonical_event_table.id -> event_payment_table.canonical_event_id: "1 to many"
+tenant_table.id -> source_rx_reference_table.tenant_id: "1 to many"
+pharmacy_table.id -> source_rx_reference_table.pharmacy_id: "1 to many"
+tenant_table.id -> ingestion_event_table.tenant_id: "1 to many"
+pharmacy_table.id -> ingestion_event_table.pharmacy_id: "1 to many"
+source_rx_reference_table.id -> ingestion_event_table.source_rx_reference_id: "optional"
+raw_payload_archive_table.id -> ingestion_event_table.raw_payload_archive_id: "optional"
+tenant_table.id -> pharmacy_event_table.tenant_id: "1 to many"
+pharmacy_table.id -> pharmacy_event_table.pharmacy_id: "1 to many"
+ingestion_event_table.id -> pharmacy_event_table.ingestion_event_id: "1 to 1"
+drug_table.id -> pharmacy_event_table.drug_id: "optional"
+pharmacy_event_table.id -> event_payment_table.pharmacy_event_id: "1 to many"
 payer_table.id -> event_payment_table.payer_id: "optional; null for cash"
 payer_event_link_note -> event_payment_table: "bridge table"
 tenant_schema_note -> tenant_table: "contains"

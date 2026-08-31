@@ -151,6 +151,16 @@
           <strong>Data Platform Service Design</strong>
           <span>Spring Boot service boundary, JWT bearer auth, RBAC, tenant schema routing, dashboard APIs, internal admin, RDS Proxy access, and Phase 2 extension points.</span>
         </a>
+        <a class="link-card" href="architecture/role-based-access-control-standard.md">
+          <span class="badge">Architecture</span>
+          <strong>RBAC Standard</strong>
+          <span>Standard role definitions, user-role assignment guidance, API permission matrix, field restrictions, service principals, and RBAC test expectations.</span>
+        </a>
+        <a class="link-card" href="architecture/rbac-role-summary.md">
+          <span class="badge">Architecture</span>
+          <strong>RBAC Role Summary</strong>
+          <span>Short teammate reference for user types, recommended roles, and plain-English role meanings.</span>
+        </a>
         <a class="link-card" href="architecture/product-planning-primerx-data-questions.html">
           <span class="badge">Planning</span>
           <strong>Product Planning + PrimeRx Questions</strong>
@@ -191,12 +201,12 @@
         <a class="link-card" href="database/canonical-event-database-schema.html">
           <span class="badge">Database</span>
           <strong>Canonical Event Database Schema</strong>
-          <span>Tenant-schema PostgreSQL model for raw references, audit/idempotency, restricted source IDs, drug/payer lookups, payment rows, and PHI-minimized canonical events.</span>
+          <span>Tenant-schema PostgreSQL model for raw archive metadata, ingestion/idempotency, restricted source IDs, drug/payer lookups, payment rows, and PHI-minimized pharmacy events.</span>
         </a>
         <a class="link-card" href="database/canonical-event-table-dictionary.html">
           <span class="badge">Database</span>
           <strong>Canonical Event Table Dictionary</strong>
-          <span>ER diagram, field-level definitions, tenant-schema access rules, and restrictions for webhook canonical storage.</span>
+          <span>ER diagram, field-level definitions, tenant-schema access rules, and restrictions for webhook event storage.</span>
         </a>
         <a class="link-card" href="database/pgadmin-erd-generation-guide.html">
           <span class="badge">Database</span>
@@ -206,7 +216,7 @@
         <a class="link-card" href="schemas/mvp_canonical_event_schema.sql">
           <span class="badge secondary">Schema</span>
           <strong>MVP Canonical Event SQL</strong>
-          <span>Executable first-pass PostgreSQL DDL for the tenant schema template and canonical event, drug, payer, and payment model.</span>
+          <span>Executable first-pass PostgreSQL DDL for the tenant schema template and pharmacy event, drug, payer, and payment model.</span>
         </a>
         <a class="link-card" href="schemas/migrations/2026-07-24-drug-payer-event-fields.sql">
           <span class="badge secondary">Schema</span>
@@ -222,6 +232,11 @@
           <span class="badge secondary">Schema</span>
           <strong>Raw Payload Retention SQL</strong>
           <span>Migration that applies the MVP 30-day retention default for restricted raw payload archive metadata.</span>
+        </a>
+        <a class="link-card" href="schemas/migrations/2026-08-29-rename-event-model-tables.sql">
+          <span class="badge secondary">Schema</span>
+          <strong>Event Model Rename SQL</strong>
+          <span>Migration that renames early draft table and FK column names to source_rx_reference, ingestion_event, pharmacy_event, and event_payment.</span>
         </a>
       </div>
     </section>
