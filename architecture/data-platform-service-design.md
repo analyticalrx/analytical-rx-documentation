@@ -79,12 +79,12 @@ High-level flow:
 
 | Decision | Recommendation | Reason |
 | --- | --- | --- |
-| Backend framework | Java 21 + Spring Boot 3.x | Strong typing, mature security, good AWS/container support, good team handoff. |
+| Backend framework | Java 21 + Spring Boot 3.5.16 | Uses a stable Spring Boot line with Java 21 support and avoids snapshot dependencies in deployed builds. |
 | Deployment | Container in AWS, preferably ECS Fargate for Phase 1 | Long-running API service, predictable behavior, no Lambda cold-start concern for user-facing dashboards. |
 | Database | Existing AWS RDS PostgreSQL through RDS Proxy | Already provisioned and documented for Phase 1. |
 | Tenant isolation | One PostgreSQL schema per tenant for tenant-owned pharmacy data | Matches the current SaaS isolation decision. |
 | Platform metadata | Add a non-PHI `control_plane` schema | Needed for login, users, tenant registry, schema mapping, role assignments, and cross-tenant internal admin views. |
-| Dashboard queries | Explicit SQL read models using Spring JDBC or jOOQ | Dashboard queries are aggregation-heavy and should be clear, testable, and not hidden behind complex ORM behavior. |
+| Persistence | Spring Data JPA by default, with DTO projections and targeted native SQL for complex dashboard aggregates | JPA keeps transactional modules and table mappings maintainable, while explicit reporting queries prevent inefficient entity loading and unreadable JPQL. |
 | Auth | Username/password login with backend-issued JWT bearer access tokens containing role claims | Meets Phase 1 need while keeping APIs stateless. Tokens must be short-lived and must not contain PHI or raw source identifiers. |
 | Raw data access | Not available to normal dashboard APIs | Prevents accidental PHI exposure and keeps dashboards tied to canonical data. |
 
@@ -136,9 +136,15 @@ Environment variables:
 
 | Variable | Purpose |
 | --- | --- |
-| `SPRING_PROFILES_ACTIVE` | `local`, `dev`, `stage`, or `prod`. |
-| `DB_SECRET_ID` | AWS Secrets Manager secret for app database credentials. Current dev secret: `analytical-rx/phase1/dev/postgres/app-rw`. |
+| `SPRING_PROFILES_ACTIVE` | Runtime location: `local` or `aws`. |
+| `APP_ENVIRONMENT` | Resource environment: `dev`, `stage`, or `prod`. |
+| `DB_SECRET_ID` | AWS Secrets Manager secret for database credentials. Current dev secret: `analytical-rx/phase1/dev/postgres/app-rw`. |
 | `AWS_REGION` | `us-east-1` for current Phase 1 dev. |
+| `DB_HOST_OVERRIDE` | Local only. Use `localhost` while the SSM tunnel is open. |
+| `DB_PORT_OVERRIDE` | Local only. Current SSM tunnel port is `5433`. |
+| `DB_SSL_MODE` | `require` initially; production should move to certificate verification once the container trust configuration is tested. |
+| `DB_POOL_MAX_SIZE` | Hikari connection limit per service instance. Start with `5` for the Phase 1 database. |
+| `DB_CONNECTION_TIMEOUT_MS` | Maximum wait for a connection. Start with `5000`. |
 | `JWT_SIGNING_SECRET_ID` | Secret containing JWT signing key or private key. Required for bearer token auth. |
 | `JWT_ACCESS_TOKEN_TTL_MINUTES` | Access token lifetime. Recommended Phase 1 default: 15 to 30 minutes. |
 | `JWT_ISSUER` | Expected token issuer, for example `analyticalrx-api`. |
@@ -166,6 +172,100 @@ Longer term, create separate database users/secrets for:
 - break-glass/admin DBA
 
 For Phase 1 development, the current app read/write secret can be used until least-privilege database roles are finalized.
+
+### Database Connection Strategy
+
+The same application artifact must run locally and in AWS. Environment variables
+select resources and connection routing; secrets are never committed to source
+control or baked into the container image.
+
+Initial authentication decision:
+
+- Use the database username and password stored in AWS Secrets Manager.
+- Retrieve the secret at application startup through the AWS SDK default
+  credential provider chain.
+- Local developers authenticate to AWS using their configured CLI identity.
+- ECS tasks use the task role; EC2 deployments use the instance profile.
+- Do not configure long-lived AWS access keys in ECS, EC2, or container
+  environment variables.
+- Keep database authentication behind a small credentials-provider interface so
+  IAM database authentication can be introduced without changing repositories or
+  business services.
+
+Local resolution:
+
+```text
+DB_SECRET_ID
+  -> retrieve username, password, database name, and proxy endpoint
+  -> override host with DB_HOST_OVERRIDE=localhost
+  -> override port with DB_PORT_OVERRIDE=5433
+  -> connect through the active SSM tunnel
+```
+
+AWS resolution:
+
+```text
+DB_SECRET_ID
+  -> retrieve username, password, database name, proxy host, and proxy port
+  -> connect directly from the application security group to RDS Proxy
+  -> use TLS for the complete client-to-proxy and proxy-to-database path
+```
+
+The secret identifier is configuration, not secret material. The retrieved
+password must never be logged, returned by an endpoint, included in an exception,
+or exposed through Actuator.
+
+### Persistence Strategy
+
+Spring Data JPA is the default persistence mechanism.
+
+Use JPA entities and repositories for:
+
+- control-plane users, tenants, access assignments, roles, and audit records
+- pharmacy metadata and other standard create/read/update operations
+- transactional Phase 2 workflow and CRM records
+- simple canonical reads that map naturally to entities or DTO projections
+
+Use JPQL DTO projections for straightforward dashboard summaries. Use targeted
+native SQL only for queries where it is materially clearer or more efficient,
+including conditional aggregates, PostgreSQL-specific operations, and complex
+grouping by pharmacy, payer, drug, or time period. Consider jOOQ only when the
+number and complexity of these reporting queries justify code generation.
+
+JPA implementation rules:
+
+- Set `spring.jpa.open-in-view=false`.
+- Do not expose entities from API controllers; map to response DTOs.
+- Avoid eager relationships and unbounded entity graphs.
+- Do not model cross-schema relationships that have no database foreign key.
+- Resolve the tenant schema from trusted control-plane metadata.
+- Do not accept schema names from request parameters or JWT claims.
+- Use Flyway for schema changes; disable Hibernate automatic schema updates in
+  deployed environments.
+
+### Secret Rotation
+
+For the first checkpoint, the application loads database credentials during
+startup. Rotating the secret requires an ECS service redeployment or application
+restart so new tasks load the new value. Automatic refresh can be added after the
+connection path is proven and a rotation schedule is defined.
+
+### Database Connectivity Checkpoint
+
+The checkpoint is complete when:
+
+1. The application starts on Java 21 with Spring Boot 3.5.16.
+2. The local profile retrieves the dev secret and connects through
+   `localhost:5433` while the SSM tunnel is active.
+3. The AWS profile uses a task role or instance profile and connects directly to
+   the RDS Proxy without AWS access keys.
+4. `/actuator/health/readiness` reports database readiness without exposing
+   connection details.
+5. A startup verification query confirms the expected database user, database,
+   `control_plane` schema, and dev tenant schema.
+6. Invalid or missing configuration fails startup with a sanitized error.
+7. Unit tests cover secret parsing and host overrides, and an integration test
+   verifies JPA connectivity with PostgreSQL through Testcontainers.
 
 ## 7. JWT Bearer Auth Model
 
@@ -302,7 +402,7 @@ Recommended Phase 1 approach:
 
 ## 9. Proposed Control Plane Tables
 
-These tables are not part of the current canonical event schema. They should be added for the core service.
+These tables are intentionally separate from the tenant canonical event schema. The executable SQL is checked in at `schemas/control_plane_schema.sql`.
 
 ### `control_plane.app_user`
 
@@ -314,7 +414,9 @@ Key fields:
 - `email`
 - `display_name`
 - `password_hash`
+- `password_algorithm`
 - `status`
+- `permissions_version`
 - `last_login_at`
 - `created_at`
 - `updated_at`
@@ -356,13 +458,26 @@ Key fields:
 - `user_id`
 - `tenant_id`
 - `role_code`
-- `pharmacy_id`
 - `scope_type`
 - `status`
+- `effective_from`
+- `effective_until`
 - `created_at`
 - `updated_at`
 
-`pharmacy_id` should reference the tenant schema's `pharmacy.id` logically. Because each tenant has its own schema, this may be stored as UUID plus tenant ID instead of a normal cross-schema foreign key.
+For selected pharmacy access, use `control_plane.user_role_pharmacy_scope`. It stores `pharmacy_key` and maps logically to the tenant schema's `pharmacy.pharmacy_key`. Because each tenant has its own schema, this is intentionally not a normal cross-schema foreign key.
+
+### `control_plane.user_role_pharmacy_scope`
+
+Defines selected pharmacy scope for role assignments when `scope_type = 'selected_pharmacies'`.
+
+Key fields:
+
+- `id`
+- `role_assignment_id`
+- `tenant_id`
+- `pharmacy_key`
+- `created_at`
 
 ### `control_plane.permission_audit`
 
@@ -453,7 +568,10 @@ Implementation direction:
 
 - Use `Spring Security` for authentication and authorization.
 - Use `BCrypt` or `Argon2` for password hashes.
-- Use `JdbcTemplate`, `NamedParameterJdbcTemplate`, or `jOOQ` for dashboard queries.
+- Use Spring Data JPA for standard persistence and transactional modules.
+- Use JPA DTO projections for straightforward dashboard summaries.
+- Use targeted native SQL for complex aggregates or PostgreSQL-specific queries.
+- Consider `jOOQ` only when reporting-query volume justifies code generation.
 - Use Flyway or Liquibase for `control_plane` migrations and tenant schema migrations.
 - Use Testcontainers for local integration tests if practical.
 
@@ -767,7 +885,7 @@ Do not build:
 2. Run the Spring Boot service locally with:
 
    ```bash
-   ./gradlew bootRun
+   ./mvnw spring-boot:run
    ```
 
 3. Local app connects to:
@@ -779,7 +897,13 @@ Do not build:
 4. Local profile should use:
 
    ```text
+   SPRING_PROFILES_ACTIVE=local
+   APP_ENVIRONMENT=dev
+   AWS_REGION=us-east-1
    DB_SECRET_ID=analytical-rx/phase1/dev/postgres/app-rw
+   DB_HOST_OVERRIDE=localhost
+   DB_PORT_OVERRIDE=5433
+   DB_SSL_MODE=require
    CONTROL_PLANE_SCHEMA=control_plane
    ```
 
@@ -795,7 +919,7 @@ Do not build:
 Recommended first implementation:
 
 1. Create Spring Boot repo or service module.
-2. Add Gradle/Maven build.
+2. Use the checked-in Maven wrapper and pin Spring Boot to `3.5.16`.
 3. Add Dockerfile for Java 21 runtime.
 4. Add GitHub Actions workflow:
    - run tests
@@ -860,7 +984,7 @@ These are the decisions the team should confirm before implementation goes too f
 
 1. Are we comfortable adding a shared non-PHI `control_plane` schema for users, roles, tenant registry, and schema mapping?
 2. Should Phase 1 use only short-lived access tokens, or should we also add refresh tokens?
-3. Should dashboard query implementation start with Spring JDBC/JdbcTemplate, or should we use jOOQ from day one for stronger SQL typing?
+3. Which dashboard queries, if any, need native SQL after the initial JPA projection implementation?
 4. Should the first deployed container runtime be ECS Fargate, or does the team prefer AWS App Runner for a simpler initial deployment?
 5. Which dashboard should be implemented first as the vertical slice: owner overview, daily sales, or pipeline audit?
 6. Should tenant admins be allowed to create users in Phase 1, or should only internal platform admins manage users initially?
