@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Owner Dashboard mockup">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0f172a" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+  <rect width="960" height="540" fill="#eef2f7"/>
+  <rect x="18" y="18" width="924" height="504" rx="18" fill="#ffffff" filter="url(#shadow)"/>
+  <rect x="18" y="18" width="924" height="32" rx="18" fill="#f8fafc"/>
+  <circle cx="42" cy="34" r="5" fill="#ef4444"/>
+  <circle cx="60" cy="34" r="5" fill="#f59e0b"/>
+  <circle cx="78" cy="34" r="5" fill="#22c55e"/>
+  <rect x="110" y="26" width="285" height="16" rx="8" fill="#e5e7eb"/>
+
+  <rect x="18" y="50" width="170" height="472" fill="#111827"/>
+  <text x="42" y="82" font-family="Inter, Arial, sans-serif" font-size="17" fill="#ffffff" font-weight="900" text-anchor="start">AnalyticalRx</text>
+  <text x="42" y="104" font-family="Inter, Arial, sans-serif" font-size="11" fill="#9ca3af" font-weight="600" text-anchor="start">Role dashboards</text>
+  <rect x="34" y="126" width="132" height="30" rx="8" fill="#1d4ed8"/>
+<text x="50" y="146" font-family="Inter, Arial, sans-serif" font-size="12" fill="#ffffff" font-weight="800" text-anchor="start">Overview</text>
+<rect x="34" y="164" width="132" height="30" rx="8" fill="transparent"/>
+<text x="50" y="184" font-family="Inter, Arial, sans-serif" font-size="12" fill="#9ca3af" font-weight="600" text-anchor="start">Stores</text>
+<rect x="34" y="202" width="132" height="30" rx="8" fill="transparent"/>
+<text x="50" y="222" font-family="Inter, Arial, sans-serif" font-size="12" fill="#9ca3af" font-weight="600" text-anchor="start">Work Queue</text>
+<rect x="34" y="240" width="132" height="30" rx="8" fill="transparent"/>
+<text x="50" y="260" font-family="Inter, Arial, sans-serif" font-size="12" fill="#9ca3af" font-weight="600" text-anchor="start">Finance</text>
+<rect x="34" y="278" width="132" height="30" rx="8" fill="transparent"/>
+<text x="50" y="298" font-family="Inter, Arial, sans-serif" font-size="12" fill="#9ca3af" font-weight="600" text-anchor="start">Admin</text>
+<rect x="34" y="316" width="132" height="30" rx="8" fill="transparent"/>
+<text x="50" y="336" font-family="Inter, Arial, sans-serif" font-size="12" fill="#9ca3af" font-weight="600" text-anchor="start">Outreach</text>
+
+  <rect x="188" y="50" width="754" height="472" fill="#f8fafc"/>
+  <rect x="205" y="68" width="720" height="82" rx="14" fill="#ffffff" stroke="#d8dee9"/>
+  <text x="225" y="98" font-family="Inter, Arial, sans-serif" font-size="22" fill="#111827" font-weight="900" text-anchor="start">Owner Dashboard</text>
+  <text x="225" y="122" font-family="Inter, Arial, sans-serif" font-size="12" fill="#64748b" font-weight="600" text-anchor="start">Cross-store performance and source health</text>
+  <rect x="704" y="83" width="129" height="24" rx="12" fill="#f8fafc" stroke="#d8dee9" opacity="1"/>
+<text x="716" y="99" font-family="Inter, Arial, sans-serif" font-size="11" fill="#64748b" font-weight="700" text-anchor="start">OWNER_EXECUTIVE</text>
+  <rect x="704" y="114" width="108" height="24" rx="12" fill="#fef3c7" stroke="#b45309" opacity="1"/>
+<text x="716" y="130" font-family="Inter, Arial, sans-serif" font-size="11" fill="#b45309" font-weight="700" text-anchor="start">Partial data</text>
+
+  <rect x="225" y="152" width="695" height="40" rx="10" fill="#ffffff" stroke="#d8dee9"/>
+  <text x="242" y="177" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827" font-weight="700" text-anchor="start">Date: Sep 1 - Sep 3</text>
+  <text x="390" y="177" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827" font-weight="700" text-anchor="start">Scope: All assigned pharmacies</text>
+  <text x="700" y="177" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827" font-weight="700" text-anchor="start">Group: day</text>
+
+  <rect x="225" y="205" width="210" height="78" rx="12" fill="#ffffff" stroke="#0f766e" opacity="1"/>
+<rect x="225" y="205" width="5" height="78" rx="2.5" fill="#0f766e"/>
+<text x="243" y="227" font-family="Inter, Arial, sans-serif" font-size="12" fill="#64748b" font-weight="700" text-anchor="start">Prescription Events</text>
+<text x="243" y="253" font-family="Inter, Arial, sans-serif" font-size="22" fill="#111827" font-weight="800" text-anchor="start">1,284</text>
+<text x="243" y="271" font-family="Inter, Arial, sans-serif" font-size="11" fill="#64748b" font-weight="500" text-anchor="start">+8.4% vs previous period</text>
+<rect x="451" y="205" width="210" height="78" rx="12" fill="#ffffff" stroke="#b45309" opacity="1"/>
+<rect x="451" y="205" width="5" height="78" rx="2.5" fill="#b45309"/>
+<text x="469" y="227" font-family="Inter, Arial, sans-serif" font-size="12" fill="#64748b" font-weight="700" text-anchor="start">Total Amount</text>
+<text x="469" y="253" font-family="Inter, Arial, sans-serif" font-size="22" fill="#111827" font-weight="800" text-anchor="start">USD 98,642.25</text>
+<text x="469" y="271" font-family="Inter, Arial, sans-serif" font-size="11" fill="#64748b" font-weight="500" text-anchor="start">Partial source coverage</text>
+<rect x="677" y="205" width="210" height="78" rx="12" fill="#ffffff" stroke="#b45309" opacity="1"/>
+<rect x="677" y="205" width="5" height="78" rx="2.5" fill="#b45309"/>
+<text x="695" y="227" font-family="Inter, Arial, sans-serif" font-size="12" fill="#64748b" font-weight="700" text-anchor="start">Rejected Claims</text>
+<text x="695" y="253" font-family="Inter, Arial, sans-serif" font-size="22" fill="#111827" font-weight="800" text-anchor="start">37</text>
+<text x="695" y="271" font-family="Inter, Arial, sans-serif" font-size="11" fill="#64748b" font-weight="500" text-anchor="start">Needs attention</text>
+  <rect x="225" y="302" width="400" height="132" rx="12" fill="#ffffff" stroke="#d8dee9" opacity="1"/>
+<text x="243" y="327" font-family="Inter, Arial, sans-serif" font-size="13" fill="#111827" font-weight="800" text-anchor="start">Prescription Event Trend</text>
+<line x1="253" y1="398" x2="601" y2="398" stroke="#d8dee9" stroke-width="1"/>
+<line x1="253" y1="346" x2="253" y2="398" stroke="#d8dee9" stroke-width="1"/>
+<path d="M 259.0 396.0 L 425.0 369.0 L 591.0 342.0" fill="none" stroke="#2563eb" stroke-width="3"/>
+<circle cx="259.0" cy="396.0" r="4" fill="#2563eb"/>
+<circle cx="425.0" cy="369.0" r="4" fill="#2563eb"/>
+<circle cx="591.0" cy="342.0" r="4" fill="#2563eb"/>
+<text x="259.0" y="419" font-family="Inter, Arial, sans-serif" font-size="10" fill="#64748b" font-weight="400" text-anchor="middle">Sep 1</text>
+<text x="259.0" y="386.0" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="700" text-anchor="middle">401</text>
+<text x="425.0" y="419" font-family="Inter, Arial, sans-serif" font-size="10" fill="#64748b" font-weight="400" text-anchor="middle">Sep 2</text>
+<text x="425.0" y="359.0" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="700" text-anchor="middle">428</text>
+<text x="591.0" y="419" font-family="Inter, Arial, sans-serif" font-size="10" fill="#64748b" font-weight="400" text-anchor="middle">Sep 3</text>
+<text x="591.0" y="332.0" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="700" text-anchor="middle">455</text>
+<rect x="642" y="302" width="278" height="132" rx="12" fill="#ffffff" stroke="#d8dee9" opacity="1"/>
+<text x="660" y="327" font-family="Inter, Arial, sans-serif" font-size="13" fill="#111827" font-weight="800" text-anchor="start">Store Comparison</text>
+<text x="658" y="352" font-family="Inter, Arial, sans-serif" font-size="10" fill="#64748b" font-weight="800" text-anchor="start">Pharmacy</text>
+<text x="756" y="352" font-family="Inter, Arial, sans-serif" font-size="10" fill="#64748b" font-weight="800" text-anchor="start">Rx</text>
+<text x="805.3333333333334" y="352" font-family="Inter, Arial, sans-serif" font-size="10" fill="#64748b" font-weight="800" text-anchor="start">Amount</text>
+<text x="854.6666666666667" y="352" font-family="Inter, Arial, sans-serif" font-size="10" fill="#64748b" font-weight="800" text-anchor="start">Rejected</text>
+<line x1="658" y1="362" x2="904" y2="362" stroke="#d8dee9" stroke-width="1"/>
+<text x="658" y="378" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="700" text-anchor="start">Main Street</text>
+<text x="756" y="378" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="500" text-anchor="start">542</text>
+<text x="805.3333333333334" y="378" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="500" text-anchor="start">42.8k</text>
+<text x="854.6666666666667" y="378" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="500" text-anchor="start">12</text>
+<line x1="658" y1="387" x2="904" y2="387" stroke="#d8dee9" stroke-width="1"/>
+<text x="658" y="403" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="700" text-anchor="start">Northside</text>
+<text x="756" y="403" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="500" text-anchor="start">388</text>
+<text x="805.3333333333334" y="403" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="500" text-anchor="start">31.4k</text>
+<text x="854.6666666666667" y="403" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="500" text-anchor="start">9</text>
+<line x1="658" y1="412" x2="904" y2="412" stroke="#d8dee9" stroke-width="1"/>
+<text x="658" y="428" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="700" text-anchor="start">West End</text>
+<text x="756" y="428" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="500" text-anchor="start">354</text>
+<text x="805.3333333333334" y="428" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="500" text-anchor="start">24.4k</text>
+<text x="854.6666666666667" y="428" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="500" text-anchor="start">16</text>
+
+  <rect x="225" y="456" width="695" height="42" rx="12" fill="#fff7ed" stroke="#f59e0b"/>
+  <text x="244" y="481" font-family="Inter, Arial, sans-serif" font-size="12" fill="#b45309" font-weight="700" text-anchor="start">Payment totals are partial until API/SFTP enrichment is complete.</text>
+</svg>

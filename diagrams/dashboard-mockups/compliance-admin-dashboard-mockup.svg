@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Compliance / Admin Dashboard mockup">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0f172a" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+  <rect width="960" height="540" fill="#eef2f7"/>
+  <rect x="18" y="18" width="924" height="504" rx="18" fill="#ffffff" filter="url(#shadow)"/>
+  <rect x="18" y="18" width="924" height="32" rx="18" fill="#f8fafc"/>
+  <circle cx="42" cy="34" r="5" fill="#ef4444"/>
+  <circle cx="60" cy="34" r="5" fill="#f59e0b"/>
+  <circle cx="78" cy="34" r="5" fill="#22c55e"/>
+  <rect x="110" y="26" width="285" height="16" rx="8" fill="#e5e7eb"/>
+
+  <rect x="18" y="50" width="170" height="472" fill="#111827"/>
+  <text x="42" y="82" font-family="Inter, Arial, sans-serif" font-size="17" fill="#ffffff" font-weight="900" text-anchor="start">AnalyticalRx</text>
+  <text x="42" y="104" font-family="Inter, Arial, sans-serif" font-size="11" fill="#9ca3af" font-weight="600" text-anchor="start">Role dashboards</text>
+  <rect x="34" y="126" width="132" height="30" rx="8" fill="transparent"/>
+<text x="50" y="146" font-family="Inter, Arial, sans-serif" font-size="12" fill="#9ca3af" font-weight="600" text-anchor="start">Overview</text>
+<rect x="34" y="164" width="132" height="30" rx="8" fill="transparent"/>
+<text x="50" y="184" font-family="Inter, Arial, sans-serif" font-size="12" fill="#9ca3af" font-weight="600" text-anchor="start">Stores</text>
+<rect x="34" y="202" width="132" height="30" rx="8" fill="transparent"/>
+<text x="50" y="222" font-family="Inter, Arial, sans-serif" font-size="12" fill="#9ca3af" font-weight="600" text-anchor="start">Work Queue</text>
+<rect x="34" y="240" width="132" height="30" rx="8" fill="transparent"/>
+<text x="50" y="260" font-family="Inter, Arial, sans-serif" font-size="12" fill="#9ca3af" font-weight="600" text-anchor="start">Finance</text>
+<rect x="34" y="278" width="132" height="30" rx="8" fill="#1d4ed8"/>
+<text x="50" y="298" font-family="Inter, Arial, sans-serif" font-size="12" fill="#ffffff" font-weight="800" text-anchor="start">Admin</text>
+<rect x="34" y="316" width="132" height="30" rx="8" fill="transparent"/>
+<text x="50" y="336" font-family="Inter, Arial, sans-serif" font-size="12" fill="#9ca3af" font-weight="600" text-anchor="start">Outreach</text>
+
+  <rect x="188" y="50" width="754" height="472" fill="#f8fafc"/>
+  <rect x="205" y="68" width="720" height="82" rx="14" fill="#ffffff" stroke="#d8dee9"/>
+  <text x="225" y="98" font-family="Inter, Arial, sans-serif" font-size="22" fill="#111827" font-weight="900" text-anchor="start">Compliance / Admin Dashboard</text>
+  <text x="225" y="122" font-family="Inter, Arial, sans-serif" font-size="12" fill="#64748b" font-weight="600" text-anchor="start">Safe pipeline status, audit, and compliance placeholders</text>
+  <rect x="704" y="83" width="136" height="24" rx="12" fill="#f8fafc" stroke="#d8dee9" opacity="1"/>
+<text x="716" y="99" font-family="Inter, Arial, sans-serif" font-size="11" fill="#64748b" font-weight="700" text-anchor="start">COMPLIANCE_ADMIN</text>
+  <rect x="704" y="114" width="94" height="24" rx="12" fill="#d1fae5" stroke="#0f766e" opacity="1"/>
+<text x="716" y="130" font-family="Inter, Arial, sans-serif" font-size="11" fill="#0f766e" font-weight="700" text-anchor="start">Fresh data</text>
+
+  <rect x="225" y="152" width="695" height="40" rx="10" fill="#ffffff" stroke="#d8dee9"/>
+  <text x="242" y="177" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827" font-weight="700" text-anchor="start">Date: Sep 1 - Sep 3</text>
+  <text x="390" y="177" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827" font-weight="700" text-anchor="start">Scope: Tenant or assigned pharmacies</text>
+  <text x="700" y="177" font-family="Inter, Arial, sans-serif" font-size="11" fill="#111827" font-weight="700" text-anchor="start">Group: status</text>
+
+  <rect x="225" y="205" width="210" height="78" rx="12" fill="#ffffff" stroke="#0f766e" opacity="1"/>
+<rect x="225" y="205" width="5" height="78" rx="2.5" fill="#0f766e"/>
+<text x="243" y="227" font-family="Inter, Arial, sans-serif" font-size="12" fill="#64748b" font-weight="700" text-anchor="start">Events Processed</text>
+<text x="243" y="253" font-family="Inter, Arial, sans-serif" font-size="22" fill="#111827" font-weight="800" text-anchor="start">1,248</text>
+<text x="243" y="271" font-family="Inter, Arial, sans-serif" font-size="11" fill="#64748b" font-weight="500" text-anchor="start">Pipeline status</text>
+<rect x="451" y="205" width="210" height="78" rx="12" fill="#ffffff" stroke="#b45309" opacity="1"/>
+<rect x="451" y="205" width="5" height="78" rx="2.5" fill="#b45309"/>
+<text x="469" y="227" font-family="Inter, Arial, sans-serif" font-size="12" fill="#64748b" font-weight="700" text-anchor="start">Events Failed</text>
+<text x="469" y="253" font-family="Inter, Arial, sans-serif" font-size="22" fill="#111827" font-weight="800" text-anchor="start">9</text>
+<text x="469" y="271" font-family="Inter, Arial, sans-serif" font-size="11" fill="#64748b" font-weight="500" text-anchor="start">Review failures</text>
+<rect x="677" y="205" width="210" height="78" rx="12" fill="#ffffff" stroke="#0f766e" opacity="1"/>
+<rect x="677" y="205" width="5" height="78" rx="2.5" fill="#0f766e"/>
+<text x="695" y="227" font-family="Inter, Arial, sans-serif" font-size="12" fill="#64748b" font-weight="700" text-anchor="start">Raw Payload Retention</text>
+<text x="695" y="253" font-family="Inter, Arial, sans-serif" font-size="22" fill="#111827" font-weight="800" text-anchor="start">30 days</text>
+<text x="695" y="271" font-family="Inter, Arial, sans-serif" font-size="11" fill="#64748b" font-weight="500" text-anchor="start">Metadata only</text>
+  <rect x="225" y="302" width="400" height="132" rx="12" fill="#ffffff" stroke="#d8dee9" opacity="1"/>
+<text x="243" y="327" font-family="Inter, Arial, sans-serif" font-size="13" fill="#111827" font-weight="800" text-anchor="start">Pipeline Status</text>
+<line x1="253" y1="398" x2="601" y2="398" stroke="#d8dee9" stroke-width="1"/>
+<rect x="267" y="352" width="90" height="44" rx="5" fill="#2563eb"/>
+<text x="312" y="419" font-family="Inter, Arial, sans-serif" font-size="10" fill="#64748b" font-weight="400" text-anchor="middle">Processed</text>
+<text x="312" y="344" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="700" text-anchor="middle">1248</text>
+<rect x="385" y="396" width="90" height="0" rx="5" fill="#2563eb"/>
+<text x="430" y="419" font-family="Inter, Arial, sans-serif" font-size="10" fill="#64748b" font-weight="400" text-anchor="middle">Failed</text>
+<text x="430" y="388" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="700" text-anchor="middle">9</text>
+<rect x="503" y="395" width="90" height="1" rx="5" fill="#2563eb"/>
+<text x="548" y="419" font-family="Inter, Arial, sans-serif" font-size="10" fill="#64748b" font-weight="400" text-anchor="middle">Needs Enrich</text>
+<text x="548" y="387" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="700" text-anchor="middle">41</text>
+<rect x="642" y="302" width="278" height="132" rx="12" fill="#ffffff" stroke="#d8dee9" opacity="1"/>
+<text x="660" y="327" font-family="Inter, Arial, sans-serif" font-size="13" fill="#111827" font-weight="800" text-anchor="start">Recent Failures</text>
+<text x="658" y="352" font-family="Inter, Arial, sans-serif" font-size="10" fill="#64748b" font-weight="800" text-anchor="start">Source</text>
+<text x="756" y="352" font-family="Inter, Arial, sans-serif" font-size="10" fill="#64748b" font-weight="800" text-anchor="start">Type</text>
+<text x="805.3333333333334" y="352" font-family="Inter, Arial, sans-serif" font-size="10" fill="#64748b" font-weight="800" text-anchor="start">Failure</text>
+<text x="854.6666666666667" y="352" font-family="Inter, Arial, sans-serif" font-size="10" fill="#64748b" font-weight="800" text-anchor="start">Status</text>
+<line x1="658" y1="362" x2="904" y2="362" stroke="#d8dee9" stroke-width="1"/>
+<text x="658" y="378" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="700" text-anchor="start">PrimeRx</text>
+<text x="756" y="378" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="500" text-anchor="start">claim billed</text>
+<text x="805.3333333333334" y="378" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="500" text-anchor="start">missing pharmacy</text>
+<text x="854.6666666666667" y="378" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="500" text-anchor="start">failed</text>
+<line x1="658" y1="387" x2="904" y2="387" stroke="#d8dee9" stroke-width="1"/>
+<text x="658" y="403" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="700" text-anchor="start">PrimeRx</text>
+<text x="756" y="403" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="500" text-anchor="start">payment</text>
+<text x="805.3333333333334" y="403" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="500" text-anchor="start">missing payer</text>
+<text x="854.6666666666667" y="403" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="500" text-anchor="start">needs enrichment</text>
+<line x1="658" y1="412" x2="904" y2="412" stroke="#d8dee9" stroke-width="1"/>
+<text x="658" y="428" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="700" text-anchor="start">SFTP</text>
+<text x="756" y="428" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="500" text-anchor="start">daily feed</text>
+<text x="805.3333333333334" y="428" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="500" text-anchor="start">not received</text>
+<text x="854.6666666666667" y="428" font-family="Inter, Arial, sans-serif" font-size="10" fill="#111827" font-weight="500" text-anchor="start">delayed</text>
+
+  <rect x="225" y="456" width="695" height="42" rx="12" fill="#fff7ed" stroke="#f59e0b"/>
+  <text x="244" y="481" font-family="Inter, Arial, sans-serif" font-size="12" fill="#b45309" font-weight="700" text-anchor="start">Admin views show safe metadata, not raw payload content.</text>
+</svg>
