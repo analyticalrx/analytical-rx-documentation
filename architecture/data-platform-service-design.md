@@ -294,28 +294,23 @@ Recommended access token claims:
 {
   "iss": "analyticalrx-api",
   "aud": "analyticalrx-frontend",
-  "sub": "user-uuid",
+  "sub": "123",
   "email": "user@example.com",
   "display_name": "User Name",
-  "tenant_access": [
-    {
-      "tenant_key": "valley-corporation",
-      "roles": ["OWNER_EXECUTIVE"],
-      "pharmacy_ids": ["pharmacy-uuid-1", "pharmacy-uuid-2"]
-    }
-  ],
-  "internal_roles": ["INTERNAL_PLATFORM_ADMIN"],
+  "tenant_id": 42,
+  "roles": ["OWNER"],
   "permissions_version": 4,
   "iat": 1787049000,
   "exp": 1787050800,
-  "jti": "token-uuid"
+  "jti": "random-token-id"
 }
 ```
 
 Claim rules:
 
 - Include role claims because the frontend and backend both need to understand the user's allowed product surface.
-- Include tenant key and allowed pharmacy IDs only as authorization context.
+- The current Phase 1 model assigns each customer user to one tenant. The login request supplies the public tenant key; the issued token contains the resolved internal tenant ID.
+- Resolve the user's active pharmacy assignments from the control plane for access-sensitive requests rather than trusting client-supplied pharmacy identifiers.
 - Do not include database schema names in the token.
 - Do not include PHI, raw payload references, real `RxNo`, real `RefillNo`, patient details, insurance member IDs, or raw vendor identifiers.
 - Keep token claims small enough for normal HTTP header limits.
@@ -327,11 +322,10 @@ The JWT role claims are necessary, but they are not the full security model.
 For every tenant-scoped request, the service must:
 
 1. Validate the JWT.
-2. Confirm the requested tenant exists in the user's token claims.
-3. Resolve the actual database schema name from `control_plane.tenant_registry`.
-4. Enforce pharmacy-level scope from token claims and/or the latest control-plane assignment state.
-5. Enforce role permission for the requested API.
-6. Query only dashboard-safe tables/views unless the caller is an authorized internal/admin workflow.
+2. Resolve the actual database schema name from `control_plane.tenant_registry` using the token's tenant ID.
+3. Enforce pharmacy-level scope from the latest `control_plane.user_pharmacy_access` assignment state.
+4. Enforce role permission for the requested API.
+5. Query only dashboard-safe tables/views unless the caller is an authorized internal/admin workflow.
 
 For sensitive admin actions, the service should re-check current role assignment state from `control_plane` instead of relying only on token claims.
 
@@ -377,7 +371,7 @@ The frontend may request a tenant by tenant key, for example:
 The service must treat `valley-corporation` only as a public tenant key. It must then:
 
 1. Authenticate the user.
-2. Check that the user is assigned to that tenant.
+2. Confirm the requested tenant context matches the user's single assigned tenant.
 3. Resolve the actual schema name from `control_plane.tenant_registry`.
 4. Validate the schema name against an allowlisted pattern and stored registry value.
 5. Execute queries only against that resolved schema.
@@ -435,51 +429,25 @@ Key fields:
 - `created_at`
 - `updated_at`
 
-### `control_plane.user_tenant_access`
+### `control_plane.user_pharmacy_access`
 
-Defines which users can access which tenant.
-
-Key fields:
-
-- `id`
-- `user_id`
-- `tenant_id`
-- `status`
-- `created_at`
-- `updated_at`
-
-### `control_plane.user_role_assignment`
-
-Defines role assignments inside a tenant and optional pharmacy scope.
+Defines explicit pharmacy assignments for a user in that user's tenant. It stores the tenant-owned `pharmacy_key`; the backend resolves the tenant schema before using it.
 
 Key fields:
 
 - `id`
 - `user_id`
-- `tenant_id`
-- `role_code`
-- `scope_type`
-- `status`
-- `effective_from`
-- `effective_until`
-- `created_at`
-- `updated_at`
-
-For selected pharmacy access, use `control_plane.user_role_pharmacy_scope`. It stores `pharmacy_key` and maps logically to the tenant schema's `pharmacy.pharmacy_key`. Because each tenant has its own schema, this is intentionally not a normal cross-schema foreign key.
-
-### `control_plane.user_role_pharmacy_scope`
-
-Defines selected pharmacy scope for role assignments when `scope_type = 'selected_pharmacies'`.
-
-Key fields:
-
-- `id`
-- `role_assignment_id`
 - `tenant_id`
 - `pharmacy_key`
+- `status`
 - `created_at`
+- `updated_at`
 
-### `control_plane.permission_audit`
+### Roles and permissions
+
+`role_definition` and `permission_definition` hold active role and permission codes. `role_permission` grants permissions to roles, while `user_role` assigns one or more active roles to a user. Every relational ID in this group is a `bigint`.
+
+### `control_plane.permission_audit_event`
 
 Tracks permission changes.
 
@@ -489,14 +457,13 @@ Key fields:
 - `actor_user_id`
 - `target_user_id`
 - `tenant_id`
-- `pharmacy_id`
 - `action`
 - `old_value`
 - `new_value`
 - `reason`
 - `created_at`
 
-### `control_plane.app_access_audit`
+### `control_plane.app_access_audit_event`
 
 Tracks login and sensitive app access events.
 
@@ -505,7 +472,7 @@ Key fields:
 - `id`
 - `user_id`
 - `tenant_id`
-- `action`
+- `event_type`
 - `resource_type`
 - `resource_id`
 - `status`
@@ -519,11 +486,11 @@ Detailed role definitions, role bundles, service principals, API permission code
 
 | Role | Tenant Scope | Pharmacy Scope | Initial Access |
 | --- | --- | --- | --- |
-| `OWNER_EXECUTIVE` | Assigned tenant | Usually all pharmacies in tenant | Owner dashboard, cross-store summaries, high-level exceptions. |
+| `OWNER` | Assigned tenant | Explicitly assigned pharmacies | Owner dashboard, cross-store summaries, high-level exceptions. |
 | `STORE_MANAGER` | Assigned tenant | Assigned pharmacies | Store dashboard, assigned-store metrics, open issues, task summaries. |
 | `PHARMACIST` | Assigned tenant | Assigned pharmacies | Pharmacist/technician dashboard, refill/work queue visibility when available, operational exceptions. |
 | `TECHNICIAN` | Assigned tenant | Assigned pharmacies | Technician dashboard, assigned work, allowed operational status updates. |
-| `BOOKKEEPER_FINANCE` | Assigned tenant | Assigned pharmacies or tenant-wide finance scope | Finance dashboard, financial period summaries, AR/close indicators where available. |
+| `BOOKKEEPER` | Assigned tenant | Explicitly assigned pharmacies | Finance dashboard, financial period summaries, AR/close indicators where available. |
 | `COMPLIANCE_ADMIN` | Assigned tenant | Tenant or assigned pharmacies | Compliance/admin dashboard, documents, licenses, compliance status. |
 | `BUSINESS_DEVELOPMENT` | Assigned tenant | Assigned pharmacies or doctor-office scope | Doctor office list, visits/follow-up starter dashboard where available. |
 | `TENANT_ADMIN` | Assigned tenant | Tenant-wide | Manage tenant users and tenant-level settings, but not other tenants. |

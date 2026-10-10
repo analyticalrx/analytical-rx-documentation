@@ -52,7 +52,7 @@ Conventions:
 - JSON fields use `camelCase`.
 - Date fields use `YYYY-MM-DD`.
 - Date/time fields use ISO-8601 UTC timestamps.
-- IDs returned to the frontend are opaque strings, usually UUIDs.
+- Internal IDs are bigint values. The frontend must treat IDs as opaque values and must not generate, derive meaning from, or use them as tenant authorization input.
 - `tenantKey` is a stable slug, for example `analyticalrx-dev`.
 - The frontend must not send or store database schema names.
 - The backend must resolve tenant schema from trusted server-side control-plane data.
@@ -214,7 +214,7 @@ Table model:
   ],
   "rows": [
     {
-      "pharmacyId": "3d4b55ae-7120-42b7-aef8-8cc3fb839d3f",
+      "pharmacyId": 2001,
       "pharmacyName": "Main Street Pharmacy",
       "prescriptionEvents": 542,
       "totalAmount": 42810.55,
@@ -294,7 +294,7 @@ Response:
   "expiresInSeconds": 1800,
   "issuedAt": "2026-09-03T10:00:00Z",
   "user": {
-    "id": "f34635ae-9fa6-4d5f-9dcf-0a2a76d0c3d3",
+    "id": 1001,
     "email": "owner@example.com",
     "displayName": "Owner User",
     "status": "active"
@@ -339,7 +339,7 @@ Response:
 ```json
 {
   "user": {
-    "id": "f34635ae-9fa6-4d5f-9dcf-0a2a76d0c3d3",
+    "id": 1001,
     "email": "owner@example.com",
     "displayName": "Owner User",
     "status": "active"
@@ -348,9 +348,9 @@ Response:
     {
       "tenantKey": "analyticalrx-dev",
       "displayName": "AnalyticalRx Dev Tenant",
-      "roles": ["OWNER_EXECUTIVE", "TENANT_ADMIN"],
-      "pharmacyScope": "all_pharmacies",
-      "pharmacyIds": [],
+      "roles": ["OWNER", "TENANT_ADMIN"],
+      "pharmacyScope": "assigned_pharmacies",
+      "pharmacyIds": [2001, 2002],
       "capabilities": [
         "dashboard.owner.read",
         "dashboard.compliance.read",
@@ -395,8 +395,8 @@ Response:
       "tenantKey": "analyticalrx-dev",
       "displayName": "AnalyticalRx Dev Tenant",
       "status": "active",
-      "roles": ["OWNER_EXECUTIVE"],
-      "pharmacyScope": "all_pharmacies"
+      "roles": ["OWNER"],
+      "pharmacyScope": "assigned_pharmacies"
     }
   ]
 }
@@ -420,7 +420,7 @@ Response:
 {
   "items": [
     {
-      "id": "3d4b55ae-7120-42b7-aef8-8cc3fb839d3f",
+      "id": 2001,
       "pharmacyKey": "main-street",
       "displayName": "Main Street Pharmacy",
       "stateCode": "TX",
@@ -438,13 +438,13 @@ All dashboard APIs use the common dashboard query and response contract from Sec
 
 | Dashboard | API | Allowed roles |
 | --- | --- | --- |
-| Owner / Executive | `GET /api/v1/tenants/{tenantKey}/dashboards/owner` | `OWNER_EXECUTIVE` |
-| Store Manager | `GET /api/v1/tenants/{tenantKey}/dashboards/store-manager` | `STORE_MANAGER`, `OWNER_EXECUTIVE` |
-| Pharmacist | `GET /api/v1/tenants/{tenantKey}/dashboards/pharmacist` | `PHARMACIST`, `STORE_MANAGER`, `OWNER_EXECUTIVE` |
+| Owner / Executive | `GET /api/v1/tenants/{tenantKey}/dashboards/owner` | `OWNER` |
+| Store Manager | `GET /api/v1/tenants/{tenantKey}/dashboards/store-manager` | `STORE_MANAGER` |
+| Pharmacist | `GET /api/v1/tenants/{tenantKey}/dashboards/pharmacist` | `PHARMACIST`, `STORE_MANAGER` |
 | Technician | `GET /api/v1/tenants/{tenantKey}/dashboards/technician` | `TECHNICIAN`, `PHARMACIST`, `STORE_MANAGER` |
-| Bookkeeper / Finance | `GET /api/v1/tenants/{tenantKey}/dashboards/bookkeeper` | `BOOKKEEPER_FINANCE`, `OWNER_EXECUTIVE` |
-| Compliance / Admin | `GET /api/v1/tenants/{tenantKey}/dashboards/compliance-admin` | `COMPLIANCE_ADMIN`, `TENANT_ADMIN`, `OWNER_EXECUTIVE` |
-| Business Development | `GET /api/v1/tenants/{tenantKey}/dashboards/business-development` | `BUSINESS_DEVELOPMENT`, `STORE_MANAGER`, `OWNER_EXECUTIVE` |
+| Bookkeeper / Finance | `GET /api/v1/tenants/{tenantKey}/dashboards/bookkeeper` | `BOOKKEEPER` |
+| Compliance / Admin | `GET /api/v1/tenants/{tenantKey}/dashboards/compliance-admin` | `COMPLIANCE_ADMIN`, `TENANT_ADMIN` |
+| Business Development | `GET /api/v1/tenants/{tenantKey}/dashboards/business-development` | `BUSINESS_DEVELOPMENT`, `STORE_MANAGER` |
 
 ### Owner Dashboard
 
@@ -553,7 +553,7 @@ Sample response:
       ],
       "rows": [
         {
-          "pharmacyId": "3d4b55ae-7120-42b7-aef8-8cc3fb839d3f",
+          "pharmacyId": 2001,
           "pharmacyName": "Main Street Pharmacy",
           "prescriptionEvents": 542,
           "totalAmount": 42810.55,
@@ -579,7 +579,7 @@ Sample response:
 Example:
 
 ```text
-GET /api/v1/tenants/analyticalrx-dev/dashboards/store-manager?startDate=2026-09-01&endDate=2026-09-03&pharmacyIds=3d4b55ae-7120-42b7-aef8-8cc3fb839d3f
+GET /api/v1/tenants/analyticalrx-dev/dashboards/store-manager?startDate=2026-09-01&endDate=2026-09-03&pharmacyIds=2001
 ```
 
 Recommended Phase 1 widgets:
@@ -605,7 +605,7 @@ Sample response:
   "filters": {
     "startDate": "2026-09-01",
     "endDate": "2026-09-03",
-    "pharmacyIds": ["3d4b55ae-7120-42b7-aef8-8cc3fb839d3f"],
+    "pharmacyIds": [2001],
     "groupBy": "day"
   },
   "dataFreshness": {
@@ -649,7 +649,7 @@ Sample response:
       ],
       "rows": [
         {
-          "eventId": "928a8f5f-810f-44fa-9cbf-40ce99fb4a93",
+          "eventId": 3001,
           "eventType": "claim_rejected",
           "businessDate": "2026-09-03",
           "status": "needs_review"
@@ -865,7 +865,7 @@ Sample response:
       ],
       "rows": [
         {
-          "payerId": "7dc492fd-e293-4be0-94c0-0d940ddff001",
+          "payerId": 4001,
           "payerName": "Example Payer",
           "billedAmount": 20420.25,
           "paidAmount": 18790.50,
@@ -1060,11 +1060,11 @@ Response:
 {
   "items": [
     {
-      "id": "f34635ae-9fa6-4d5f-9dcf-0a2a76d0c3d3",
+      "id": 1001,
       "email": "owner@example.com",
       "displayName": "Owner User",
       "status": "active",
-      "roles": ["OWNER_EXECUTIVE"],
+      "roles": ["OWNER"],
       "lastLoginAt": "2026-09-03T09:00:00Z"
     }
   ],
@@ -1096,7 +1096,7 @@ Response:
 
 ```json
 {
-  "id": "8b413e56-02ce-4781-87c7-dc54e4a78c9e",
+  "id": 1002,
   "email": "manager@example.com",
   "displayName": "Store Manager",
   "status": "password_reset_required",
@@ -1121,7 +1121,7 @@ Response:
 
 ```json
 {
-  "id": "8b413e56-02ce-4781-87c7-dc54e4a78c9e",
+  "id": 1002,
   "email": "manager@example.com",
   "displayName": "Store Manager Updated",
   "status": "active",
@@ -1139,60 +1139,60 @@ Response:
 {
   "items": [
     {
-      "roleCode": "OWNER_EXECUTIVE",
+      "roleCode": "OWNER",
       "displayName": "Owner / Executive",
       "description": "Tenant-level business owner or executive with cross-store visibility.",
       "roleLevel": "tenant",
-      "allowedScopeTypes": ["tenant", "all_pharmacies", "selected_pharmacies"]
+      "pharmacyAccessModel": "explicit_assignments"
     },
     {
       "roleCode": "STORE_MANAGER",
       "displayName": "Store Manager",
       "description": "Pharmacy-level manager responsible for assigned store operations.",
       "roleLevel": "pharmacy",
-      "allowedScopeTypes": ["all_pharmacies", "selected_pharmacies"]
+      "pharmacyAccessModel": "explicit_assignments"
     },
     {
       "roleCode": "PHARMACIST",
       "displayName": "Pharmacist",
       "description": "Pharmacy-level clinical and fulfillment workflow user.",
       "roleLevel": "pharmacy",
-      "allowedScopeTypes": ["all_pharmacies", "selected_pharmacies"]
+      "pharmacyAccessModel": "explicit_assignments"
     },
     {
       "roleCode": "TECHNICIAN",
       "displayName": "Technician",
       "description": "Pharmacy-level operations user with limited workflow actions.",
       "roleLevel": "pharmacy",
-      "allowedScopeTypes": ["all_pharmacies", "selected_pharmacies"]
+      "pharmacyAccessModel": "explicit_assignments"
     },
     {
-      "roleCode": "BOOKKEEPER_FINANCE",
+      "roleCode": "BOOKKEEPER",
       "displayName": "Bookkeeper / Finance",
       "description": "Finance user for payment, revenue, reconciliation, and close visibility.",
       "roleLevel": "tenant",
-      "allowedScopeTypes": ["tenant", "all_pharmacies", "selected_pharmacies"]
+      "pharmacyAccessModel": "explicit_assignments"
     },
     {
       "roleCode": "COMPLIANCE_ADMIN",
       "displayName": "Compliance Admin",
       "description": "Compliance user for documents, licenses, compliance status, and audit visibility.",
       "roleLevel": "tenant",
-      "allowedScopeTypes": ["tenant", "all_pharmacies", "selected_pharmacies"]
+      "pharmacyAccessModel": "explicit_assignments"
     },
     {
       "roleCode": "BUSINESS_DEVELOPMENT",
       "displayName": "Business Development",
       "description": "Doctor office and relationship management user.",
       "roleLevel": "tenant",
-      "allowedScopeTypes": ["tenant", "all_pharmacies", "selected_pharmacies"]
+      "pharmacyAccessModel": "explicit_assignments"
     },
     {
       "roleCode": "TENANT_ADMIN",
       "displayName": "Tenant Admin",
       "description": "Customer-side administrator for tenant users, role assignments, and tenant settings.",
       "roleLevel": "tenant",
-      "allowedScopeTypes": ["tenant"]
+      "pharmacyAccessModel": "explicit_assignments"
     }
   ]
 }
@@ -1202,14 +1202,15 @@ UI behavior:
 
 - Use this response to populate role assignment dropdowns.
 - Do not display `INTERNAL_PLATFORM_ADMIN` in tenant admin screens.
-- Use `allowedScopeTypes` to decide whether to show pharmacy selection.
+- Assign pharmacy visibility separately from roles using the user's explicit pharmacy assignments.
+- Use `pharmacyAccessModel` to show that pharmacy assignments are managed separately from roles.
 
 ### `GET /api/v1/tenants/{tenantKey}/admin/role-assignments`
 
 Example:
 
 ```text
-GET /api/v1/tenants/analyticalrx-dev/admin/role-assignments?userId=8b413e56-02ce-4781-87c7-dc54e4a78c9e
+GET /api/v1/tenants/analyticalrx-dev/admin/role-assignments?userId=1002
 ```
 
 Response:
@@ -1218,15 +1219,11 @@ Response:
 {
   "items": [
     {
-      "id": "a6fb9883-b3bb-4d73-b16a-48633104d721",
-      "userId": "8b413e56-02ce-4781-87c7-dc54e4a78c9e",
+      "userId": 1002,
       "tenantKey": "analyticalrx-dev",
       "roleCode": "STORE_MANAGER",
-      "scopeType": "selected_pharmacies",
-      "pharmacyIds": ["3d4b55ae-7120-42b7-aef8-8cc3fb839d3f"],
       "status": "active",
-      "effectiveFrom": "2026-09-03T10:30:00Z",
-      "effectiveUntil": null
+      "assignedAt": "2026-09-03T10:30:00Z"
     }
   ]
 }
@@ -1238,10 +1235,8 @@ Request:
 
 ```json
 {
-  "userId": "8b413e56-02ce-4781-87c7-dc54e4a78c9e",
+  "userId": 1002,
   "roleCode": "STORE_MANAGER",
-  "scopeType": "selected_pharmacies",
-  "pharmacyIds": ["3d4b55ae-7120-42b7-aef8-8cc3fb839d3f"],
   "reason": "Assign manager to Main Street Pharmacy."
 }
 ```
@@ -1250,26 +1245,23 @@ Response:
 
 ```json
 {
-  "id": "a6fb9883-b3bb-4d73-b16a-48633104d721",
-  "userId": "8b413e56-02ce-4781-87c7-dc54e4a78c9e",
+  "userId": 1002,
   "tenantKey": "analyticalrx-dev",
   "roleCode": "STORE_MANAGER",
-  "scopeType": "selected_pharmacies",
-  "pharmacyIds": ["3d4b55ae-7120-42b7-aef8-8cc3fb839d3f"],
   "status": "active",
-  "createdAt": "2026-09-03T10:30:00Z"
+  "assignedAt": "2026-09-03T10:30:00Z"
 }
 ```
 
-### `DELETE /api/v1/tenants/{tenantKey}/admin/role-assignments/{assignmentId}`
+### `DELETE /api/v1/tenants/{tenantKey}/admin/users/{userId}/roles/{roleCode}`
 
-Purpose: Deactivate a role assignment.
+Purpose: Deactivate a user's role assignment.
 
 Request:
 
 ```json
 {
-  "reason": "User no longer manages this pharmacy."
+  "reason": "User no longer needs the store-manager role."
 }
 ```
 
@@ -1277,8 +1269,49 @@ Response:
 
 ```json
 {
-  "id": "a6fb9883-b3bb-4d73-b16a-48633104d721",
+  "userId": 1002,
+  "roleCode": "STORE_MANAGER",
   "status": "inactive",
+  "updatedAt": "2026-09-03T11:00:00Z"
+}
+```
+
+### `GET /api/v1/tenants/{tenantKey}/admin/users/{userId}/pharmacy-access`
+
+Purpose: Return a user's explicit pharmacy assignments. This maps to
+`control_plane.user_pharmacy_access`; roles do not carry a separate pharmacy scope.
+
+Response:
+
+```json
+{
+  "userId": 1002,
+  "tenantKey": "analyticalrx-dev",
+  "pharmacyIds": [2001, 2002]
+}
+```
+
+### `PUT /api/v1/tenants/{tenantKey}/admin/users/{userId}/pharmacy-access`
+
+Purpose: Replace a user's active pharmacy assignments after validating every pharmacy
+belongs to the tenant.
+
+Request:
+
+```json
+{
+  "pharmacyIds": [2001, 2002],
+  "reason": "Manager is responsible for both locations."
+}
+```
+
+Response:
+
+```json
+{
+  "userId": 1002,
+  "tenantKey": "analyticalrx-dev",
+  "pharmacyIds": [2001, 2002],
   "updatedAt": "2026-09-03T11:00:00Z"
 }
 ```
@@ -1358,7 +1391,7 @@ Response:
   "latestEventAt": "2026-09-03T09:55:00Z",
   "recentFailures": [
     {
-      "ingestionEventId": "d731b68c-d4ee-40ad-917e-134599d67ff8",
+      "ingestionEventId": 6001,
       "sourceSystem": "primerx",
       "sourceEventType": "claim_billed",
       "receivedAt": "2026-09-03T09:20:00Z",
@@ -1386,18 +1419,18 @@ Response:
 {
   "items": [
     {
-      "id": "1977aeb1-852d-47e0-b3aa-448bcdbf7c6b",
+      "id": 7001,
       "createdAt": "2026-09-03T10:30:00Z",
       "actorUser": {
-        "id": "f34635ae-9fa6-4d5f-9dcf-0a2a76d0c3d3",
+        "id": 1001,
         "displayName": "Owner User"
       },
       "targetUser": {
-        "id": "8b413e56-02ce-4781-87c7-dc54e4a78c9e",
+        "id": 1002,
         "displayName": "Store Manager"
       },
       "action": "role_assignment_created",
-      "resourceType": "user_role_assignment",
+      "resourceType": "user_role",
       "reason": "Assign manager to Main Street Pharmacy."
     }
   ],
@@ -1477,7 +1510,7 @@ Response:
 {
   "items": [
     {
-      "id": "8b413e56-02ce-4781-87c7-dc54e4a78c9e",
+      "id": 1002,
       "email": "manager@example.com",
       "displayName": "Store Manager",
       "status": "active",
@@ -1504,12 +1537,10 @@ Response:
 {
   "items": [
     {
-      "id": "a6fb9883-b3bb-4d73-b16a-48633104d721",
       "tenantKey": "analyticalrx-dev",
-      "userId": "8b413e56-02ce-4781-87c7-dc54e4a78c9e",
+      "userId": 1002,
       "userDisplayName": "Store Manager",
       "roleCode": "STORE_MANAGER",
-      "scopeType": "selected_pharmacies",
       "status": "active"
     }
   ]
@@ -1553,11 +1584,11 @@ These APIs are not required for the first Phase 1 UI integration. They are liste
 
 | Area | Proposed API area | Primary roles |
 | --- | --- | --- |
-| Workflow settings | `/api/v1/tenants/{tenantKey}/workflows/...` | `TENANT_ADMIN`, `COMPLIANCE_ADMIN`, `OWNER_EXECUTIVE` |
-| Workflow run status | `/api/v1/tenants/{tenantKey}/workflow-runs/...` | `TENANT_ADMIN`, `COMPLIANCE_ADMIN`, `STORE_MANAGER`, `OWNER_EXECUTIVE` |
+| Workflow settings | `/api/v1/tenants/{tenantKey}/workflows/...` | `TENANT_ADMIN`, `COMPLIANCE_ADMIN`, `OWNER` |
+| Workflow run status | `/api/v1/tenants/{tenantKey}/workflow-runs/...` | `TENANT_ADMIN`, `COMPLIANCE_ADMIN`, `STORE_MANAGER`, `OWNER` |
 | Internal tasks | `/api/v1/tenants/{tenantKey}/tasks/...` | Role assigned to task/module |
-| Refill queue | `/api/v1/tenants/{tenantKey}/refill-queue/...` | `PHARMACIST`, `TECHNICIAN`, `STORE_MANAGER`, `OWNER_EXECUTIVE` |
-| Doctor CRM | `/api/v1/tenants/{tenantKey}/doctor-crm/...` | `BUSINESS_DEVELOPMENT`, `STORE_MANAGER`, `OWNER_EXECUTIVE` |
+| Refill queue | `/api/v1/tenants/{tenantKey}/refill-queue/...` | `PHARMACIST`, `TECHNICIAN`, `STORE_MANAGER`, `OWNER` |
+| Doctor CRM | `/api/v1/tenants/{tenantKey}/doctor-crm/...` | `BUSINESS_DEVELOPMENT`, `STORE_MANAGER`, `OWNER` |
 | Alerts | `/api/v1/tenants/{tenantKey}/alerts/...` | Authenticated assigned users |
 | Email settings/send | `/api/v1/tenants/{tenantKey}/email/...` | `TENANT_ADMIN`, `BUSINESS_DEVELOPMENT` where enabled |
 

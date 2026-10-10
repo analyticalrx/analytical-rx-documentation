@@ -227,13 +227,13 @@
         <tbody>
           <tr>
             <td>Exact original webhook/API payload</td>
-            <td>Restricted encrypted object storage, if raw archive is enabled</td>
-            <td>Do not copy full raw JSON into dashboard-facing tables.</td>
+            <td>Restricted <code>raw_payload_archive</code> storage for the development schema</td>
+            <td>Do not copy full raw JSON into dashboard-facing tables or normal API responses.</td>
           </tr>
           <tr>
             <td>Raw payload archive metadata</td>
             <td><code>raw_payload_archive</code></td>
-            <td>Store pointer, hash, size, source, and retention metadata only.</td>
+            <td>Stores restricted raw JSON, hash, size, source, and retention metadata. Access must be limited to authorized operational services.</td>
           </tr>
           <tr>
             <td>Real <code>RxNo</code> and <code>RefillNo</code></td>
@@ -320,7 +320,7 @@
       <h2>Processing Flow</h2>
       <ol>
         <li>Webhook receiver accepts the event and creates an <code>ingestion_event</code> record.</li>
-        <li>Receiver optionally stores raw payload in restricted encrypted storage and stores only archive metadata in the database.</li>
+        <li>Receiver archives the raw payload only in restricted <code>raw_payload_archive</code> storage for short-term replay/debugging.</li>
         <li>Processor validates the queued event, applies idempotency checks, and updates ingestion status.</li>
         <li>Processor stores real <code>RxNo</code> and <code>RefillNo</code> only in <code>source_rx_reference</code> when present.</li>
         <li>Processor upserts safe drug and payer lookup rows.</li>

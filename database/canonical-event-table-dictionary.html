@@ -180,6 +180,9 @@
       <div class="callout">
         <p><strong>SaaS isolation decision:</strong> use one PostgreSQL schema per tenant and put all tenant-owned tables inside that schema. The checked-in SQL uses <code>tenant_template</code> as the local review schema. Table names below are intentionally unqualified because the active tenant schema is selected by authenticated tenant context.</p>
       </div>
+      <div class="callout">
+        <p><strong>Identifier convention:</strong> internal relational identifiers are <code>bigint</code> identity values. Source-system identifiers such as queue message IDs, pharmacy IDs, prescription numbers, and refill numbers remain text because they are external values, not database keys.</p>
+      </div>
     </section>
 
     <section>
@@ -202,7 +205,7 @@
 
     <section>
       <h2>ER Diagram</h2>
-      <p>The PostgreSQL-derived ERD is the exact database view. It includes all tables, all columns, key markers, and foreign key connections from the live local schema.</p>
+      <p>The PostgreSQL-derived ERD is the exact database view. It includes all tables, all columns, key markers, and foreign key connections from the deployed development schema.</p>
       <div class="diagram full">
         <img src="../diagrams/canonical-event-postgres-erd.svg" alt="Full PostgreSQL canonical event ER diagram with all columns and relationships">
       </div>
@@ -220,7 +223,7 @@
       <h2>Data Flow</h2>
       <ol>
         <li>Webhook receiver receives the PrimeRx event and creates an <code>ingestion_event</code> record.</li>
-        <li>Receiver optionally stores the raw payload in restricted storage and saves only the storage pointer in the database.</li>
+        <li>Receiver archives the raw payload only in the restricted <code>raw_payload_archive</code> table for short-term replay/debugging; normal product APIs do not read it.</li>
         <li>Processor reads the queued event, validates it, de-duplicates it, and stores restricted source identifiers if present.</li>
         <li>Processor upserts safe drug and insurance payer lookup rows when the event contains usable NDC, product, BIN, PCN, or payer name values.</li>
         <li>Processor creates one PHI-minimized <code>pharmacy_event</code> row and zero or more event payment rows.</li>
@@ -296,7 +299,7 @@
           </tr>
           <tr>
             <td><code>raw_payload_archive</code></td>
-            <td>Store pointer and hash only. Raw JSON belongs in restricted encrypted object storage if retained.</td>
+            <td>Restricted operational storage only. Raw JSON is never a dashboard/API data source and must not be logged.</td>
             <td>Keeps the database from becoming a raw PHI payload store.</td>
           </tr>
           <tr>
@@ -415,16 +418,18 @@
 
     <section>
       <h2><code>raw_payload_archive</code></h2>
-      <p>Stores metadata about a raw webhook payload if raw archive is enabled. The table should not store the raw JSON payload itself. MVP retention defaults to 30 days so the team has a short replay/debug window; legal/security should revisit this before production.</p>
+      <p>Stores the restricted raw webhook payload and its metadata for short-term replay/debugging. MVP retention defaults to 30 days; legal/security must approve the retention and access model before production PHI is processed.</p>
       <table>
         <thead><tr><th>Field</th><th>Meaning</th><th>Access / restriction</th></tr></thead>
         <tbody>
-          <tr><td><code>id</code></td><td>Internal unique archive metadata ID.</td><td>Restricted operational identifier.</td></tr>
-          <tr><td><code>tenant_id</code></td><td>Tenant associated with the payload.</td><td>Required for tenant isolation.</td></tr>
+          <tr><td><code>id</code></td><td>Internal unique archive ID.</td><td>Restricted operational identifier. Internal IDs are bigint identity values.</td></tr>
+          <tr><td><code>message_id</code></td><td>External queue message identifier used for idempotent raw archive writes.</td><td>Stored as text because source-system identifiers are not internal database IDs.</td></tr>
+          <tr><td><code>tenant_id</code></td><td>Tenant associated with the payload after tenant resolution.</td><td>Nullable at initial receipt when the source payload has not yet been resolved; it must not be used to bypass tenant isolation.</td></tr>
           <tr><td><code>pharmacy_id</code></td><td>Pharmacy associated with the payload, if known at receipt time.</td><td>Nullable because some events may need parsing before store is known.</td></tr>
+          <tr><td><code>source_pharmacy_id</code></td><td>Vendor pharmacy identifier from the source payload, for example <code>PHARM-002</code>.</td><td>Text identifier used to resolve the internal <code>pharmacy_id</code>.</td></tr>
           <tr><td><code>source_system</code></td><td>Source system name, for example <code>primerx</code>.</td><td>Safe lineage field.</td></tr>
           <tr><td><code>source_event_type</code></td><td>Vendor event type from the payload, such as <code>RxBilled</code>.</td><td>Safe operational metadata.</td></tr>
-          <tr><td><code>raw_payload_reference</code></td><td>Pointer to restricted encrypted object storage location.</td><td>Restricted. Should not be exposed to dashboards or data engineers by default.</td></tr>
+          <tr><td><code>raw_payload</code></td><td>Original source payload retained as JSON for short-term replay/debugging.</td><td>Highly restricted. Never expose through dashboards, normal APIs, logs, or analytics access paths.</td></tr>
           <tr><td><code>raw_payload_sha256</code></td><td>Hash of the raw payload used for integrity checks and duplicate fallback.</td><td>Operational metadata. Does not replace idempotency key.</td></tr>
           <tr><td><code>payload_size_bytes</code></td><td>Size of the raw payload.</td><td>Operational metadata for troubleshooting.</td></tr>
           <tr><td><code>received_at</code></td><td>When the payload was received.</td><td>Operational metadata.</td></tr>

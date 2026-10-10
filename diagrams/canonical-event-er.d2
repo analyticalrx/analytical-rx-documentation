@@ -9,7 +9,7 @@ tenant_schema_note: "Tenant schema\nexample: tenant_acme_pharmacy_group\nall tab
 tenant_table: {
   shape: sql_table
   label: "tenant"
-  id: uuid {constraint: primary_key}
+  id: bigint {constraint: primary_key}
   tenant_key: text
   display_name: text
   status: text
@@ -18,8 +18,8 @@ tenant_table: {
 pharmacy_table: {
   shape: sql_table
   label: "pharmacy"
-  id: uuid {constraint: primary_key}
-  tenant_id: uuid {constraint: foreign_key}
+  id: bigint {constraint: primary_key}
+  tenant_id: bigint {constraint: foreign_key}
   pharmacy_key: text
   source_system: text
   source_pharmacy_id: text
@@ -28,8 +28,8 @@ pharmacy_table: {
 drug_table: {
   shape: sql_table
   label: "drug"
-  id: uuid {constraint: primary_key}
-  tenant_id: uuid {constraint: foreign_key}
+  id: bigint {constraint: primary_key}
+  tenant_id: bigint {constraint: foreign_key}
   source_system: text
   source_drug_id: text
   ndc: text
@@ -39,8 +39,8 @@ drug_table: {
 payer_table: {
   shape: sql_table
   label: "payer"
-  id: uuid {constraint: primary_key}
-  tenant_id: uuid {constraint: foreign_key}
+  id: bigint {constraint: primary_key}
+  tenant_id: bigint {constraint: foreign_key}
   source_system: text
   source_payer_id: text
   payer_type: text
@@ -51,19 +51,21 @@ payer_table: {
 raw_payload_archive_table: {
   shape: sql_table
   label: "raw_payload_archive"
-  id: uuid {constraint: primary_key}
-  tenant_id: uuid {constraint: foreign_key}
-  pharmacy_id: uuid {constraint: foreign_key}
-  raw_payload_reference: text
+  id: bigint {constraint: primary_key}
+  message_id: text
+  tenant_id: bigint {constraint: foreign_key}
+  pharmacy_id: bigint {constraint: foreign_key}
+  source_pharmacy_id: text
+  raw_payload: jsonb {constraint: restricted}
   raw_payload_sha256: text
 }
 
 source_rx_reference_table: {
   shape: sql_table
   label: "source_rx_reference"
-  id: uuid {constraint: primary_key}
-  tenant_id: uuid {constraint: foreign_key}
-  pharmacy_id: uuid {constraint: foreign_key}
+  id: bigint {constraint: primary_key}
+  tenant_id: bigint {constraint: foreign_key}
+  pharmacy_id: bigint {constraint: foreign_key}
   rx_no: text {constraint: restricted}
   refill_no: text {constraint: restricted}
   prescription_reference_token: text
@@ -73,11 +75,11 @@ source_rx_reference_table: {
 ingestion_event_table: {
   shape: sql_table
   label: "ingestion_event"
-  id: uuid {constraint: primary_key}
-  tenant_id: uuid {constraint: foreign_key}
-  pharmacy_id: uuid {constraint: foreign_key}
-  source_rx_reference_id: uuid {constraint: foreign_key}
-  raw_payload_archive_id: uuid {constraint: foreign_key}
+  id: bigint {constraint: primary_key}
+  tenant_id: bigint {constraint: foreign_key}
+  pharmacy_id: bigint {constraint: foreign_key}
+  source_rx_reference_id: bigint {constraint: foreign_key}
+  raw_payload_archive_id: bigint {constraint: foreign_key}
   idempotency_key: text
   status: text
 }
@@ -85,11 +87,11 @@ ingestion_event_table: {
 pharmacy_event_table: {
   shape: sql_table
   label: "pharmacy_event"
-  id: uuid {constraint: primary_key}
-  tenant_id: uuid {constraint: foreign_key}
-  pharmacy_id: uuid {constraint: foreign_key}
-  ingestion_event_id: uuid {constraint: foreign_key}
-  drug_id: uuid {constraint: foreign_key}
+  id: bigint {constraint: primary_key}
+  tenant_id: bigint {constraint: foreign_key}
+  pharmacy_id: bigint {constraint: foreign_key}
+  ingestion_event_id: bigint {constraint: foreign_key}
+  drug_id: bigint {constraint: foreign_key}
   canonical_event_type: text
   prescription_reference_token: text
   fill_reference_token: text
@@ -101,11 +103,11 @@ pharmacy_event_table: {
 event_payment_table: {
   shape: sql_table
   label: "event_payment"
-  id: uuid {constraint: primary_key}
-  tenant_id: uuid {constraint: foreign_key}
-  pharmacy_id: uuid {constraint: foreign_key}
-  pharmacy_event_id: uuid {constraint: foreign_key}
-  payer_id: uuid {constraint: foreign_key}
+  id: bigint {constraint: primary_key}
+  tenant_id: bigint {constraint: foreign_key}
+  pharmacy_id: bigint {constraint: foreign_key}
+  pharmacy_event_id: bigint {constraint: foreign_key}
+  payer_id: bigint {constraint: foreign_key}
   payment_type: text
   payer_sequence: text
   paid_amount: numeric

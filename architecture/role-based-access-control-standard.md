@@ -33,7 +33,7 @@ All implementation should follow these rules.
 | Pharmacy scope | Pharmacy filters must be intersected with the user's allowed pharmacy scope. |
 | Roles are additive | A user can have multiple roles. Role permissions add together, but restricted data rules still apply. |
 | Admin is not owner | `TENANT_ADMIN` manages users/settings. It does not automatically grant all owner/finance/business views unless those roles are also assigned. |
-| Owner is not platform admin | `OWNER_EXECUTIVE` has tenant business visibility. It must not manage other tenants or platform-wide settings. |
+| Owner is not platform admin | `OWNER` has tenant business visibility. It must not manage other tenants or platform-wide settings. |
 | No schema names in client trust | JWTs and request paths may include tenant keys, but database schema names must be resolved server-side. |
 | No restricted fields in dashboards | Dashboard APIs must use safe tables/views and return only approved fields. |
 | Re-check sensitive permissions | User/role management, workflow settings, email settings, and sensitive admin actions must re-check current control-plane state, not only JWT claims. |
@@ -45,7 +45,7 @@ All implementation should follow these rules.
 | --- | --- |
 | Tenant | A customer organization or pharmacy group. A tenant may own one or more pharmacy locations. |
 | Pharmacy | A store/location under a tenant. Most operational users are scoped to one or more pharmacies. |
-| Role | A named business or platform responsibility such as `STORE_MANAGER` or `BOOKKEEPER_FINANCE`. |
+| Role | A named business or platform responsibility such as `STORE_MANAGER` or `BOOKKEEPER`. |
 | Permission | A concrete action such as `dashboard.owner.read` or `tenant.users.manage`. Roles map to permissions. |
 | Scope | The tenant, pharmacy, module, and data boundary where a permission applies. |
 | Control plane | Shared non-PHI metadata for users, tenants, roles, assignments, and audit records. |
@@ -137,7 +137,7 @@ The tenant schema name must come from `control_plane.tenant_registry`, not direc
 
 These are roles assigned to customer users inside a tenant.
 
-### `OWNER_EXECUTIVE`
+### `OWNER`
 
 Meaning: Tenant-level business owner or executive who needs cross-store visibility and business performance context.
 
@@ -175,9 +175,9 @@ Typical users:
 
 Recommended assignment:
 
-- Assign `OWNER_EXECUTIVE` tenant-wide.
+- Assign `OWNER` tenant-wide.
 - Add `TENANT_ADMIN` only if this person should manage tenant users/settings.
-- Add `BOOKKEEPER_FINANCE` only if this person needs detailed finance views beyond executive summaries.
+- Add `BOOKKEEPER` only if this person needs detailed finance views beyond executive summaries.
 
 ### `STORE_MANAGER`
 
@@ -202,7 +202,7 @@ Not allowed by this role alone:
 
 - View unassigned pharmacy data.
 - Manage tenant users or role assignments.
-- Read finance/bookkeeper-specific details unless also assigned `BOOKKEEPER_FINANCE`.
+- Read finance/bookkeeper-specific details unless also assigned `BOOKKEEPER`.
 - Read restricted source references or raw payload archive.
 - Override pharmacist-only clinical decisions unless explicitly granted by workflow permission and pharmacy policy.
 - Manage outbound email settings.
@@ -292,7 +292,7 @@ Recommended assignment:
 - Assign `TECHNICIAN` to assigned pharmacies only.
 - Keep write actions limited to operational status updates.
 
-### `BOOKKEEPER_FINANCE`
+### `BOOKKEEPER`
 
 Meaning: Finance/bookkeeping user responsible for revenue, payment, close, AR, and financial reconciliation views.
 
@@ -329,7 +329,7 @@ Recommended assignment:
 
 - Assign tenant-wide when the finance user supports the whole pharmacy group.
 - Assign pharmacy-scoped when the customer wants location-level finance separation.
-- Add `OWNER_EXECUTIVE` only for finance leaders who should also see executive dashboards.
+- Add `OWNER` only for finance leaders who should also see executive dashboards.
 
 ### `COMPLIANCE_ADMIN`
 
@@ -354,7 +354,7 @@ Not allowed by this role alone:
 - Read restricted raw payload archive.
 - Read real `RxNo` or `RefillNo`.
 - Read direct patient identifiers.
-- Access detailed finance views unless also assigned `BOOKKEEPER_FINANCE`.
+- Access detailed finance views unless also assigned `BOOKKEEPER`.
 - Send outbound doctor emails unless email permissions are explicitly enabled.
 
 Typical users:
@@ -436,8 +436,8 @@ Not allowed by this role alone:
 - Read restricted raw payload archive.
 - Read real `RxNo` or `RefillNo`.
 - Read direct patient identifiers.
-- Read finance dashboards unless also assigned `BOOKKEEPER_FINANCE` or `OWNER_EXECUTIVE`.
-- Read business development dashboards unless also assigned `BUSINESS_DEVELOPMENT` or `OWNER_EXECUTIVE`.
+- Read finance dashboards unless also assigned `BOOKKEEPER` or `OWNER`.
+- Read business development dashboards unless also assigned `BUSINESS_DEVELOPMENT` or `OWNER`.
 
 Typical users:
 
@@ -449,7 +449,7 @@ Recommended assignment:
 
 - Assign sparingly.
 - Prefer one or two tenant admins per customer.
-- Pair with `OWNER_EXECUTIVE`, `COMPLIANCE_ADMIN`, or `BOOKKEEPER_FINANCE` only when the user needs those product views.
+- Pair with `OWNER`, `COMPLIANCE_ADMIN`, or `BOOKKEEPER` only when the user needs those product views.
 
 ## 8. Internal Platform Roles
 
@@ -558,13 +558,13 @@ Use permission codes internally even if the frontend only knows roles.
 
 | Permission | API | Allowed roles | Scope |
 | --- | --- | --- | --- |
-| `dashboard.owner.read` | `GET /api/v1/tenants/{tenantKey}/dashboards/owner` | `OWNER_EXECUTIVE` | Tenant/all assigned pharmacies. |
-| `dashboard.store_manager.read` | `GET /api/v1/tenants/{tenantKey}/dashboards/store-manager` | `STORE_MANAGER`, `OWNER_EXECUTIVE` | Assigned pharmacies. |
-| `dashboard.pharmacist.read` | `GET /api/v1/tenants/{tenantKey}/dashboards/pharmacist` | `PHARMACIST`, `STORE_MANAGER`, `OWNER_EXECUTIVE` | Assigned pharmacies. |
+| `dashboard.owner.read` | `GET /api/v1/tenants/{tenantKey}/dashboards/owner` | `OWNER` | Assigned pharmacies. |
+| `dashboard.store_manager.read` | `GET /api/v1/tenants/{tenantKey}/dashboards/store-manager` | `STORE_MANAGER` | Assigned pharmacies. |
+| `dashboard.pharmacist.read` | `GET /api/v1/tenants/{tenantKey}/dashboards/pharmacist` | `PHARMACIST`, `STORE_MANAGER` | Assigned pharmacies. |
 | `dashboard.technician.read` | `GET /api/v1/tenants/{tenantKey}/dashboards/technician` | `TECHNICIAN`, `PHARMACIST`, `STORE_MANAGER` | Assigned pharmacies. |
-| `dashboard.bookkeeper.read` | `GET /api/v1/tenants/{tenantKey}/dashboards/bookkeeper` | `BOOKKEEPER_FINANCE`, `OWNER_EXECUTIVE` | Finance scope. |
-| `dashboard.compliance.read` | `GET /api/v1/tenants/{tenantKey}/dashboards/compliance-admin` | `COMPLIANCE_ADMIN`, `TENANT_ADMIN`, `OWNER_EXECUTIVE` | Tenant or assigned pharmacies. |
-| `dashboard.business_development.read` | `GET /api/v1/tenants/{tenantKey}/dashboards/business-development` | `BUSINESS_DEVELOPMENT`, `STORE_MANAGER`, `OWNER_EXECUTIVE` | Assigned pharmacies/territory. |
+| `dashboard.bookkeeper.read` | `GET /api/v1/tenants/{tenantKey}/dashboards/bookkeeper` | `BOOKKEEPER` | Assigned pharmacies. |
+| `dashboard.compliance.read` | `GET /api/v1/tenants/{tenantKey}/dashboards/compliance-admin` | `COMPLIANCE_ADMIN`, `TENANT_ADMIN` | Assigned pharmacies. |
+| `dashboard.business_development.read` | `GET /api/v1/tenants/{tenantKey}/dashboards/business-development` | `BUSINESS_DEVELOPMENT`, `STORE_MANAGER` | Assigned pharmacies/territory. |
 
 Rules:
 
@@ -583,7 +583,7 @@ Recommended Phase 1 tenant admin APIs should be tenant-scoped.
 | `tenant.users.manage` | Create/update/deactivate tenant users | `TENANT_ADMIN` | Own tenant only. |
 | `tenant.roles.read` | List role assignments | `TENANT_ADMIN` | Own tenant only. |
 | `tenant.roles.manage` | Add/remove role assignments | `TENANT_ADMIN` | Own tenant only, allowed customer roles only. |
-| `tenant.settings.read` | Read tenant settings | `TENANT_ADMIN`, `COMPLIANCE_ADMIN`, `OWNER_EXECUTIVE` | Own tenant only. |
+| `tenant.settings.read` | Read tenant settings | `TENANT_ADMIN`, `COMPLIANCE_ADMIN`, `OWNER` | Own tenant only. |
 | `tenant.settings.manage` | Update tenant settings | `TENANT_ADMIN` | Own tenant only. |
 | `pipeline.status.read` | View ingestion/import status summary | `TENANT_ADMIN`, `COMPLIANCE_ADMIN`, `INTERNAL_PLATFORM_ADMIN` | Tenant-scoped unless internal. |
 | `permission_audit.read` | View permission change history | `TENANT_ADMIN`, `INTERNAL_PLATFORM_ADMIN` | Tenant-scoped unless internal. |
@@ -621,16 +621,16 @@ These permissions should guide Phase 2 implementation.
 
 | Permission | Module/API area | Allowed roles | Scope |
 | --- | --- | --- | --- |
-| `workflow.settings.read` | Workflow settings | `TENANT_ADMIN`, `COMPLIANCE_ADMIN`, `OWNER_EXECUTIVE` | Tenant or assigned pharmacies. |
+| `workflow.settings.read` | Workflow settings | `TENANT_ADMIN`, `COMPLIANCE_ADMIN`, `OWNER` | Tenant or assigned pharmacies. |
 | `workflow.settings.manage` | Enable/disable predefined workflows, thresholds, schedules | `TENANT_ADMIN` | Own tenant only. |
-| `workflow.run.read` | Workflow run status and failures | `TENANT_ADMIN`, `COMPLIANCE_ADMIN`, `STORE_MANAGER`, `OWNER_EXECUTIVE` | Tenant or assigned pharmacies. |
+| `workflow.run.read` | Workflow run status and failures | `TENANT_ADMIN`, `COMPLIANCE_ADMIN`, `STORE_MANAGER`, `OWNER` | Tenant or assigned pharmacies. |
 | `task.read` | Task/queue list and details | Role assigned to task/module | Tenant and pharmacy scoped. |
-| `task.create` | Create internal scheduled task | `STORE_MANAGER`, `BUSINESS_DEVELOPMENT`, `TENANT_ADMIN`, `OWNER_EXECUTIVE` | Assigned tenant/pharmacy/module. |
+| `task.create` | Create internal scheduled task | `STORE_MANAGER`, `BUSINESS_DEVELOPMENT`, `TENANT_ADMIN`, `OWNER` | Assigned tenant/pharmacy/module. |
 | `task.update_status` | Update task or queue item status | Assigned owner role, `STORE_MANAGER`, `PHARMACIST`, `TECHNICIAN` for allowed statuses | Assigned task and pharmacy. |
-| `refill_queue.read` | Daily refill queue and upcoming refills | `PHARMACIST`, `TECHNICIAN`, `STORE_MANAGER`, `OWNER_EXECUTIVE` | Assigned pharmacies. |
+| `refill_queue.read` | Daily refill queue and upcoming refills | `PHARMACIST`, `TECHNICIAN`, `STORE_MANAGER`, `OWNER` | Assigned pharmacies. |
 | `refill_queue.verify` | Verify refill queue item | `PHARMACIST`, approved `TECHNICIAN` only if policy allows | Assigned pharmacies. |
-| `doctor_crm.read` | Doctor office list, profile, pitch/visit history | `BUSINESS_DEVELOPMENT`, `STORE_MANAGER`, `OWNER_EXECUTIVE` | Assigned pharmacies/territory. |
-| `doctor_crm.manage` | Create/update doctor office records and outreach tasks | `BUSINESS_DEVELOPMENT`, `STORE_MANAGER`, `OWNER_EXECUTIVE` | Assigned pharmacies/territory. |
+| `doctor_crm.read` | Doctor office list, profile, pitch/visit history | `BUSINESS_DEVELOPMENT`, `STORE_MANAGER`, `OWNER` | Assigned pharmacies/territory. |
+| `doctor_crm.manage` | Create/update doctor office records and outreach tasks | `BUSINESS_DEVELOPMENT`, `STORE_MANAGER`, `OWNER` | Assigned pharmacies/territory. |
 | `email.settings.manage` | Enable email, sender rules, templates | `TENANT_ADMIN` | Own tenant only. |
 | `email.send_or_schedule` | Schedule/send optional outreach email when enabled | `BUSINESS_DEVELOPMENT`, `TENANT_ADMIN` | Own tenant/approved templates only. |
 
@@ -646,14 +646,14 @@ Use these defaults when setting up users.
 
 | User type | Recommended roles | Scope | Notes |
 | --- | --- | --- | --- |
-| Pharmacy group owner | `OWNER_EXECUTIVE` | Tenant-wide, all pharmacies | Add `TENANT_ADMIN` only if they manage users/settings. Add `BOOKKEEPER_FINANCE` only for detailed finance views. |
-| Executive operator | `OWNER_EXECUTIVE` | Tenant-wide or assigned pharmacies | Good for cross-store visibility without user-management power. |
+| Pharmacy group owner | `OWNER` | Tenant-wide, all pharmacies | Add `TENANT_ADMIN` only if they manage users/settings. Add `BOOKKEEPER` only for detailed finance views. |
+| Executive operator | `OWNER` | Tenant-wide or assigned pharmacies | Good for cross-store visibility without user-management power. |
 | Customer admin | `TENANT_ADMIN` | Tenant-wide | Add business roles separately if they also need dashboards. |
 | Store manager | `STORE_MANAGER` | Assigned pharmacies | Add `PHARMACIST` only if they perform pharmacist workflow actions. |
 | Pharmacist in charge | `PHARMACIST`, optional `STORE_MANAGER` | Assigned pharmacies | Use `STORE_MANAGER` only when responsible for store operations. |
 | Pharmacist | `PHARMACIST` | Assigned pharmacies | No finance/admin/business roles by default. |
 | Technician | `TECHNICIAN` | Assigned pharmacies | Keep writes limited to approved status updates. |
-| Bookkeeper | `BOOKKEEPER_FINANCE` | Tenant-wide or assigned pharmacies | Add `OWNER_EXECUTIVE` only for finance leaders needing executive dashboards. |
+| Bookkeeper | `BOOKKEEPER` | Tenant-wide or assigned pharmacies | Add `OWNER` only for finance leaders needing executive dashboards. |
 | Compliance officer | `COMPLIANCE_ADMIN` | Tenant-wide or assigned pharmacies | Add `TENANT_ADMIN` only if they manage user access. |
 | Business development user | `BUSINESS_DEVELOPMENT` | Assigned pharmacies/territory | Add `STORE_MANAGER` only if also managing store operations. |
 | AnalyticalRx platform admin | `INTERNAL_PLATFORM_ADMIN` | Platform-wide by policy | Internal only. Not for customer users. |
