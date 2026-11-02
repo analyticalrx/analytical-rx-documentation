@@ -2,9 +2,17 @@
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "DescribePhase1DevDatabase",
+      "Sid": "ReadPhase1LifecycleStatusAndUsage",
       "Effect": "Allow",
-      "Action": "rds:DescribeDBInstances",
+      "Action": [
+        "rds:DescribeDBInstances",
+        "rds:DescribeDBProxies",
+        "rds:DescribeDBProxyTargets",
+        "ec2:DescribeInstances",
+        "ssm:DescribeSessions",
+        "ssm:DescribeInstanceInformation",
+        "cloudwatch:GetMetricStatistics"
+      ],
       "Resource": "*"
     },
     {
@@ -15,6 +23,15 @@
         "rds:StopDBInstance"
       ],
       "Resource": "arn:aws:rds:us-east-1:209556026827:db:analytical-rx-phase1-dev-db"
+    },
+    {
+      "Sid": "StartAndStopOnlyPhase1TunnelInstance",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:StartInstances",
+        "ec2:StopInstances"
+      ],
+      "Resource": "arn:aws:ec2:us-east-1:209556026827:instance/i-0ee64eae7d8505bfc"
     }
   ]
 }

@@ -17,6 +17,7 @@ Use [index.html](index.html) as the visual catalog for the full set of design an
 | What should I work on next? | The live AnalyticalRx GitHub Project and the issue assigned to you. |
 | What is the current backend API contract? | `data-platform/docs/ui-api-contract.md` in the Data Platform repository. The broader [UI API Contracts design](architecture/ui-api-contracts.md) is a draft for planned APIs. |
 | How should a system or data boundary work? | The applicable architecture, ingestion, RBAC, or database design, noting its status and date. |
+| What changed when the development proxy was removed? | [Developer connection changes](operations/development-proxy-retirement.md). |
 | How do I connect to the Phase 1 dev database? | [Teammate RDS/pgAdmin Guide](operations/teammate-rds-pgadmin-access-guide.md) and [Database Operations Guide](operations/phase1-aws-postgres-dev-database.md). |
 
 The product PRD describes intended scope; it does not mean every feature is already implemented. Planning snapshots and task drafts are not a live project status report.

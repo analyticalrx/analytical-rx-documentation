@@ -1,0 +1,331 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Guarded weekday development lifecycle for fixed Phase 1 database and tunnel. Proxies are preserved.",
+  "Resources": {
+    "Logs": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/analyticalrx-phase1-dev-schedule",
+        "RetentionInDays": 14
+      }
+    },
+    "WorkerRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "FixedDevResources",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "rds:DescribeDBInstances",
+                    "rds:DescribeDBProxyTargets",
+                    "ec2:DescribeInstances",
+                    "ssm:DescribeSessions",
+                    "ssm:DescribeInstanceInformation",
+                    "cloudwatch:GetMetricStatistics"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "cloudwatch:PutMetricData"
+                  ],
+                  "Resource": "*",
+                  "Condition": {
+                    "StringEquals": {
+                      "cloudwatch:namespace": "AnalyticalRx/DevSchedule"
+                    }
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "rds:StartDBInstance",
+                    "rds:StopDBInstance"
+                  ],
+                  "Resource": "arn:aws:rds:us-east-1:209556026827:db:analytical-rx-phase1-dev-db"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "ec2:StartInstances",
+                    "ec2:StopInstances"
+                  ],
+                  "Resource": "arn:aws:ec2:us-east-1:209556026827:instance/i-0ee64eae7d8505bfc"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": "arn:aws:logs:us-east-1:209556026827:log-group:/aws/lambda/analyticalrx-phase1-dev-schedule:*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "Worker": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": "Logs",
+      "Properties": {
+        "FunctionName": "analyticalrx-phase1-dev-schedule",
+        "Handler": "index.handler",
+        "Runtime": "python3.12",
+        "Role": {
+          "Fn::GetAtt": [
+            "WorkerRole",
+            "Arn"
+          ]
+        },
+        "Timeout": 120,
+        "MemorySize": 128,
+        "Code": {
+          "ZipFile": "\"\"\"Scheduled lifecycle of the two fixed Phase 1 dev resources.\"\"\"\nimport datetime as dt\nimport json\nimport boto3\n\nREGION = 'us-east-1'\nDB = 'analytical-rx-phase1-dev-db'\nINSTANCE = 'i-0ee64eae7d8505bfc'\nPROXIES = ('processor-lambda-iam-auth-proxy',)\nrds = boto3.client('rds', region_name=REGION)\nec2 = boto3.client('ec2', region_name=REGION)\nssm = boto3.client('ssm', region_name=REGION)\ncw = boto3.client('cloudwatch', region_name=REGION)\n\n\ndef idle_check():\n    now = dt.datetime.now(dt.timezone.utc)\n    # Exclude the newest two minutes to allow CloudWatch publication to finish.\n    end = (now - dt.timedelta(minutes=2)).replace(second=0, microsecond=0)\n    start = end - dt.timedelta(minutes=15)\n    for proxy in PROXIES:\n        points = cw.get_metric_statistics(\n            Namespace='AWS/RDS', MetricName='ClientConnections',\n            Dimensions=[{'Name': 'ProxyName', 'Value': proxy}],\n            StartTime=start, EndTime=end, Period=60, Statistics=['Maximum'],\n        )['Datapoints']\n        # Require all completed minutes. A missing minute is not proof of idleness.\n        stamps = {p['Timestamp'] for p in points}\n        expected = {start + dt.timedelta(minutes=i) for i in range(15)}\n        if not expected.issubset(stamps):\n            return False, f'{proxy}: incomplete recent client-connection data'\n        if any(p['Maximum'] > 0 for p in points):\n            return False, f'{proxy}: recent client connections detected'\n    return True, 'The processor proxy has reported zero clients for the completed window'\n\n\ndef sessions_active():\n    return bool(ssm.describe_sessions(\n        State='Active', Filters=[{'key': 'Target', 'value': INSTANCE}], MaxResults=1\n    ).get('Sessions'))\n\n\ndef handler(event, context):\n    action = event.get('action')\n    if action not in ('start', 'stop', 'check'):\n        raise ValueError('action must be start, stop, or check')\n    dry_run = event.get('dry_run', False)\n    if not isinstance(dry_run, bool):\n        raise ValueError('dry_run must be boolean')\n    database = rds.describe_db_instances(DBInstanceIdentifier=DB)['DBInstances'][0]['DBInstanceStatus']\n    instance = ec2.describe_instances(InstanceIds=[INSTANCE])['Reservations'][0]['Instances'][0]['State']['Name']\n    result = {'action': action, 'dry_run': dry_run, 'database': database, 'tunnel': instance}\n    if action == 'start':\n        if database not in ('available', 'starting', 'stopped'):\n            raise RuntimeError(f'Database in unexpected state: {database}')\n        if instance not in ('running', 'pending', 'stopped'):\n            raise RuntimeError(f'Tunnel in unexpected state: {instance}')\n        if not dry_run:\n            if database == 'stopped':\n                rds.start_db_instance(DBInstanceIdentifier=DB)\n            if instance == 'stopped':\n                ec2.start_instances(InstanceIds=[INSTANCE])\n    elif action == 'check':\n        ready = database == 'available' and instance == 'running'\n        for proxy in PROXIES:\n            targets = rds.describe_db_proxy_targets(DBProxyName=proxy)['Targets']\n            ready = ready and bool(targets) and all(t.get('TargetHealth', {}).get('State') == 'AVAILABLE' for t in targets)\n        agents = ssm.describe_instance_information(Filters=[{'Key': 'InstanceIds', 'Values': [INSTANCE]}])['InstanceInformationList']\n        ready = ready and bool(agents) and agents[0].get('PingStatus') == 'Online'\n        if not ready:\n            raise RuntimeError('Morning readiness check failed: ' + json.dumps(result))\n        result['ready'] = True\n    else:\n        safe, reason = (False, 'Active SSM tunnel session') if sessions_active() else (True, 'No active SSM sessions')\n        if safe and database == 'available':\n            safe, reason = idle_check()\n        elif database not in ('available', 'stopped'):\n            safe, reason = False, f'Database is {database}'\n        # Last session check immediately before issuing lifecycle operations.\n        if safe and sessions_active():\n            safe, reason = False, 'SSM session started during activity checks'\n        result.update(safe_to_stop=safe, reason=reason)\n        if not dry_run:\n            cw.put_metric_data(Namespace='AnalyticalRx/DevSchedule', MetricData=[\n                {'MetricName': 'ShutdownSkipped', 'Value': 0 if safe else 1, 'Unit': 'Count'}\n            ])\n            if safe:\n                if database == 'available':\n                    rds.stop_db_instance(DBInstanceIdentifier=DB)\n                if instance == 'running':\n                    ec2.stop_instances(InstanceIds=[INSTANCE])\n    print(json.dumps(result))\n    return result\n"
+        }
+      }
+    },
+    "AsyncConfig": {
+      "Type": "AWS::Lambda::EventInvokeConfig",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "Worker"
+        },
+        "Qualifier": "$LATEST",
+        "MaximumEventAgeInSeconds": 300,
+        "MaximumRetryAttempts": 0
+      }
+    },
+    "ScheduleGroup": {
+      "Type": "AWS::Scheduler::ScheduleGroup",
+      "Properties": {
+        "Name": "analyticalrx-phase1-dev"
+      }
+    },
+    "ScheduleRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "scheduler.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "StringEquals": {
+                  "aws:SourceAccount": "209556026827"
+                },
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "ScheduleGroup",
+                      "Arn"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "InvokeDevWorkerOnly",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "lambda:InvokeFunction"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "Worker",
+                      "Arn"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "StartSchedule": {
+      "Type": "AWS::Scheduler::Schedule",
+      "Properties": {
+        "Name": "analyticalrx-phase1-dev-start",
+        "GroupName": {
+          "Ref": "ScheduleGroup"
+        },
+        "ScheduleExpression": "cron(30 8 ? * MON-FRI *)",
+        "ScheduleExpressionTimezone": "Asia/Kolkata",
+        "FlexibleTimeWindow": {
+          "Mode": "OFF"
+        },
+        "State": "ENABLED",
+        "Target": {
+          "Arn": {
+            "Fn::GetAtt": [
+              "Worker",
+              "Arn"
+            ]
+          },
+          "RoleArn": {
+            "Fn::GetAtt": [
+              "ScheduleRole",
+              "Arn"
+            ]
+          },
+          "Input": "{\"action\": \"start\"}",
+          "RetryPolicy": {
+            "MaximumEventAgeInSeconds": 300,
+            "MaximumRetryAttempts": 2
+          }
+        }
+      }
+    },
+    "StopSchedule": {
+      "Type": "AWS::Scheduler::Schedule",
+      "Properties": {
+        "Name": "analyticalrx-phase1-dev-stop",
+        "GroupName": {
+          "Ref": "ScheduleGroup"
+        },
+        "ScheduleExpression": "cron(0 1 * * ? *)",
+        "ScheduleExpressionTimezone": "Asia/Kolkata",
+        "FlexibleTimeWindow": {
+          "Mode": "OFF"
+        },
+        "State": "ENABLED",
+        "Target": {
+          "Arn": {
+            "Fn::GetAtt": [
+              "Worker",
+              "Arn"
+            ]
+          },
+          "RoleArn": {
+            "Fn::GetAtt": [
+              "ScheduleRole",
+              "Arn"
+            ]
+          },
+          "Input": "{\"action\": \"stop\"}",
+          "RetryPolicy": {
+            "MaximumEventAgeInSeconds": 300,
+            "MaximumRetryAttempts": 2
+          }
+        }
+      }
+    },
+    "ReadySchedule": {
+      "Type": "AWS::Scheduler::Schedule",
+      "Properties": {
+        "Name": "analyticalrx-phase1-dev-check",
+        "GroupName": {
+          "Ref": "ScheduleGroup"
+        },
+        "ScheduleExpression": "cron(15 9 ? * MON-FRI *)",
+        "ScheduleExpressionTimezone": "Asia/Kolkata",
+        "FlexibleTimeWindow": {
+          "Mode": "OFF"
+        },
+        "State": "ENABLED",
+        "Target": {
+          "Arn": {
+            "Fn::GetAtt": [
+              "Worker",
+              "Arn"
+            ]
+          },
+          "RoleArn": {
+            "Fn::GetAtt": [
+              "ScheduleRole",
+              "Arn"
+            ]
+          },
+          "Input": "{\"action\": \"check\"}",
+          "RetryPolicy": {
+            "MaximumEventAgeInSeconds": 300,
+            "MaximumRetryAttempts": 2
+          }
+        }
+      }
+    },
+    "FailuresAlarm": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "AlarmName": "analyticalrx-phase1-dev-schedule-failures",
+        "Namespace": "AWS/Lambda",
+        "MetricName": "Errors",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "Worker"
+            }
+          }
+        ],
+        "Statistic": "Sum",
+        "Period": 300,
+        "EvaluationPeriods": 1,
+        "Threshold": 1,
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "TreatMissingData": "notBreaching"
+      }
+    },
+    "SkippedAlarm": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "AlarmName": "analyticalrx-phase1-dev-schedule-skipped",
+        "Namespace": "AnalyticalRx/DevSchedule",
+        "MetricName": "ShutdownSkipped",
+        "Dimensions": [],
+        "Statistic": "Sum",
+        "Period": 300,
+        "EvaluationPeriods": 1,
+        "Threshold": 1,
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "TreatMissingData": "notBreaching"
+      }
+    }
+  },
+  "Outputs": {
+    "WorkerArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "Worker",
+          "Arn"
+        ]
+      }
+    },
+    "ScheduleGroup": {
+      "Value": {
+        "Ref": "ScheduleGroup"
+      }
+    }
+  }
+}

@@ -21,21 +21,21 @@ This is the Phase 1 development PostgreSQL database for the webhook/canonical ev
 | Deletion protection | Enabled |
 | Public endpoint | Disabled |
 
-The RDS instance should not be used directly by application services or local developer tools. Use RDS Proxy for application connections and SSM port forwarding for local pgAdmin/psql access.
+Developers connect directly to this private RDS endpoint through SSM port forwarding. The processor Lambda uses its dedicated IAM-authenticated RDS Proxy. The database remains private.
 
 ## RDS Proxy
 
 | Field | Value |
 | --- | --- |
-| Proxy name | `analytical-rx-phase1-rds-proxy` |
-| Proxy endpoint | `analytical-rx-phase1-rds-proxy.proxy-c6ry4mqo6ydb.us-east-1.rds.amazonaws.com` |
+| Proxy name | `processor-lambda-iam-auth-proxy` |
+| Proxy endpoint | `processor-lambda-iam-auth-proxy.proxy-c6ry4mqo6ydb.us-east-1.rds.amazonaws.com` |
 | Engine family | PostgreSQL |
 | TLS required | Yes |
 | Target status | `AVAILABLE` |
-| IAM role | `analytical-rx-phase1-rds-proxy-role` |
+| IAM role | `processor-lambda-rds-connector-role` |
 | Credential secret | `analytical-rx/phase1/dev/postgres/app-rw` |
 
-Lambda/ECS services should connect to the proxy endpoint, not the direct RDS endpoint.
+The processor Lambda uses IAM authentication through this proxy. The former development proxy was retired on 2026-11-02 after direct SSM access was verified. Local tools use the private database endpoint through the tunnel.
 
 ## Schemas Created
 
@@ -51,16 +51,16 @@ Lambda/ECS services should connect to the proxy endpoint, not the direct RDS end
 
 | Security group | ID | Purpose |
 | --- | --- | --- |
-| `analytical-rx-phase1-db-sg` | `sg-0baa533faee336e7b` | Attached to RDS. Allows PostgreSQL only from the RDS Proxy security group. |
+| `analytical-rx-phase1-db-sg` | `sg-0baa533faee336e7b` | Attached to RDS. Allows PostgreSQL from approved proxy security groups and the SSM tunnel host security group. |
 | `analytical-rx-phase1-rds-proxy-sg` | `sg-07b9975f425288f7f` | Attached to RDS Proxy. Allows PostgreSQL from app services and the SSM tunnel host. |
 | `analytical-rx-phase1-app-sg` | `sg-05d7ea352dbbb1de8` | Attach this to Lambda/ECS/app services that need database access through RDS Proxy. |
 | `analytical-rx-phase1-ssm-db-tunnel-sg` | `sg-063dbd4e747686437` | Attached to the SSM tunnel host. Has no inbound rules. |
 
 Current access rules:
 
-- RDS accepts TCP `5432` only from `analytical-rx-phase1-rds-proxy-sg`.
+- RDS accepts TCP `5432` from its approved proxy security groups and `sg-063dbd4e747686437` (the SSM tunnel host).
 - RDS Proxy accepts TCP `5432` from `analytical-rx-phase1-app-sg`.
-- RDS Proxy accepts TCP `5432` from `analytical-rx-phase1-ssm-db-tunnel-sg`.
+- Developer SSM tunnels go directly to private RDS; the processor proxy remains for Lambda traffic.
 - SSM tunnel host has no inbound rules.
 
 Do not add changing developer public IP addresses to the database security group. Use SSM port forwarding for local access.
@@ -84,29 +84,41 @@ The IAM group `analytical-rx-developers-webhook` has an inline policy named `Ana
 - Starting an SSM port forwarding session to the tunnel host.
 - Describing the relevant RDS/SSM/EC2 resources.
 
-To use the database lifecycle script below, an AWS administrator must also grant the teammate the actions in [analyticalrx-phase1-db-lifecycle-policy.json](analyticalrx-phase1-db-lifecycle-policy.json). The policy limits start/stop permissions to this database.
+To use the lifecycle script below, an AWS administrator must grant the teammate the actions in [analyticalrx-phase1-db-lifecycle-policy.json](analyticalrx-phase1-db-lifecycle-policy.json). The policy limits start/stop permissions to this database and the SSM tunnel instance. Each teammate must use their own IAM identity and AWS CLI profile. Do not use root credentials or share credentials.
 
 ## Start Or Stop The Dev Database
 
-The shared development database can be stopped when the team is not using it. From the `analytical-rx-documentation` repository root, run the cross-platform script with Python 3.10+ and AWS CLI v2:
+The development environment also has an [automatic weekday schedule](dev-schedule/README.md):
+startup at 8:30 am IST Monday–Friday, a readiness check at 9:15 am, and a guarded
+shutdown check at 1:00 am daily. Use the commands below for access outside those hours.
+
+From the `analytical-rx-documentation` repository root, run the cross-platform script with Python 3.10+ and AWS CLI v2. It manages only the named Phase 1 development database and SSM tunnel host:
 
 ```bash
 python3 operations/phase1-db-lifecycle.py status --env-file .env
-python3 operations/phase1-db-lifecycle.py start --env-file .env
-python3 operations/phase1-db-lifecycle.py stop --env-file .env
+python3 operations/phase1-db-lifecycle.py start database --env-file .env
+python3 operations/phase1-db-lifecycle.py start tunnel --env-file .env
+python3 operations/phase1-db-lifecycle.py start all --env-file .env
+python3 operations/phase1-db-lifecycle.py stop database --env-file .env
+python3 operations/phase1-db-lifecycle.py stop tunnel --env-file .env
 ```
 
 On Windows, use `py` in place of `python3`:
 
 ```powershell
 py .\operations\phase1-db-lifecycle.py status --env-file .env
-py .\operations\phase1-db-lifecycle.py start --env-file .env
-py .\operations\phase1-db-lifecycle.py stop --env-file .env
+py .\operations\phase1-db-lifecycle.py start database --env-file .env
+py .\operations\phase1-db-lifecycle.py start tunnel --env-file .env
+py .\operations\phase1-db-lifecycle.py start all --env-file .env
+py .\operations\phase1-db-lifecycle.py stop database --env-file .env
+py .\operations\phase1-db-lifecycle.py stop tunnel --env-file .env
 ```
 
-If credentials are already configured through the AWS CLI, omit `--env-file .env`. To select a named AWS CLI profile, add `--profile PROFILE_NAME`.
+If credentials are already configured through the AWS CLI, omit `--env-file .env`. To select a named AWS CLI profile, add `--profile PROFILE_NAME` before or after the command.
 
-The script verifies the AWS account before acting, prompts for the database identifier before stopping, and waits for RDS to finish. Add `--yes` to skip the stop confirmation when calling it from an intentional automation. Stopped RDS databases automatically restart after seven days. Stopping reduces the database instance compute charge; database storage, backups, and the separate RDS proxies can continue to incur charges. Coordinate with teammates before stopping this shared database.
+`start all` starts the database and tunnel host, then waits for the database and the processor proxy target to become ready and for the tunnel's SSM agent to come online. `stop database` checks recent RDS Proxy connections and active SSM sessions, checks again after confirmation, and requires you to type `STOP SHARED DEV DATABASE`. `stop tunnel` refuses while an SSM session is active and requires a separate confirmation. There is no `stop all` command because the database and tunnel have different users and impacts.
+
+Stopping the database interrupts every app, Lambda, and developer task that needs the database until it is started again. The checks only confirm recent observed usage; they cannot prevent a new request arriving immediately after the check. Coordinate a maintenance window with the team and stop it only when the shared dev environment is idle. The RDS Proxies cannot be paused; the script only reports their status and never deletes them. Stopped RDS databases automatically restart after seven days. Database storage, backups, and the provisioned RDS Proxies can continue to incur charges while the database is stopped. Stopping the tunnel host blocks local tunnel access; its auto-assigned public IPv4 address can change after restart.
 
 ## Local pgAdmin / psql Access
 
@@ -118,7 +130,6 @@ Local access flow:
 Developer laptop
   -> AWS SSM Session Manager tunnel
   -> analytical-rx-phase1-ssm-db-tunnel
-  -> RDS Proxy
   -> RDS PostgreSQL
 ```
 
@@ -126,7 +137,7 @@ Prerequisites:
 
 - AWS CLI configured with an IAM user in `analytical-rx-developers-webhook`.
 - Session Manager plugin installed locally.
-- Permission to read `analytical-rx/phase1/dev/postgres/app-rw`.
+- Permission to read `analytical-rx/phase1/dev/postgres/data-platform-password-rw`.
 
 ## Create AWS Access Key For Local Setup
 
@@ -198,7 +209,7 @@ After the script starts, pgAdmin should use:
 | Host | `localhost` |
 | Port | `5433` |
 | Maintenance database | `analyticalrx` |
-| Username | `analyticalrx_app_rw` |
+| Username | `analyticalrx_data_platform_password_rw` |
 | Password | Copied to clipboard by the script |
 | SSL mode | `Require` |
 
@@ -234,7 +245,7 @@ Start the tunnel:
 aws ssm start-session \
   --target i-0ee64eae7d8505bfc \
   --document-name AWS-StartPortForwardingSessionToRemoteHost \
-  --parameters '{"host":["analytical-rx-phase1-rds-proxy.proxy-c6ry4mqo6ydb.us-east-1.rds.amazonaws.com"],"portNumber":["5432"],"localPortNumber":["5433"]}'
+  --parameters '{"host":["analytical-rx-phase1-dev-db.c6ry4mqo6ydb.us-east-1.rds.amazonaws.com"],"portNumber":["5432"],"localPortNumber":["5433"]}'
 ```
 
 Keep that terminal open while using pgAdmin or psql.
@@ -246,8 +257,8 @@ pgAdmin connection settings:
 | Host | `localhost` |
 | Port | `5433` |
 | Maintenance database | `analyticalrx` |
-| Username | From `analytical-rx/phase1/dev/postgres/app-rw` |
-| Password | From `analytical-rx/phase1/dev/postgres/app-rw` |
+| Username | From `analytical-rx/phase1/dev/postgres/data-platform-password-rw` |
+| Password | From `analytical-rx/phase1/dev/postgres/data-platform-password-rw` |
 | SSL mode | `Require` |
 
 ## Credentials
@@ -258,18 +269,18 @@ Use the app-level read/write secret:
 
 | Field | Value |
 | --- | --- |
-| Secret name | `analytical-rx/phase1/dev/postgres/app-rw` |
-| Secret ARN | `arn:aws:secretsmanager:us-east-1:209556026827:secret:analytical-rx/phase1/dev/postgres/app-rw-nqJIXo` |
-| Database user | `analyticalrx_app_rw` |
+| Secret name | `analytical-rx/phase1/dev/postgres/data-platform-password-rw` |
+| Secret ARN | `arn:aws:secretsmanager:us-east-1:209556026827:secret:analytical-rx/phase1/dev/postgres/data-platform-password-rw-2dgiyh` |
+| Database user | `analyticalrx_data_platform_password_rw` |
 | Default schema | `tenant_analyticalrx_dev` |
 
-The secret's `host` value points to the RDS Proxy endpoint. It also includes `rds_host`, `proxy_host`, `ssm_tunnel_instance_id`, and `recommended_local_port`.
+The developer secret's `host` points directly to the private RDS endpoint. Use `localhost:5433` from a laptop while the SSM tunnel is open.
 
 ## Fetch The Connection Secret
 
 ```bash
 aws secretsmanager get-secret-value \
-  --secret-id analytical-rx/phase1/dev/postgres/app-rw \
+  --secret-id analytical-rx/phase1/dev/postgres/data-platform-password-rw \
   --query SecretString \
   --output text
 ```
@@ -284,7 +295,6 @@ The secret JSON contains:
 - `password`
 - `sslmode`
 - `default_schema`
-- `proxy_host`
 - `rds_host`
 - `ssm_tunnel_instance_id`
 - `recommended_local_port`
@@ -295,7 +305,7 @@ Start the SSM tunnel first. Then connect locally with SSL:
 
 ```bash
 PGPASSWORD='PASSWORD_FROM_SECRET' psql \
-  "host=localhost port=5433 dbname=analyticalrx user=analyticalrx_app_rw sslmode=require"
+  "host=localhost port=5433 dbname=analyticalrx user=analyticalrx_data_platform_password_rw sslmode=require"
 ```
 
 Use the development tenant schema:
@@ -311,13 +321,13 @@ order by table_schema;
 
 ## Application Access
 
-For AWS Lambda/ECS/app services:
+For the existing processor Lambda:
 
 - Attach `analytical-rx-phase1-app-sg` to the compute service.
 - Place the function/service in the same VPC/subnets as the database/proxy.
 - Read the database connection secret from Secrets Manager.
-- Connect to `analytical-rx-phase1-rds-proxy.proxy-c6ry4mqo6ydb.us-east-1.rds.amazonaws.com`.
-- Connect with `sslmode=require`.
+- Connect to `processor-lambda-iam-auth-proxy.proxy-c6ry4mqo6ydb.us-east-1.rds.amazonaws.com`.
+- Connect with `sslmode=require` and an IAM authentication token.
 - Resolve tenant schema server-side from authenticated tenant context or trusted job configuration.
 - Do not accept a schema name from frontend input or raw webhook payloads.
 
@@ -340,7 +350,7 @@ Processor code should:
 - Read `DB_SECRET_ID`.
 - Fetch the secret from Secrets Manager.
 - Use the secret's `host` value, which points to the RDS Proxy endpoint.
-- Connect with PostgreSQL JDBC using `sslmode=require`.
+- Connect with PostgreSQL JDBC using an IAM token and `sslmode=require`.
 - Set the schema from `DB_SCHEMA`.
 
 Lambda execution role requirements:
@@ -355,7 +365,7 @@ Do not use the Lambda console direct RDS connection path for this processor. The
 ```text
 primeRx-webhook-processor
   -> analytical-rx-phase1-app-sg
-  -> analytical-rx-phase1-rds-proxy
+  -> processor-lambda-iam-auth-proxy
   -> analytical-rx-phase1-db-sg
   -> analytical-rx-phase1-dev-db
 ```

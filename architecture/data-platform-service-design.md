@@ -81,7 +81,7 @@ High-level flow:
 | --- | --- | --- |
 | Backend framework | Java 21 + Spring Boot 3.5.16 | Uses a stable Spring Boot line with Java 21 support and avoids snapshot dependencies in deployed builds. |
 | Deployment | Container in AWS, preferably ECS Fargate for Phase 1 | Long-running API service, predictable behavior, no Lambda cold-start concern for user-facing dashboards. |
-| Database | Existing AWS RDS PostgreSQL through RDS Proxy | Already provisioned and documented for Phase 1. |
+| Database | Existing AWS RDS PostgreSQL through SSM for local development | Private database access; processor Lambda retains its own IAM-auth proxy. |
 | Tenant isolation | One PostgreSQL schema per tenant for tenant-owned pharmacy data | Matches the current SaaS isolation decision. |
 | Platform metadata | Add a non-PHI `control_plane` schema | Needed for login, users, tenant registry, schema mapping, role assignments, and cross-tenant internal admin views. |
 | Persistence | Spring Data JPA by default, with DTO projections and targeted native SQL for complex dashboard aggregates | JPA keeps transactional modules and table mappings maintainable, while explicit reporting queries prevent inefficient entity loading and unreadable JPQL. |
@@ -116,17 +116,16 @@ Frontend application
   -> HTTPS
   -> Application Load Balancer or API Gateway
   -> ECS Fargate service running Spring Boot
-  -> RDS Proxy
   -> RDS PostgreSQL
 ```
 
-For local development:
+For local development (updated 2026-11-02: the development proxy is retired; the
+SSM tunnel connects directly to private RDS):
 
 ```text
 Developer laptop
   -> Spring Boot local app
   -> SSM port forwarding tunnel
-  -> RDS Proxy
   -> RDS PostgreSQL
 ```
 
@@ -138,7 +137,7 @@ Environment variables:
 | --- | --- |
 | `SPRING_PROFILES_ACTIVE` | Runtime location: `local` or `aws`. |
 | `APP_ENVIRONMENT` | Resource environment: `dev`, `stage`, or `prod`. |
-| `DB_SECRET_ID` | AWS Secrets Manager secret for database credentials. Current dev secret: `analytical-rx/phase1/dev/postgres/app-rw`. |
+| `DB_SECRET_ID` | AWS Secrets Manager secret for database credentials. Current dev secret: `analytical-rx/phase1/dev/postgres/data-platform-password-rw`. |
 | `AWS_REGION` | `us-east-1` for current Phase 1 dev. |
 | `DB_HOST_OVERRIDE` | Local only. Use `localhost` while the SSM tunnel is open. |
 | `DB_PORT_OVERRIDE` | Local only. Current SSM tunnel port is `5433`. |
@@ -157,9 +156,9 @@ Existing database secret:
 
 | Field | Value |
 | --- | --- |
-| Secret name | `analytical-rx/phase1/dev/postgres/app-rw` |
-| Database user | `analyticalrx_app_rw` |
-| Host | RDS Proxy endpoint |
+| Secret name | `analytical-rx/phase1/dev/postgres/data-platform-password-rw` |
+| Database user | `analyticalrx_data_platform_password_rw` |
+| Host | Private RDS endpoint (use localhost:5433 through SSM locally) |
 | Database | `analyticalrx` |
 | SSL | required |
 
@@ -196,13 +195,18 @@ Local resolution:
 
 ```text
 DB_SECRET_ID
-  -> retrieve username, password, database name, and proxy endpoint
+  -> retrieve username, password, database name, and private database endpoint
   -> override host with DB_HOST_OVERRIDE=localhost
   -> override port with DB_PORT_OVERRIDE=5433
   -> connect through the active SSM tunnel
 ```
 
-AWS resolution:
+Proposed future AWS backend resolution (not deployed by this development change):
+
+The development proxy is retired. The remaining proxy is dedicated to processor
+Lambda IAM authentication. A future AWS-hosted backend needs its own reviewed
+authentication and network configuration before using a proxy or direct RDS.
+
 
 ```text
 DB_SECRET_ID
@@ -858,7 +862,7 @@ Do not build:
 3. Local app connects to:
 
    ```text
-   localhost:5433 -> SSM tunnel -> RDS Proxy -> RDS PostgreSQL
+   localhost:5433 -> SSM tunnel -> private RDS PostgreSQL
    ```
 
 4. Local profile should use:
@@ -867,7 +871,7 @@ Do not build:
    SPRING_PROFILES_ACTIVE=local
    APP_ENVIRONMENT=dev
    AWS_REGION=us-east-1
-   DB_SECRET_ID=analytical-rx/phase1/dev/postgres/app-rw
+   DB_SECRET_ID=analytical-rx/phase1/dev/postgres/data-platform-password-rw
    DB_HOST_OVERRIDE=localhost
    DB_PORT_OVERRIDE=5433
    DB_SSL_MODE=require
@@ -903,7 +907,7 @@ Recommended first implementation:
    - app subnets
    - `analytical-rx-phase1-app-sg`
 8. Connect to RDS through:
-   - `analytical-rx-phase1-rds-proxy.proxy-c6ry4mqo6ydb.us-east-1.rds.amazonaws.com`
+   - `analytical-rx-phase1-dev-db.c6ry4mqo6ydb.us-east-1.rds.amazonaws.com`
 
 ## 19. Observability
 
@@ -978,7 +982,7 @@ Why this slice:
 - proves auth
 - proves RBAC
 - proves tenant schema routing
-- proves RDS Proxy connection
+- proves private RDS connectivity through SSM
 - proves canonical read model
 - gives frontend a stable response pattern
 - avoids waiting for every Airtable-style module to exist

@@ -9,9 +9,9 @@ $ErrorActionPreference = "Stop"
 
 $ExpectedAccount = "209556026827"
 $Region = "us-east-1"
-$SecretId = "analytical-rx/phase1/dev/postgres/app-rw"
+$SecretId = "analytical-rx/phase1/dev/postgres/data-platform-password-rw"
 $TunnelInstanceId = "i-0ee64eae7d8505bfc"
-$ProxyHost = "analytical-rx-phase1-rds-proxy.proxy-c6ry4mqo6ydb.us-east-1.rds.amazonaws.com"
+$DatabaseHost = "analytical-rx-phase1-dev-db.c6ry4mqo6ydb.us-east-1.rds.amazonaws.com"
 
 function Require-Command {
   param([string]$Name, [string]$InstallHint)
@@ -118,7 +118,7 @@ Write-Host "Press Ctrl+C to close the tunnel."
 Write-Host ""
 
 $parameters = @{
-  host = @($ProxyHost)
+  host = @($DatabaseHost)
   portNumber = @("5432")
   localPortNumber = @("$LocalPort")
 } | ConvertTo-Json -Compress

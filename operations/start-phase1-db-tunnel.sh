@@ -7,7 +7,7 @@ LOCAL_PORT="${2:-5433}"
 EXPECTED_ACCOUNT="209556026827"
 REGION="us-east-1"
 TARGET="i-0ee64eae7d8505bfc"
-PROXY_HOST="analytical-rx-phase1-rds-proxy.proxy-c6ry4mqo6ydb.us-east-1.rds.amazonaws.com"
+DB_HOST="analytical-rx-phase1-dev-db.c6ry4mqo6ydb.us-east-1.rds.amazonaws.com"
 
 if [[ ! -f "$ENV_FILE" ]]; then
   echo "Cannot find $ENV_FILE. Create it with your AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY." >&2
@@ -36,4 +36,4 @@ aws ssm start-session \
   --region "$REGION" \
   --target "$TARGET" \
   --document-name AWS-StartPortForwardingSessionToRemoteHost \
-  --parameters "{\"host\":[\"$PROXY_HOST\"],\"portNumber\":[\"5432\"],\"localPortNumber\":[\"$LOCAL_PORT\"]}"
+  --parameters "{\"host\":[\"$DB_HOST\"],\"portNumber\":[\"5432\"],\"localPortNumber\":[\"$LOCAL_PORT\"]}"

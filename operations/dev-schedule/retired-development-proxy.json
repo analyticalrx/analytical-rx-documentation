@@ -1,0 +1,80 @@
+{
+  "retired_on": "2026-11-02",
+  "proxy": {
+    "DBProxyName": "analytical-rx-phase1-rds-proxy",
+    "DBProxyArn": "arn:aws:rds:us-east-1:209556026827:db-proxy:prx-0fed1d608b721e677",
+    "Status": "available",
+    "EngineFamily": "POSTGRESQL",
+    "VpcId": "vpc-009878654ad2bac42",
+    "VpcSecurityGroupIds": [
+      "sg-07b9975f425288f7f",
+      "sg-0c25a8c04a794829a"
+    ],
+    "VpcSubnetIds": [
+      "subnet-0a1ffc5161b38c5e5",
+      "subnet-05c7d1f1fde1c2b84",
+      "subnet-0cea0eb252ebca70e",
+      "subnet-0c885192fece53c98",
+      "subnet-03f5fb7199efed202"
+    ],
+    "DefaultAuthScheme": "NONE",
+    "Auth": [
+      {
+        "AuthScheme": "SECRETS",
+        "SecretArn": "arn:aws:secretsmanager:us-east-1:209556026827:secret:analytical-rx/phase1/dev/postgres/app-rw-nqJIXo",
+        "IAMAuth": "DISABLED",
+        "ClientPasswordAuthType": "POSTGRES_SCRAM_SHA_256"
+      },
+      {
+        "AuthScheme": "SECRETS",
+        "SecretArn": "arn:aws:secretsmanager:us-east-1:209556026827:secret:rds!db-5620d1fb-1c55-4c04-8097-531e54c07311-qe1RKR",
+        "IAMAuth": "DISABLED",
+        "ClientPasswordAuthType": "POSTGRES_SCRAM_SHA_256"
+      },
+      {
+        "AuthScheme": "SECRETS",
+        "SecretArn": "arn:aws:secretsmanager:us-east-1:209556026827:secret:analytical-rx/phase1/dev/postgres/data-platform-password-rw-2dgiyh",
+        "IAMAuth": "DISABLED",
+        "ClientPasswordAuthType": "POSTGRES_SCRAM_SHA_256"
+      }
+    ],
+    "RoleArn": "arn:aws:iam::209556026827:role/analytical-rx-phase1-rds-proxy-role",
+    "Endpoint": "analytical-rx-phase1-rds-proxy.proxy-c6ry4mqo6ydb.us-east-1.rds.amazonaws.com",
+    "RequireTLS": true,
+    "IdleClientTimeout": 1800,
+    "DebugLogging": false,
+    "CreatedDate": "2026-08-04T14:37:10.909000+00:00",
+    "UpdatedDate": "2026-10-19T22:48:14.293000+00:00",
+    "EndpointNetworkType": "IPV4",
+    "TargetConnectionNetworkType": "IPV4"
+  },
+  "target_groups": [
+    {
+      "DBProxyName": "analytical-rx-phase1-rds-proxy",
+      "TargetGroupName": "default",
+      "TargetGroupArn": "arn:aws:rds:us-east-1:209556026827:target-group:prx-tg-02cc26ab97308bde4",
+      "IsDefault": true,
+      "Status": "available",
+      "ConnectionPoolConfig": {
+        "MaxConnectionsPercent": 100,
+        "MaxIdleConnectionsPercent": 50,
+        "ConnectionBorrowTimeout": 120,
+        "SessionPinningFilters": []
+      },
+      "CreatedDate": "2026-08-04T14:37:10.909000+00:00",
+      "UpdatedDate": "2026-09-03T14:56:24.903000+00:00"
+    }
+  ],
+  "targets": [
+    {
+      "Endpoint": "analytical-rx-phase1-dev-db.c6ry4mqo6ydb.us-east-1.rds.amazonaws.com",
+      "RdsResourceId": "analytical-rx-phase1-dev-db",
+      "Port": 5432,
+      "Type": "RDS_INSTANCE",
+      "Role": "READ_WRITE",
+      "TargetHealth": {
+        "State": "AVAILABLE"
+      }
+    }
+  ]
+}
