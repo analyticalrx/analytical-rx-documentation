@@ -23,7 +23,7 @@ Once your work email and GitHub account are active, follow these steps in order:
 
 1. Confirm you can sign in to GitHub and open the repositories assigned to you. Clone only those repositories.
 2. Open your first assigned GitHub issue. Confirm the goal, acceptance criteria, and reviewer with your mentor before changing code.
-3. Read the short onboarding path below, then open the README in your assigned code repository.
+3. Read the short onboarding path below and the [documentation map](../documentation-map.md). Complete shared AWS/database setup only if your assignment needs it, then open the README in your assigned code repository.
 4. Follow that README to install tools, configure the local environment, and run the listed checks. Ask your mentor if a command fails; don't copy credentials from another teammate.
 5. Start with synthetic data. Keep real patient data and all secrets out of source files, logs, screenshots, and chat.
 
@@ -66,6 +66,10 @@ The workspace contains several repositories. Clone only the ones needed for your
 | `primerx-processing-lambda-service` | Queue event processing, PHI minimization, and database persistence. | [Repository README](https://github.com/analyticalrx/primerx-processing-lambda-service/blob/main/README.md) and the ingestion design. |
 | `webhook-test-simulator` | Synthetic PrimeRx-shaped webhook payloads for safe local and test use. | [Repository README](https://github.com/analyticalrx/webhook-test-simulator/blob/main/README.md); start in dry-run mode. |
 
+The [documentation map](../documentation-map.md) identifies the maintained home for
+each topic. Shared AWS/database setup and system designs live here; run commands,
+implemented API contracts, and service-specific migrations live beside their code.
+
 The documentation is maintained in a separate repository from the application code. Changes to a design document do not change the running implementation; code changes do not automatically update the design.
 
 ## A mental model of the system
@@ -88,7 +92,7 @@ The diagram summarizes the intended boundaries. The webhook receiver accepts eve
 
 1. Sign in to GitHub with your own account and clone only the repositories assigned to you. The [older teammate GitHub setup document](analyticalrx-teammate-setup-guide.docx) covers documentation-repository access and cloning only; confirm the repository URL and access with the current team owner before using it.
 2. Follow the README in your assigned code repository for language/runtime versions, local configuration, and commands.
-3. Use synthetic data for local development. The [webhook test simulator](../../webhook-test-simulator/README.md) runs in dry-run mode when no endpoint is configured.
+3. Use synthetic data for local development. The [webhook test simulator](https://github.com/analyticalrx/webhook-test-simulator/blob/main/README.md) runs in dry-run mode when no endpoint is configured.
 4. Request AWS/database access only if your task needs it. Use your own approved IAM identity and the [pgAdmin/SSM access guide](../operations/teammate-rds-pgadmin-access-guide.md). The [database operations guide](../operations/phase1-aws-postgres-dev-database.md) documents the dev instance, tunnel, and start/stop utility. Some existing local environment notes refer to root-level credentials; do not copy or use those credentials.
 5. Never commit `.env`, access keys, database passwords, JWT signing secrets, or real PHI. Do not point the simulator at a live endpoint unless the task explicitly calls for it and the owner has confirmed the target.
 

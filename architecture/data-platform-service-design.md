@@ -3,8 +3,17 @@
 Created: August 18, 2026
 Status: Draft for engineering review
 Primary audience: backend, frontend, data engineering, security, and implementation leads
-Related PRD: `prd/product-requirements-document.md`
+Related PRD: [Product Requirements Document](../prd/product-requirements-document.md)
 Related epic: GitHub issue `#40: Epic: Pharmacy Data Platform And Role-Based Dashboards`
+
+This is the maintained service-design document. Use the
+[backend README](https://github.com/analyticalrx/data-platform/blob/main/README.md)
+for running the service and the [implemented API contract](https://github.com/analyticalrx/data-platform/blob/main/docs/ui-api-contract.md)
+for integration work. This draft also contains future features.
+
+The former backend copy described an older tenant/role proposal. Its historical
+version is linked from the backend's design pointer; current migrations and API
+contracts take precedence for implemented behavior.
 
 ## 1. Purpose
 
@@ -62,8 +71,8 @@ The Data Platform Service reads safe, processed data. It must not make normal da
 
 See the rendered diagram:
 
-- `diagrams/data-platform-service.svg`
-- editable source: `diagrams/data-platform-service.d2`
+- [Rendered service diagram](../diagrams/data-platform-service.svg)
+- [Editable diagram source](../diagrams/data-platform-service.d2)
 
 High-level flow:
 
