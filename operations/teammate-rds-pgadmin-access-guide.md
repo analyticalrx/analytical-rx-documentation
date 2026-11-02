@@ -2,12 +2,87 @@
 
 Status: Team setup guide
 
-Updated 2026-11-02: developer tunnels now connect directly to private RDS. If you
-already registered pgAdmin, change its username to `analyticalrx_data_platform_password_rw`
-and retrieve the password from `analytical-rx/phase1/dev/postgres/data-platform-password-rw`.
-The host stays `localhost` and the port stays `5433`. Restart any old tunnel.
+Updated: 2026-11-02
 
-Audience: AnalyticalRx developers who need local pgAdmin access to the Phase 1 PostgreSQL database
+Audience: Developers connecting pgAdmin or a local backend to the shared development database.
+
+## Already Connected Before? Update These Once
+
+The development proxy has been removed. From the `analytical-rx-documentation`
+repository directory:
+
+1. Run `git pull` to get the updated tunnel scripts.
+2. Close the terminal running your old tunnel. Disconnect the saved server in pgAdmin.
+3. Start the updated tunnel using the command for your OS under **Daily Connection** below.
+4. In pgAdmin, right-click the saved server and open **Properties → Connection**.
+   Change the username to `analyticalrx_data_platform_password_rw` and replace its
+   saved password with the `password` value from
+   `analytical-rx/phase1/dev/postgres/data-platform-password-rw` in AWS Secrets Manager.
+   Keep host `localhost`, port `5433`, database `analyticalrx`, and SSL mode `Require`.
+5. Save and reconnect. You do not need to create another pgAdmin server registration.
+
+The old user `analyticalrx_app_rw` is for the processor Lambda's IAM authentication.
+Use the developer username above for pgAdmin and the local backend.
+
+## Daily Connection
+
+After completing the one-time setup below, open a terminal in
+`analytical-rx-documentation` and run the command for your OS.
+
+Windows PowerShell:
+
+```powershell
+.\operations\start-phase1-db-tunnel.ps1 -EnvFile .env
+```
+
+If PowerShell blocks the script:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\operations\start-phase1-db-tunnel.ps1 -EnvFile .env
+```
+
+macOS / Linux:
+
+```bash
+bash operations/start-phase1-db-tunnel.sh
+```
+
+Leave this terminal open. Connect pgAdmin or start the backend in another terminal.
+On Windows the script copies the database password to your clipboard. On macOS/Linux,
+retrieve it from **AWS Console → Secrets Manager →
+analytical-rx/phase1/dev/postgres/data-platform-password-rw → Retrieve secret value**.
+
+| pgAdmin setting | Value |
+| --- | --- |
+| Host | `localhost` |
+| Port | `5433` |
+| Maintenance database | `analyticalrx` |
+| Username | `analyticalrx_data_platform_password_rw` |
+| Password | `password` from the developer secret above |
+| SSL mode | `Require` |
+
+Resources start at **8:30 am IST Monday–Friday**, with a readiness check at 9:15 am.
+At **1:00 am daily**, shutdown is attempted only if activity checks pass. There is
+no automatic weekend startup. If resources are stopped, first run the command for
+your OS, wait until it finishes, and then open the tunnel:
+
+Windows:
+
+```powershell
+py .\operations\phase1-db-lifecycle.py start all --env-file .env
+```
+
+macOS / Linux:
+
+```bash
+python3 operations/phase1-db-lifecycle.py start all --env-file .env
+```
+
+Lifecycle access requires the additional policy described under **Start Or Stop
+Shared Dev Resources**. Opening a tunnel and starting AWS resources are separate
+steps: the tunnel command does not start stopped resources. To finish work, close
+your pgAdmin/backend connection and press Ctrl+C in the tunnel terminal. Closing
+your tunnel does not stop the shared database.
 
 ## What This Setup Does
 
@@ -243,6 +318,25 @@ If you started the tunnel with another local port, use that port instead of `543
 
 Click **Save**.
 
+## Using The Same Tunnel For The Local Backend
+
+Keep the tunnel running in its own terminal, then follow the
+[backend setup instructions](https://github.com/analyticalrx/data-platform#local-setup)
+in the `data-platform` repository. Its Windows startup script and Linux setup
+script already retrieve the developer database credential.
+
+| Backend setting | Value |
+| --- | --- |
+| `DB_JDBC_URL` | `jdbc:postgresql://127.0.0.1:5433/analyticalrx?sslmode=require` |
+| `DB_USERNAME` | `analyticalrx_data_platform_password_rw` |
+| `DB_PASSWORD` | Retrieved from the developer secret by the backend setup script |
+
+If you use another local tunnel port, change both pgAdmin's port and the port in
+`DB_JDBC_URL`. The local backend connects through localhost; do not put the private
+RDS hostname in its local connection URL. Keep AWS credentials in the documentation
+repository's `.env`; the backend repository's `.env` contains application settings.
+These are different files with different contents.
+
 ## Step 6: Confirm The Database Is Visible
 
 In pgAdmin, open:
@@ -352,6 +446,25 @@ Verify:
 ```bash
 session-manager-plugin
 ```
+
+### Error: PAM authentication failed or password authentication failed
+
+Check the username first. `analyticalrx_app_rw` requires IAM authentication and
+cannot be used with a password for this direct developer connection. Set the
+username to `analyticalrx_data_platform_password_rw`, retrieve its current password
+from the developer secret, and replace any old saved password in pgAdmin.
+
+### Error: Connection mentions the old development proxy
+
+Close the old tunnel, run `git pull` in the documentation repository, and start the
+updated script. It connects to the private RDS endpoint. A saved local backend
+configuration should use `localhost:5433`, as shown above.
+
+### Error: Connection times out outside working hours
+
+The database or tunnel host may be stopped. Run `status`, then `start all` using
+the lifecycle commands above if you have access. Wait for startup to finish before
+opening the tunnel. If you lack lifecycle permissions, ask the AWS administrator.
 
 ### Error: pgAdmin cannot connect
 
