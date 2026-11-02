@@ -2,7 +2,7 @@
 
 This document maps the current PRD against the existing task drafts and identifies what should exist in GitHub Issues.
 
-Current GitHub API status: Codex can authenticate with `GITHUB_TOKEN` and access the `analytical-rx` organization, the `analytical-rx-documentation` repository, and the `Analytical Rx` GitHub Project.
+> **Historical planning snapshot:** The issue and project statuses below record the state when this plan was written. They may have changed. Use the live AnalyticalRx GitHub Project and the issue assigned to you for current status and ownership.
 
 ## Issue Creation Completed
 

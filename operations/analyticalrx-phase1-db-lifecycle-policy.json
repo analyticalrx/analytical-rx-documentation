@@ -1,0 +1,20 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DescribePhase1DevDatabase",
+      "Effect": "Allow",
+      "Action": "rds:DescribeDBInstances",
+      "Resource": "*"
+    },
+    {
+      "Sid": "StartAndStopOnlyPhase1DevDatabase",
+      "Effect": "Allow",
+      "Action": [
+        "rds:StartDBInstance",
+        "rds:StopDBInstance"
+      ],
+      "Resource": "arn:aws:rds:us-east-1:209556026827:db:analytical-rx-phase1-dev-db"
+    }
+  ]
+}

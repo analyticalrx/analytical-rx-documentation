@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AnalyticalRx Design Index</title>
+  <title>AnalyticalRx Documentation Index</title>
   <style>
     :root {
       color-scheme: light;
@@ -124,12 +124,49 @@
 <body>
   <main>
     <header>
-      <h1>AnalyticalRx Design Index</h1>
-      <p>Single entry point for product requirements, architecture, ingestion, database, Airtable reverse-engineering, operations, task drafts, presentations, and diagrams.</p>
+      <h1>AnalyticalRx Documentation Index</h1>
+      <p>Browse product requirements, architecture, ingestion, database, operations, archived research, task drafts, presentations, and diagrams. New teammates should start with the onboarding guide.</p>
     </header>
 
     <section>
-      <h2>Start Here</h2>
+      <h2>New Teammate Route</h2>
+      <p>Use the short onboarding path first. This index covers the main guides and artifacts; supporting scripts and policies are linked from their related guides. Not every document is current implementation guidance.</p>
+      <div class="grid">
+        <a class="link-card" href="team-setup/new-teammate-onboarding.md">
+          <span class="badge">Start here</span>
+          <strong>New Teammate Onboarding</strong>
+          <span>Product overview, reading sequence, repository map, source-of-truth rules, setup links, and first-week checklist.</span>
+        </a>
+        <a class="link-card" href="prd/product-requirements-document.md">
+          <span class="badge">Product</span>
+          <strong>Product Requirements Document</strong>
+          <span>Product problem, goals, roles, Phase 1 and Phase 2 scope, user stories, and non-goals.</span>
+        </a>
+        <a class="link-card" href="diagrams/overall-platform.svg">
+          <span class="badge">Architecture</span>
+          <strong>Overall Platform Diagram</strong>
+          <span>One-page view of source systems, ingestion, storage, APIs, and role-based product surfaces.</span>
+        </a>
+        <a class="link-card" href="operations/teammate-rds-pgadmin-access-guide.md">
+          <span class="badge secondary">Optional setup</span>
+          <strong>Database Access Guide</strong>
+          <span>Use only when your task needs access to the shared Phase 1 development database.</span>
+        </a>
+        <a class="link-card" href="https://github.com/analyticalrx/data-platform/blob/main/README.md">
+          <span class="badge">Backend setup</span>
+          <strong>Run the Data Platform Backend</strong>
+          <span>Windows and Linux instructions for the Spring Boot backend and its local database tunnel.</span>
+        </a>
+        <a class="link-card" href="https://github.com/analyticalrx/analyticalrx-ui/blob/main/README.md">
+          <span class="badge">Frontend setup</span>
+          <strong>Run the AnalyticalRx UI</strong>
+          <span>Windows and Linux instructions for installing and starting the Next.js frontend.</span>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2>Product And Architecture References</h2>
       <div class="grid">
         <a class="link-card" href="prd/product-requirements-document.md">
           <span class="badge">PRD</span>
@@ -137,9 +174,9 @@
           <span>Implementation source of truth using the PRD skill structure, including Phase 1, Phase 2, user stories, acceptance criteria, technical specs, risks, and rollout plan.</span>
         </a>
         <a class="link-card" href="prd/prd-readiness-review.md">
-          <span class="badge">PRD</span>
+          <span class="badge secondary">Snapshot</span>
           <strong>PRD Readiness Review</strong>
-          <span>Review of whether the current PRD is professional, clear, and implementation-ready for the team.</span>
+          <span>Dated July 2026 review of an earlier PRD version; use the current PRD for scope and requirements.</span>
         </a>
         <a class="link-card" href="architecture/high-level-design.html">
           <span class="badge">Architecture</span>
@@ -150,6 +187,11 @@
           <span class="badge">Architecture</span>
           <strong>Data Platform Service Design</strong>
           <span>Spring Boot service boundary, JWT bearer auth, RBAC, tenant schema routing, dashboard APIs, internal admin, RDS Proxy access, and Phase 2 extension points.</span>
+        </a>
+        <a class="link-card" href="architecture/ui-api-contracts.md">
+          <span class="badge">Architecture</span>
+          <strong>UI API Contracts</strong>
+          <span>Initial frontend integration contract for auth, current user, tenant/pharmacy lookup, dashboards, admin APIs, errors, filters, and sample payloads.</span>
         </a>
         <a class="link-card" href="architecture/role-based-access-control-standard.md">
           <span class="badge">Architecture</span>
@@ -198,6 +240,11 @@
           <strong>Canonical Event Schema Review Guide</strong>
           <span>Start here for teammate review: Phase 1 scope, source-of-truth rules, table relationships, access model, retention, and review checklist.</span>
         </a>
+        <a class="link-card" href="database/phase1-database-schema-overview.md">
+          <span class="badge">Database</span>
+          <strong>Phase 1 Database Overview</strong>
+          <span>Short orientation to the Phase 1 database, tenant schemas, and related schema references.</span>
+        </a>
         <a class="link-card" href="database/canonical-event-database-schema.html">
           <span class="badge">Database</span>
           <strong>Canonical Event Database Schema</strong>
@@ -218,6 +265,11 @@
           <strong>MVP Canonical Event SQL</strong>
           <span>Executable first-pass PostgreSQL DDL for the tenant schema template and pharmacy event, drug, payer, and payment model.</span>
         </a>
+        <a class="link-card" href="schemas/control_plane_schema.sql">
+          <span class="badge secondary">Schema</span>
+          <strong>Control Plane SQL</strong>
+          <span>Shared non-PHI PostgreSQL schema for app users, tenant registry, RBAC assignments, and app audit events.</span>
+        </a>
         <a class="link-card" href="schemas/migrations/2026-07-24-drug-payer-event-fields.sql">
           <span class="badge secondary">Schema</span>
           <strong>Drug/Payer Migration SQL</strong>
@@ -237,6 +289,21 @@
           <span class="badge secondary">Schema</span>
           <strong>Event Model Rename SQL</strong>
           <span>Migration that renames early draft table and FK column names to source_rx_reference, ingestion_event, pharmacy_event, and event_payment.</span>
+        </a>
+        <a class="link-card" href="schemas/migrations/2026-09-04-raw-payload-external-identifiers.sql">
+          <span class="badge secondary">Schema</span>
+          <strong>Raw Payload External Identifiers Migration</strong>
+          <span>Adds external event and source identifiers to the restricted raw-payload archive metadata.</span>
+        </a>
+        <a class="link-card" href="schemas/migrations/2026-09-29-bigint-internal-ids.sql">
+          <span class="badge secondary">Schema</span>
+          <strong>Bigint Internal IDs Migration</strong>
+          <span>Migration and backfill plan for widening internal identifiers to bigint.</span>
+        </a>
+        <a class="link-card" href="schemas/migrations/2026-10-03-task-management.sql">
+          <span class="badge secondary">Schema</span>
+          <strong>Task Management Migration</strong>
+          <span>Creates tenant-scoped task, comment, and activity tables with data-platform access grants.</span>
         </a>
       </div>
     </section>
@@ -264,6 +331,11 @@
           <strong>Airtable Automations</strong>
           <span>Workflow intent from screenshots, including triggers, actions, idempotency, notifications, and validation gaps.</span>
         </a>
+        <a class="link-card" href="airtable/interface-screenshot-analysis.html">
+          <span class="badge secondary">Archived research</span>
+          <strong>Airtable Interface Screenshot Analysis</strong>
+          <span>Visual analysis of Airtable interface screenshots used as product discovery references.</span>
+        </a>
         <a class="link-card" href="presentations/airtable-product-alignment.pptx">
           <span class="badge secondary">Deck</span>
           <strong>Airtable Product Alignment Deck</strong>
@@ -280,15 +352,20 @@
           <strong>Safe IAM Agent Setup Guide</strong>
           <span>Guardrails, policies, and workflow for an IAM-only assistant that can diagnose and apply approved AWS access changes.</span>
         </a>
+        <a class="link-card" href="operations/teammate-rds-pgadmin-access-guide.md">
+          <span class="badge">AWS</span>
+          <strong>Teammate pgAdmin Access Guide</strong>
+          <span>Step-by-step setup for AWS access keys, local .env, SSM tunnel, Secrets Manager password lookup, and pgAdmin connection.</span>
+        </a>
         <a class="link-card" href="operations/phase1-aws-postgres-dev-database.md">
           <span class="badge">AWS</span>
           <strong>Phase 1 PostgreSQL Dev Database</strong>
-          <span>RDS Proxy, SSM tunnel, Windows pgAdmin setup, Secrets Manager access, and app/Lambda database connection notes.</span>
+          <span>RDS Proxy, Windows/Linux SSM tunnel, database start/stop utility, Secrets Manager access, and app/Lambda connection notes.</span>
         </a>
         <a class="link-card" href="team-setup/analyticalrx-teammate-setup-guide.docx">
-          <span class="badge secondary">Setup</span>
-          <strong>Teammate GitHub Setup Guide</strong>
-          <span>Word document for team members to set up GitHub access and clone the documentation repo.</span>
+          <span class="badge secondary">Older reference</span>
+          <strong>Teammate GitHub Clone Guide (DOCX)</strong>
+          <span>Older documentation-repository clone instructions. Confirm the current repository URL and access before using; start from the Markdown onboarding guide.</span>
         </a>
       </div>
     </section>
@@ -309,7 +386,7 @@
         <a class="link-card" href="project-tasks/phase-1-phase-2-github-issue-gap-plan.md">
           <span class="badge secondary">Draft</span>
           <strong>Phase 1 / Phase 2 Issue Gap Plan</strong>
-          <span>Issue gap analysis from the PRD, including Phase 1 tasks to create, Phase 2 planned tasks, and data engineering backlog status guidance.</span>
+          <span>Historical issue-planning snapshot. Use the live GitHub Project for current status and assignments.</span>
         </a>
       </div>
     </section>
@@ -336,6 +413,11 @@
           <span class="badge">D2</span>
           <strong>Data Platform Service Diagram</strong>
           <span>Spring backend service, auth/RBAC, control plane, tenant schema, ingestion boundary, and Phase 2 extension points.</span>
+        </a>
+        <a class="link-card" href="diagrams/dashboard-mockups/README.md">
+          <span class="badge">SVG</span>
+          <strong>Dashboard Mockups</strong>
+          <span>Compact app-style Phase 1 dashboard mockups tied to the sample API responses in the UI API contract.</span>
         </a>
         <a class="link-card" href="diagrams/canonical-event-schema.svg">
           <span class="badge">D2</span>

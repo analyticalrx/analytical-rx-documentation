@@ -41,10 +41,11 @@ Lambda/ECS services should connect to the proxy endpoint, not the direct RDS end
 
 | Schema | Purpose |
 | --- | --- |
+| `control_plane` | Shared non-PHI application metadata: users, roles, tenant registry, role assignments, and app audit. |
 | `tenant_template` | Template/review schema from the checked-in SQL file. |
 | `tenant_analyticalrx_dev` | Initial development tenant schema for team testing. |
 
-Both schemas currently have 9 tables from `schemas/mvp_canonical_event_schema.sql`.
+`control_plane` has 8 tables from `schemas/control_plane_schema.sql`. Each tenant schema currently has 9 tables from `schemas/mvp_canonical_event_schema.sql`.
 
 ## Security Groups
 
@@ -83,7 +84,33 @@ The IAM group `analytical-rx-developers-webhook` has an inline policy named `Ana
 - Starting an SSM port forwarding session to the tunnel host.
 - Describing the relevant RDS/SSM/EC2 resources.
 
+To use the database lifecycle script below, an AWS administrator must also grant the teammate the actions in [analyticalrx-phase1-db-lifecycle-policy.json](analyticalrx-phase1-db-lifecycle-policy.json). The policy limits start/stop permissions to this database.
+
+## Start Or Stop The Dev Database
+
+The shared development database can be stopped when the team is not using it. From the `analytical-rx-documentation` repository root, run the cross-platform script with Python 3.10+ and AWS CLI v2:
+
+```bash
+python3 operations/phase1-db-lifecycle.py status --env-file .env
+python3 operations/phase1-db-lifecycle.py start --env-file .env
+python3 operations/phase1-db-lifecycle.py stop --env-file .env
+```
+
+On Windows, use `py` in place of `python3`:
+
+```powershell
+py .\operations\phase1-db-lifecycle.py status --env-file .env
+py .\operations\phase1-db-lifecycle.py start --env-file .env
+py .\operations\phase1-db-lifecycle.py stop --env-file .env
+```
+
+If credentials are already configured through the AWS CLI, omit `--env-file .env`. To select a named AWS CLI profile, add `--profile PROFILE_NAME`.
+
+The script verifies the AWS account before acting, prompts for the database identifier before stopping, and waits for RDS to finish. Add `--yes` to skip the stop confirmation when calling it from an intentional automation. Stopped RDS databases automatically restart after seven days. Stopping reduces the database instance compute charge; database storage, backups, and the separate RDS proxies can continue to incur charges. Coordinate with teammates before stopping this shared database.
+
 ## Local pgAdmin / psql Access
+
+For teammate-facing setup instructions, start with [Teammate Guide: Connect pgAdmin To AnalyticalRx Phase 1 Database](teammate-rds-pgadmin-access-guide.md).
 
 Local access flow:
 
@@ -121,13 +148,13 @@ Create the access key from AWS Console:
 Create a local `.env` file in the repository root:
 
 ```text
-AWS_ACCESS_KEY=YOUR_ACCESS_KEY
+AWS_ACCESS_KEY_ID=YOUR_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY
 ```
 
 Do not commit `.env`. It is already ignored by git.
 
-The Windows tunnel script also supports the standard AWS variable name `AWS_ACCESS_KEY_ID` if a developer prefers that instead of `AWS_ACCESS_KEY`.
+The Windows tunnel script also supports the older local alias `AWS_ACCESS_KEY`, but new setup should use `AWS_ACCESS_KEY_ID`.
 
 ## Windows One-Shot Tunnel Script
 
@@ -189,23 +216,13 @@ Expected values:
 - Account: `209556026827`
 - Region: `us-east-1`
 
-If the command shows a different account or region, switch to the correct AWS profile before continuing. Example:
+If the command shows a different account or region, clear any stale profile value and load the repository `.env` before continuing:
 
 ```bash
-export AWS_PROFILE=analyticalrx-dev
-export AWS_REGION=us-east-1
-export AWS_DEFAULT_REGION=us-east-1
-aws sts get-caller-identity
-```
-
-If using the repository `.env` temporarily, map the local variable names to AWS CLI variable names:
-
-```bash
+unset AWS_PROFILE
 set -a
 source .env
 set +a
-export AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY"
-export AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY"
 export AWS_REGION=us-east-1
 export AWS_DEFAULT_REGION=us-east-1
 aws sts get-caller-identity

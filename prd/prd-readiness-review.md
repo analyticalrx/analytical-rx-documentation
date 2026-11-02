@@ -3,6 +3,8 @@
 Created: July 30, 2026  
 Reviewed document: `prd/product-requirements-document.md`
 
+> **Historical snapshot:** This review reflects the PRD as it stood on July 30, 2026. The current PRD now includes success criteria and user stories that this review listed as gaps. Use the current PRD for product scope; treat the scorecard and recommendations below as review history, not a current gap list.
+
 ## 1. Review Decision
 
 The current PRD is professional enough for stakeholder alignment and client-facing explanation. It clearly explains the problem, background, product goals, phase boundaries, Phase 1 commitments, and Phase 2 direction.
