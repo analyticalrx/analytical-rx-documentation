@@ -1,6 +1,6 @@
 # New Teammate Onboarding
 
-Last reviewed: November 2, 2026
+Last reviewed: November 10, 2026
 
 Audience: new engineers, data interns, and product contributors
 
@@ -36,6 +36,8 @@ This path should take about one to two hours. Read the short sections listed her
 1. [Product Requirements Document](../prd/product-requirements-document.md): read the executive summary, product principles, Phase 1 scope, Phase 2 scope, and non-goals.
 2. [Overall platform diagram](../diagrams/overall-platform.svg): trace the major components and data flow.
 3. [High-Level Design](../architecture/high-level-design.html): read the system boundary, deployment flow, security boundary, and build sequence.
+   - Reference diagrams: [Overall platform](../diagrams/overall-platform.svg), [PrimeRx ingestion](../diagrams/primerx-ingestion.svg), and [Webhook processing](../diagrams/webhook-processing.svg).
+   - If you download the HTML page separately, use its GitHub diagram links. To use the local diagram links, clone the full documentation repository and keep its folder structure intact.
 4. [Webhook processing pipeline](../ingestion/webhook-processing-pipeline.html): understand why receipt, asynchronous processing, retries, idempotency, and PHI minimization are separate concerns.
 5. [Canonical event schema review guide](../database/canonical-event-schema-review-guide.html): learn the tenant data model and its access/retention boundaries. Use the checked-in SQL schemas for exact DDL.
 6. Read the role-specific references below only as needed:
