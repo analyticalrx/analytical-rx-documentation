@@ -19,6 +19,7 @@ responsible for the shared platform, product, or integration being changed.
 | Get approved AWS access and connect pgAdmin | [Developer database guide](operations/teammate-rds-pgadmin-access-guide.md) |
 | Understand the database schedule and access outside working hours | [Development schedule](operations/dev-schedule/README.md) |
 | Understand the new direct SSM connection | [Development proxy retirement](operations/development-proxy-retirement.md) |
+| Evaluate removal of the processor proxy | [Direct RDS evaluation, November 17](operations/processor-direct-rds-evaluation.md) |
 | Inspect AWS database resources and access rules | [Database operations](operations/phase1-aws-postgres-dev-database.md) |
 | Understand service responsibilities | [Data Platform service design](architecture/data-platform-service-design.md) |
 | Understand tenant and role boundaries | [RBAC standard](architecture/role-based-access-control-standard.md) |
